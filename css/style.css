@@ -1,0 +1,13 @@
+
+#puzzle {
+	width: 33%;
+}
+
+#puzzle td {
+width: 25px;
+max-width: 25px;
+}
+
+#puzzle input {
+	width: 20px;
+}
