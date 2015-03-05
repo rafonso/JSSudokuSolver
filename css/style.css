@@ -5,11 +5,16 @@ body {
     /*  border-style: solid;*/
     /*    border-width: 2px;*/
 }
+
+#puzzle {
+    display: table;
+    border-collapse: collapse;
+}
 #puzzle input {
     width: 30px;
     height: 30px;
     border: solid 1px #000;
-    border-collapse: collapse;
+    display: table-cell;
     text-align: center;
     font-size: x-large;
 }
