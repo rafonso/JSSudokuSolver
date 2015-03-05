@@ -1,13 +1,36 @@
-
-#puzzle {
-	width: 33%;
+body {
+	padding-left: 33%;
+    width: 33%;	
+    text-align: center;
+    /*  border-style: solid;*/
+    /*    border-width: 2px;*/
 }
-
-#puzzle td {
-width: 25px;
-max-width: 25px;
-}
-
 #puzzle input {
-	width: 20px;
+    width: 30px;
+    height: 30px;
+    border: solid 1px #000;
+    border-collapse: collapse;
+    text-align: center;
+    font-size: x-large;
 }
+#cell11, #cell12, #cell13, #cell14, #cell15, #cell16, #cell17, #cell18, #cell19 {
+    border-top-width: thick !important;
+}
+#cell11, #cell21, #cell31, #cell41, #cell51, #cell61, #cell71, #cell81, #cell91 {
+    border-left-width: thick !important;
+}
+#cell19, #cell29, #cell39, #cell49, #cell59, #cell69, #cell79, #cell89, #cell99 {
+    border-right-width: thick !important;
+}
+#cell91, #cell92, #cell93, #cell94, #cell95, #cell96, #cell97, #cell98, #cell99 {
+    border-bottom-width: thick !important;
+}
+#cell31, #cell32, #cell33, #cell34, #cell35, #cell36, #cell37, #cell38, #cell39, 
+#cell61, #cell62, #cell63, #cell64, #cell65, #cell66, #cell67, #cell68, #cell69 {
+    border-bottom-width: medium !important;
+}
+#cell13, #cell23, #cell33, #cell43, #cell53, #cell63, #cell73, #cell83, #cell93, 
+#cell16, #cell26, #cell36, #cell46, #cell56, #cell66, #cell76, #cell86, #cell96 {
+    border-right-width: medium !important;
+}
+

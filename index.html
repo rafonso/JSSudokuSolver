@@ -5,274 +5,113 @@
     <title>JS Sudoku Solver</title>
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel="stylesheet" type="text/css" href="css/humanity/jquery-ui-1.9.2.custom.css    ">
-    <script type="text/javascript" src="./js/jquery-1.8.3.js" ></script>
-    <script type="text/javascript" src="./js/jquery-ui-1.9.2.custom.js" ></script>
+    <script type="text/javascript" src="./js/jquery-1.8.3.js"></script>
+    <script type="text/javascript" src="./js/jquery-ui-1.9.2.custom.js"></script>
+    <script type="text/jaxvascript" src="./js/sudoku.js"></script>
 </head>
 
 <body>
-    <table id="puzzle">
-        <tr id="row1">
-            <td id="col11">
-                <input />
-            </td>
-            <td id="col12">
-                <input />
-            </td>
-            <td id="col13">
-                <input />
-            </td>
-            <td id="col14">
-                <input />
-            </td>
-            <td id="col15">
-                <input />
-            </td>
-            <td id="col16">
-                <input />
-            </td>
-            <td id="col17">
-                <input />
-            </td>
-            <td id="col18">
-                <input />
-            </td>
-            <td id="col19">
-                <input />
-            </td>
-        </tr>
-        <tr id="row2">
-            <td id="col21">
-                <input />
-            </td>
-            <td id="col22">
-                <input />
-            </td>
-            <td id="col23">
-                <input />
-            </td>
-            <td id="col24">
-                <input />
-            </td>
-            <td id="col25">
-                <input />
-            </td>
-            <td id="col26">
-                <input />
-            </td>
-            <td id="col27">
-                <input />
-            </td>
-            <td id="col28">
-                <input />
-            </td>
-            <td id="col29">
-                <input />
-            </td>
-        </tr>
-        <tr id="row3">
-            <td id="col31">
-                <input />
-            </td>
-            <td id="col32">
-                <input />
-            </td>
-            <td id="col33">
-                <input />
-            </td>
-            <td id="col34">
-                <input />
-            </td>
-            <td id="col35">
-                <input />
-            </td>
-            <td id="col36">
-                <input />
-            </td>
-            <td id="col37">
-                <input />
-            </td>
-            <td id="col38">
-                <input />
-            </td>
-            <td id="col39">
-                <input />
-            </td>
-        </tr>
-        <tr id="row4">
-            <td id="col41">
-                <input />
-            </td>
-            <td id="col42">
-                <input />
-            </td>
-            <td id="col43">
-                <input />
-            </td>
-            <td id="col44">
-                <input />
-            </td>
-            <td id="col45">
-                <input />
-            </td>
-            <td id="col46">
-                <input />
-            </td>
-            <td id="col47">
-                <input />
-            </td>
-            <td id="col48">
-                <input />
-            </td>
-            <td id="col49">
-                <input />
-            </td>
-        </tr>
-        <tr id="row5">
-            <td id="col51">
-                <input />
-            </td>
-            <td id="col52">
-                <input />
-            </td>
-            <td id="col53">
-                <input />
-            </td>
-            <td id="col54">
-                <input />
-            </td>
-            <td id="col55">
-                <input />
-            </td>
-            <td id="col56">
-                <input />
-            </td>
-            <td id="col57">
-                <input />
-            </td>
-            <td id="col58">
-                <input />
-            </td>
-            <td id="col59">
-                <input />
-            </td>
-        </tr>
-        <tr id="row6">
-            <td id="col61">
-                <input />
-            </td>
-            <td id="col62">
-                <input />
-            </td>
-            <td id="col63">
-                <input />
-            </td>
-            <td id="col64">
-                <input />
-            </td>
-            <td id="col65">
-                <input />
-            </td>
-            <td id="col66">
-                <input />
-            </td>
-            <td id="col67">
-                <input />
-            </td>
-            <td id="col68">
-                <input />
-            </td>
-            <td id="col69">
-                <input />
-            </td>
-        </tr>
-        <tr id="row7">
-            <td id="col71">
-                <input />
-            </td>
-            <td id="col72">
-                <input />
-            </td>
-            <td id="col73">
-                <input />
-            </td>
-            <td id="col74">
-                <input />
-            </td>
-            <td id="col75">
-                <input />
-            </td>
-            <td id="col76">
-                <input />
-            </td>
-            <td id="col77">
-                <input />
-            </td>
-            <td id="col78">
-                <input />
-            </td>
-            <td id="col79">
-                <input />
-            </td>
-        </tr>
-        <tr id="row8">
-            <td id="col81">
-                <input />
-            </td>
-            <td id="col82">
-                <input />
-            </td>
-            <td id="col83">
-                <input />
-            </td>
-            <td id="col84">
-                <input />
-            </td>
-            <td id="col85">
-                <input />
-            </td>
-            <td id="col86">
-                <input />
-            </td>
-            <td id="col87">
-                <input />
-            </td>
-            <td id="col88">
-                <input />
-            </td>
-            <td id="col89">
-                <input />
-            </td>
-        </tr>
-        <tr id="row9">
-            <td id="col91">
-                <input />
-            </td>
-            <td id="col92">
-                <input />
-            </td>
-            <td id="col93">
-                <input />
-            </td>
-            <td id="col94">
-                <input />
-            </td>
-            <td id="col95">
-                <input />
-            </td>
-            <td id="col96">
-                <input />
-            </td>
-            <td id="col97">
-                <input />
-            </td>
-            <td id="col98">
-                <input />
-            </td>
-            <td id="col99">
-                <input />
-            </td>
-        </tr>
-    </table>
+    <div id="puzzle">
+        <div id="row1">
+            <input id="cell11"/>
+            <input id="cell12"/>
+            <input id="cell13"/>
+            <input id="cell14"/>
+            <input id="cell15"/>
+            <input id="cell16"/>
+            <input id="cell17"/>
+            <input id="cell18"/>
+            <input id="cell19"/>
+        </div>
+        <div id="row2">
+            <input id="cell21"/>
+            <input id="cell22"/>
+            <input id="cell23"/>
+            <input id="cell24"/>
+            <input id="cell25"/>
+            <input id="cell26"/>
+            <input id="cell27"/>
+            <input id="cell28"/>
+            <input id="cell29"/>
+        </div>
+        <div id="row3">
+            <input id="cell31"/>
+            <input id="cell32">
+            <input id="cell33">
+            <input id="cell34">
+            <input id="cell35">
+            <input id="cell36">
+            <input id="cell37">
+            <input id="cell38">
+            <input id="cell39">
+        </div>
+        <div id="row4">
+            <input id="cell41">
+            <input id="cell42">
+            <input id="cell43">
+            <input id="cell44">
+            <input id="cell45">
+            <input id="cell46">
+            <input id="cell47">
+            <input id="cell48">
+            <input id="cell49">
+        </div>
+        <div id="row5">
+            <input id="cell51">
+            <input id="cell52">
+            <input id="cell53">
+            <input id="cell54">
+            <input id="cell55">
+            <input id="cell56">
+            <input id="cell57">
+            <input id="cell58">
+            <input id="cell59">
+        </div>
+        <div id="row6">
+            <input id="cell61">
+            <input id="cell62">
+            <input id="cell63">
+            <input id="cell64">
+            <input id="cell65">
+            <input id="cell66">
+            <input id="cell67">
+            <input id="cell68">
+            <input id="cell69">
+        </div>
+        <div id="row7">
+            <input id="cell71">
+            <input id="cell72">
+            <input id="cell73">
+            <input id="cell74">
+            <input id="cell75">
+            <input id="cell76">
+            <input id="cell77">
+            <input id="cell78">
+            <input id="cell79">
+        </div>
+        <div id="row8">
+            <input id="cell81">
+            <input id="cell82">
+            <input id="cell83">
+            <input id="cell84">
+            <input id="cell85">
+            <input id="cell86">
+            <input id="cell87">
+            <input id="cell88">
+            <input id="cell89">
+        </div>
+        <div id="row9">
+            <input id="cell91">
+            <input id="cell92">
+            <input id="cell93">
+            <input id="cell94">
+            <input id="cell95">
+            <input id="cell96">
+            <input id="cell97">
+            <input id="cell98">
+            <input id="cell99">
+        </div>
+    </div>
 </body>
 
 </html>
