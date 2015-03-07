@@ -1,4 +1,5 @@
 body {
+     font-family: sans-serif;
 	padding-left: 33%;
     width: 33%;	
     text-align: center;
@@ -7,8 +8,12 @@ body {
 }
 
 #puzzle {
-    display: table;
+    display: inline-block;
     border-collapse: collapse;
+}
+#puzzle div.puzzle-row {
+    display: table-row;
+    display: -ms-inline-flexbox;
 }
 #puzzle input {
     width: 30px;
@@ -42,3 +47,6 @@ body {
     border-right-width: medium !important;
 }
 
+#buttons {
+    padding-top: 20px;
+}

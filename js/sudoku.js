@@ -40,22 +40,28 @@ var Movement = {
 function getCurrentPos(element) {
     var pos = /^cell(\d)(\d)$/.exec(element.id);
     return {
-        row: Number.parseInt(pos[1]),
-        col: Number.parseInt(pos[2])
+        row: parseInt(pos[1]),
+        col: parseInt(pos[2])
     };
 }
 
-function moveTo(origin, movement) {
-    var pos = getCurrentPos(origin);
+function moveTo(e, movement, preventDefault) {
+    var pos = getCurrentPos(e.target);
     var nextPos = movement(pos.row, pos.col);
     $("#cell" + nextPos.row + nextPos.col).focus();
+    if (preventDefault) {
+        e.preventDefault();
+    }
 }
 
 function createMovementAction(movement) {
     return function(e) {
-        moveTo(e.target, movement);
-        e.preventDefault();
+        moveTo(e, movement, false);
     }
+}
+
+function gotoNextCell(e) {
+    moveTo(e, Movement.TO_RIGHT, true);
 }
 
 var noAction = function(e) {};
@@ -69,21 +75,26 @@ var numberAction = function(e) {
 var numberPadAction = function(e) {
     e.target.value = (e.keyCode - 96);
 };
+var cleanAndGotoPrevious = function(e) {
+    if (!e.target.value) {
+        moveTo(e, Movement.TO_LEFT, true);
+    }
+};
 
 var actionByKeyCode = {
-    8: noAction, // Backspace
+    8: cleanAndGotoPrevious, // Backspace
     9: noAction, // Tab
     13: noAction, // Enter
     27: noAction, // Esc
-    32: createMovementAction(Movement.TO_RIGHT), // space
+    32: gotoNextCell, // space
     35: createMovementAction(Movement.TO_ROW_END), // end
     36: createMovementAction(Movement.TO_ROW_START), // home
     37: createMovementAction(Movement.TO_LEFT), // left arrow 
     38: createMovementAction(Movement.TO_UP), // up arrow 
-    39: createMovementAction(Movement.TO_RIGHT), // right arrow
+    39: gotoNextCell, // right arrow
     40: createMovementAction(Movement.TO_DOWN), // down arrow
     46: noAction, // Delete
-    48: createMovementAction(Movement.TO_RIGHT), // 0
+    48: gotoNextCell, // 0
     49: numberAction, // 1
     50: numberAction, // 2
     51: numberAction, // 3
@@ -93,7 +104,7 @@ var actionByKeyCode = {
     55: numberAction, // 7
     56: numberAction, // 8
     57: numberAction, // 9
-    96: createMovementAction(Movement.TO_RIGHT), // numpad 0
+    96: gotoNextCell, // numpad 0
     97: numberPadAction, // numpad 1 
     98: numberPadAction, // numpad 2
     99: numberPadAction, // numpad 3 
@@ -116,8 +127,11 @@ function handleKey(e) {
 
 function handleKeyUp(e) {
     if (((e.keyCode >= 49) && (e.keyCode <= 57)) || ((e.keyCode >= 97) && (e.keyCode <= 105))) {
-        moveTo(e.target, Movement.TO_RIGHT);
-    } 
+        gotoNextCell(e);
+    }
+    //    else ((e.keyCode == 48) || (e.keyCode == 96)) {
+    //        e.preventDefault();
+    //    }
 }
 
 
@@ -127,7 +141,11 @@ $(document).ready(function() {
         .attr("size", 1)
         .attr("maxlength", 1)
         .keydown(handleKey)
-        .keyup(handleKeyUp)
-        ;
+        .keyup(handleKeyUp);
+
+    $("button").button();
+    $("#btnRun").button( "option", "icons", { primary: "ui-icon-play" } ).button( "option", "label", "Run" );
+
+
     $("#cell11").focus();
 });
