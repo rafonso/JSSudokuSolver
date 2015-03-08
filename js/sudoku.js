@@ -1,3 +1,5 @@
+var puzzle = {};
+
 var Movement = {
     TO_ROW_END: function(currentRow, currentCol) {
         return {
@@ -126,13 +128,13 @@ function handleKey(e) {
 }
 
 function handleKeyUp(e) {
-    if (((e.keyCode >= 49) && (e.keyCode <= 57)) || ((e.keyCode >= 97) && (e.keyCode <= 105))) {
+    if (((e.keyCode >= 49) && (e.keyCode <= 57)) ||
+        ((e.keyCode >= 97) && (e.keyCode <= 105))) {
         gotoNextCell(e);
     }
-    //    else ((e.keyCode == 48) || (e.keyCode == 96)) {
-    //        e.preventDefault();
-    //    }
 }
+
+
 
 
 $(document).ready(function() {
@@ -144,8 +146,20 @@ $(document).ready(function() {
         .keyup(handleKeyUp);
 
     $("button").button();
-    $("#btnRun").button( "option", "icons", { primary: "ui-icon-play" } ).button( "option", "label", "Run" );
-
+    $("#btnRun")
+        .button("option", "icons", {
+            primary: "ui-icon-play"
+        })
+        .button("option", "label", "Run")
+        .attr("accesskey", "r");
+    $("#btnClean")
+        .button("option", "icons", {
+            primary: "ui-icon-document"
+        })
+        .button("option", "label", "Clean")
+        .attr("accesskey", "c");
 
     $("#cell11").focus();
+
+    puzzle = new Puzzle($("#puzzle"));
 });

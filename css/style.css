@@ -50,3 +50,9 @@ body {
 #buttons {
     padding-top: 20px;
 }
+#buttons button {
+    width: 100px;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
