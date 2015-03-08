@@ -155,5 +155,18 @@ $(document).ready(function() {
 
     puzzle = new Puzzle($("#puzzle"));
 
+    $("#btnRun").click(function() {
+        try {
+            puzzle.validatePuzzle();
+            $("#messages").removeClass("ui-state-error").text("");
+        } catch (err) {
+            $("#messages").addClass("ui-state-error").text(err.msg);
+            console.error(err);
+            // $.each(err.cells, function(c) {
+            //   $(c).toogle("pulsate");  
+            // })
+        }
+    })
+
     console.debug("Initializing finished");
 });

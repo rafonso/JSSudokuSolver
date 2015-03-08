@@ -47,8 +47,12 @@ body {
     border-right-width: medium !important;
 }
 
+#messages {
+    height: 32px;
+}
+
 #buttons {
-    padding-top: 20px;
+    padding-top: 10px;
 }
 #buttons button {
     width: 100px;

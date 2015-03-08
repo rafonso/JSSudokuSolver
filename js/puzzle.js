@@ -58,4 +58,35 @@ function Puzzle(puzzleElement) {
 
 }
 
+Puzzle.prototype.validatePuzzle = function() {
+
+    function validate(cells, pos, description) {
+        var found = [false, false, false, false, false, false, false, false, false, false];
+        for (var i = 0; i < cells.length; i++) {
+            var cell = cells[i];
+            if (cell.isFilled()) {
+                var value = cell.getValue();
+                if (found[value]) {
+                    throw {
+                        msg: description + " " + pos + ". Repeated value: " + value,
+                        invalidCells: cells
+                    }
+                } else {
+                    found[value] = true;
+                }
+            }
+        }
+    }
+
+    for(var i = 1; i <= 9; i ++) {
+    	validate(this.getCellsRow(i), i, "Row");
+    }
+    for(var i = 1; i <= 9; i ++) {
+    	validate(this.getCellsCol(i), i, "Column");
+    }
+    for(var i = 1; i <= 9; i ++) {
+    	validate(this.getCellsSector(i), i, "Sector");
+    }
+}
+
 Object.freeze(Puzzle);
