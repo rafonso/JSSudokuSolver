@@ -2,80 +2,65 @@
  *
  */
 function Cell(input) {
-    var pos = Cell.getCellPos(input);
 
+    var row = -1;
+    var col = -1;
+    var sector = -1;
 
-    function getSector() {
-        switch (pos.row) {
-            case 1:
-            case 2:
-            case 3:
-                switch (pos.col) {
-                    case 1:
-                    case 2:
-                    case 3:
-                        return 1;
-                    case 4:
-                    case 5:
-                    case 6:
-                        return 2;
-                    case 7:
-                    case 8:
-                    case 9:
-                        return 3;
-                }
-            case 4:
-            case 5:
-            case 6:
-                switch (pos.col) {
-                    case 1:
-                    case 2:
-                    case 3:
-                        return 4;
-                    case 4:
-                    case 5:
-                    case 6:
-                        return 5;
-                    case 7:
-                    case 8:
-                    case 9:
-                        return 6;
-                }
-            case 7:
-            case 8:
-            case 9:
-                switch (pos.col) {
-                    case 1:
-                    case 2:
-                    case 3:
-                        return 7;
-                    case 4:
-                    case 5:
-                    case 6:
-                        return 8;
-                    case 7:
-                    case 8:
-                    case 9:
-                        return 9;
-                }
+    function init() {
+        var pos = Cell.getCellPos(input);
+
+        row = pos.row;
+        col = pos.col;
+
+        var rowSector;
+        if (row <= 3) {
+            rowSector = 0;
+        } else if (row <= 6) {
+            rowSector = 1;
+        } else {
+            rowSector = 2;
         }
-        return NaN;
-
+        var colSector;
+        if (col <= 3) {
+            colSector = 1;
+        } else if (col <= 6) {
+            colSector = 2;
+        } else {
+            colSector = 3;
+        }
+        sector = 3 * rowSector + colSector;
     }
 
-    this.row = pos.row;
-    this.col = pos.col;
-    this.sector = getSector();
+    this.getRow = function() {
+        return row;
+    }
 
+    this.getCol = function() {
+        return col;
+    }
+
+    this.getSector = function() {
+        return sector;
+    }
 
     this.getElement = function() {
         return $(input);
     }
 
+    this.toString = function() {
+        return "[" + this.getRow() + ", " + this.getCol() + ", " + this.getSector() + ", " + (this.isFilled() ? this.getValue() : "-") + "]";
+    }
+
+    init();
 }
 
 Cell.prototype.getValue = function() {
     return parseInt(this.getElement().val());
+}
+
+Cell.prototype.setValue = function(value) {
+    this.getElement.val(value);
 }
 
 Cell.prototype.isFilled = function() {
@@ -85,13 +70,19 @@ Cell.prototype.isFilled = function() {
 Cell.prototype.addClass = function(classe) {
     $(this.input).addClass(classe);
 }
-
 Cell.prototype.removeClass = function(classe) {
     $(this.input).removeClass(classe);
 }
 
-Cell.prototype.toString = function() {
-    return "[" + this.row + ", " + this.col + ", " + this.sector + ", " + (this.isFilled() ? this.getValue() : " ") + "]";
+/**
+ * Verifies if a Cell is in the same Row and Column. i.e. if this this the same Cell.
+ *
+ * @param c Cell to be evaluated
+ * @return true if c is in the same Row and Column
+ */
+Cell.prototype.sameCell = function(c) {
+    return (this.getRow() === c.getRow()) &&
+        (this.getCol() === c.getCol());
 }
 
 Cell.getCellPos = function(element) {
@@ -101,3 +92,5 @@ Cell.getCellPos = function(element) {
         col: parseInt(pos[2])
     };
 }
+
+Object.freeze(Cell);

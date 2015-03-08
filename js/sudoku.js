@@ -39,16 +39,8 @@ var Movement = {
     },
 };
 
-function getCurrentPos(element) {
-    var pos = /^cell(\d)(\d)$/.exec(element.id);
-    return {
-        row: parseInt(pos[1]),
-        col: parseInt(pos[2])
-    };
-}
-
 function moveTo(e, movement, preventDefault) {
-    var pos = getCurrentPos(e.target);
+    var pos = Cell.getCellPos(e.target);
     var nextPos = movement(pos.row, pos.col);
     $("#cell" + nextPos.row + nextPos.col).focus();
     if (preventDefault) {
@@ -138,7 +130,7 @@ function handleKeyUp(e) {
 
 
 $(document).ready(function() {
-    console.debug("iniciando ...");
+    console.debug("Initializing");
     $("#puzzle input")
         .attr("size", 1)
         .attr("maxlength", 1)
@@ -162,4 +154,6 @@ $(document).ready(function() {
     $("#cell11").focus();
 
     puzzle = new Puzzle($("#puzzle"));
+
+    console.debug("Initializing finished");
 });
