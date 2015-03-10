@@ -63,7 +63,8 @@ Cell.prototype.setValue = function(value) {
     this.getElement.val(value);
 }
 
-Cell.prototype.isFilled = function() {
+Cell.prototype.isFilled
+ = function() {
     return !!this.getValue();
 }
 

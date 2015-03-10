@@ -1,4 +1,5 @@
 var puzzle = {};
+var solver = {};
 
 var Movement = {
     TO_ROW_END: function(currentRow, currentCol) {
@@ -143,30 +144,37 @@ $(document).ready(function() {
             primary: "ui-icon-play"
         })
         .button("option", "label", "Run")
-        .attr("accesskey", "r");
+        .attr("accesskey", "r")
+        .click(function() {
+            try {
+                solver.validatePuzzle();
+                $("#messages").removeClass("ui-state-error").text("");
+            } catch (err) {
+                $("#messages").addClass("ui-state-error").text(err.msg);
+                _.each(err.invalidCells, function(c) {
+                    c.getElement().effect("pulsate");
+                });
+                console.error(err);
+            }
+        });
     $("#btnClean")
         .button("option", "icons", {
             primary: "ui-icon-document"
         })
         .button("option", "label", "Clean")
-        .attr("accesskey", "c");
+        .attr("accesskey", "c")
+        .click(function() {
+            _.each(puzzle.cells, function(c) {
+                c.getElement().val("");
+            });
+            $("#messages").removeClass("ui-state-error").text("");
+        });
 
     $("#cell11").focus();
 
     puzzle = new Puzzle($("#puzzle"));
+    solver = new Solver(puzzle);
 
-    $("#btnRun").click(function() {
-        try {
-            puzzle.validatePuzzle();
-            $("#messages").removeClass("ui-state-error").text("");
-        } catch (err) {
-            $("#messages").addClass("ui-state-error").text(err.msg);
-            console.error(err);
-            // $.each(err.cells, function(c) {
-            //   $(c).toogle("pulsate");  
-            // })
-        }
-    })
 
     console.debug("Initializing finished");
 });
