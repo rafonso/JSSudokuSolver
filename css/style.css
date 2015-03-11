@@ -12,7 +12,7 @@ body {
     border-collapse: collapse;
 }
 #puzzle div.puzzle-row {
-    display: table-row;
+    display: flex;
     display: -ms-inline-flexbox;
 }
 #puzzle input {
@@ -60,3 +60,10 @@ body {
     margin-right: 5px;
 }
 
+#controls {
+    margin-top: 10px;
+}
+
+#controls > div > label {
+    width: 50%;
+}

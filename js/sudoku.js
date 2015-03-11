@@ -169,6 +169,12 @@ $(document).ready(function() {
             });
             $("#messages").removeClass("ui-state-error").text("");
         });
+    $("#btnStop")
+        .button("option", "icons", {
+            primary: "ui-icon-stop"
+        })
+        .button("option", "label", "Stop").hide();
+    $("#interval").selectmenu();
 
     $("#cell11").focus();
 

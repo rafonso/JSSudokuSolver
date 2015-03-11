@@ -1,3 +1,12 @@
+var CellStatus = {
+    IDLE: "idle",
+    ORIGINAL: "original",
+    FILLED: "filled",
+    EVALUATING: "evaluating",
+    GUESSING: "guessing",
+    ERROR: "error",
+};
+
 /**
  *
  */
@@ -6,6 +15,7 @@ function Cell(input) {
     var row = -1;
     var col = -1;
     var sector = -1;
+    var status = CellStatus.IDLE;
 
     function init() {
         var pos = Cell.getCellPos(input);
@@ -48,6 +58,17 @@ function Cell(input) {
         return $(input);
     }
 
+    this.getStatus = function() {
+        return status;
+    }
+
+    this.setStatus = function(newStatus) {
+        var oldStatus = status;
+        status = newStatus;
+
+        this.getElement().removeClass(oldStatus).addClass(newStatus);
+    }
+
     this.toString = function() {
         return "[" + this.getRow() + ", " + this.getCol() + ", " + this.getSector() + ", " + (this.isFilled() ? this.getValue() : "-") + "]";
     }
@@ -63,8 +84,7 @@ Cell.prototype.setValue = function(value) {
     this.getElement.val(value);
 }
 
-Cell.prototype.isFilled
- = function() {
+Cell.prototype.isFilled = function() {
     return !!this.getValue();
 }
 

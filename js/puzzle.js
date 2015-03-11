@@ -1,4 +1,23 @@
+var PuzzleStatus = {
+    WAITING: "waiting",
+    VALIDATING: "validating",
+    INVALID: "invalid",
+    RUNNING: "running",
+    STOPPED: "stopped",
+    SOLVED: "solved",
+}
+
 function Puzzle(puzzleElement) {
+
+    // PRIVATE ATTRIBUTES
+
+    var status = PuzzleStatus.WAITING;
+
+    // PRIVATE METHODS
+
+    function init() {
+
+    }
 
     function excluderCell(excludeCell) {
         return (!!excludeCell) ?
@@ -54,6 +73,26 @@ function Puzzle(puzzleElement) {
                 return c.getSector() === sec;
             })
             .reject(excluderCell(excludeCell)).value();
+    }
+
+    this.getStatus = function() {
+        return status;
+    }
+
+    this.setStatus = function(newStatus) {
+        if (!!newStatus) {
+            var oldStatus = status;
+            status = newStatus;
+
+            console.debug("STATUS: " + oldStatus + " -> " + newStatus);
+
+            puzzleElement.removeClass(oldStatus).addClass(newStatus);
+            _.each(this.cells, function(c) {
+                c.getElement().removeClass(oldStatus).addClass(newStatus);
+            });
+        }
+
+
     }
 
 }
