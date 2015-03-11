@@ -174,8 +174,7 @@ $(document).ready(function() {
             primary: "ui-icon-stop"
         })
         .button("option", "label", "Stop").hide();
-    $("#interval").selectmenu();
-
+    $("#interval").selectmenu()
     $("#cell11").focus();
 
     puzzle = new Puzzle($("#puzzle"));

@@ -1,6 +1,7 @@
 var PuzzleStatus = {
     WAITING: "waiting",
     VALIDATING: "validating",
+    READY: "ready",
     INVALID: "invalid",
     RUNNING: "running",
     STOPPED: "stopped",
@@ -13,22 +14,29 @@ function Puzzle(puzzleElement) {
 
     var status = PuzzleStatus.WAITING;
 
+    var _cells = $.map(puzzleElement.children().children("input"), function(input) {
+        return new Cell(input);
+    });
+
     // PRIVATE METHODS
 
     function init() {
 
     }
 
-    function excluderCell(excludeCell) {
-        return (!!excludeCell) ?
+    function get(func, pos, excludeCell) {
+        var predicate = function(c) {
+            return c[func]() === pos;
+        };
+        var excluder = (!!excludeCell) ?
             function(c) {
                 return excludeCell.sameCell(c);
             } : _.constant(false);
+
+        return _.chain(_cells).filter(predicate).reject(excluder).value();
     }
 
-    this.cells = $.map(puzzleElement.children().children("input"), function(input) {
-        return new Cell(input);
-    });
+    this.cells = _cells;
 
     /**
      * Returns the Cells who are in determinated Row. It is possible exclude a Cell which (presumively) is in this Row.
@@ -38,11 +46,7 @@ function Puzzle(puzzleElement) {
      * @return Cells which are in the solicitated Row. If excludeCell is defined, this will not be present in result.
      */
     this.getCellsRow = function(row, excludeCell) {
-        return _.chain(this.cells)
-            .filter(function(c) {
-                return c.getRow() === row;
-            })
-            .reject(excluderCell(excludeCell)).value();
+        return get("getRow", row, excludeCell);
     }
 
     /**
@@ -53,11 +57,7 @@ function Puzzle(puzzleElement) {
      * @return Cells which are in the solicitated Column. If excludeCell is defined, this will not be present in result.
      */
     this.getCellsCol = function(col, excludeCell) {
-        return _.chain(this.cells)
-            .filter(function(c) {
-                return c.getCol() === col;
-            })
-            .reject(excluderCell(excludeCell)).value();
+        return get("getCol", col, excludeCell);
     }
 
     /**
@@ -68,11 +68,7 @@ function Puzzle(puzzleElement) {
      * @return Cells which are in the solicitated Sector. If excludeCell is defined, this will not be present in result.
      */
     this.getCellsSector = function(sec, excludeCell) {
-        return _.chain(this.cells)
-            .filter(function(c) {
-                return c.getSector() === sec;
-            })
-            .reject(excluderCell(excludeCell)).value();
+        return get("getSector", sec, excludeCell);
     }
 
     this.getStatus = function() {
@@ -91,8 +87,6 @@ function Puzzle(puzzleElement) {
                 c.getElement().removeClass(oldStatus).addClass(newStatus);
             });
         }
-
-
     }
 
 }
