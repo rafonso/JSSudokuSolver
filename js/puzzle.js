@@ -14,7 +14,7 @@ function Puzzle(puzzleElement) {
 
     var status = PuzzleStatus.WAITING;
 
-    var _cells = $.map(puzzleElement.children().children("input"), function(input) {
+    var _cells = puzzleElement.children().children("input").toArray().map(function(input) {
         return new Cell(input);
     });
 
@@ -30,10 +30,12 @@ function Puzzle(puzzleElement) {
         };
         var excluder = (!!excludeCell) ?
             function(c) {
-                return excludeCell.sameCell(c);
-            } : _.constant(false);
+                return !excludeCell.sameCell(c);
+            } : function() {
+                return true;
+            }
 
-        return _.chain(_cells).filter(predicate).reject(excluder).value();
+        return _cells.filter(predicate).filter(excluder);
     }
 
     this.cells = _cells;
@@ -83,7 +85,7 @@ function Puzzle(puzzleElement) {
             console.debug("STATUS: " + oldStatus + " -> " + newStatus);
 
             puzzleElement.removeClass(oldStatus).addClass(newStatus);
-            _.each(this.cells, function(c) {
+            this.cells.forEach(function(c) {
                 c.getElement().removeClass(oldStatus).addClass(newStatus);
             });
         }

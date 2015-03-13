@@ -87,13 +87,14 @@ Cell.prototype.setValue = function(value) {
 Cell.prototype.isFilled = function() {
     return !!this.getValue();
 }
-
+/*
 Cell.prototype.addClass = function(classe) {
     $(this.input).addClass(classe);
 }
 Cell.prototype.removeClass = function(classe) {
     $(this.input).removeClass(classe);
 }
+*/
 
 /**
  * Verifies if a Cell is in the same Row and Column. i.e. if this this the same Cell.

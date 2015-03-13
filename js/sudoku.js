@@ -149,12 +149,13 @@ $(document).ready(function() {
             try {
                 solver.validatePuzzle();
                 $("#messages").removeClass("ui-state-error").text("");
+                solver.solve();
             } catch (err) {
+                console.error(err);
                 $("#messages").addClass("ui-state-error").text(err.msg);
-                _.each(err.invalidCells, function(c) {
+                err.invalidCells.forEach(function(c) {
                     c.getElement().effect("pulsate");
                 });
-                console.error(err);
             }
         });
     $("#btnClean")
@@ -164,7 +165,7 @@ $(document).ready(function() {
         .button("option", "label", "Clean")
         .attr("accesskey", "c")
         .click(function() {
-            _.each(puzzle.cells, function(c) {
+            puzzle.cells.forEach(function(c) {
                 c.getElement().val("");
             });
             $("#messages").removeClass("ui-state-error").text("");
