@@ -152,10 +152,12 @@ $(document).ready(function() {
                 solver.solve();
             } catch (err) {
                 console.error(err);
-                $("#messages").addClass("ui-state-error").text(err.msg);
-                err.invalidCells.forEach(function(c) {
-                    c.getElement().effect("pulsate");
-                });
+                $("#messages").addClass("ui-state-error").text((!!err.msg) ? err.msg : err);
+                if (!!err.invalidCells) {
+                    err.invalidCells.forEach(function(c) {
+                        c.getElement().effect("pulsate");
+                    });
+                }
             }
         });
     $("#btnClean")
@@ -166,8 +168,9 @@ $(document).ready(function() {
         .attr("accesskey", "c")
         .click(function() {
             puzzle.cells.forEach(function(c) {
-                c.getElement().val("");
+                c.setValue("");
             });
+            puzzle.setStatus(PuzzleStatus.WAITING);
             $("#messages").removeClass("ui-state-error").text("");
         });
     $("#btnStop")

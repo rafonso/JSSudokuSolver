@@ -45,7 +45,7 @@
          //    c.getElement().prop('readonly', true);
          // });
 
-         this.puzzle.setStatus(PuzzleStatus.SOLVED);
+         // this.puzzle.setStatus(PuzzleStatus.SOLVED);
 
      }
 

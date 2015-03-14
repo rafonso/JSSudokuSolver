@@ -17,6 +17,10 @@ function Cell(input) {
     var sector = -1;
     var status = CellStatus.IDLE;
 
+    function unfocus() {
+        $(this).blur();
+    }
+
     function init() {
         var pos = Cell.getCellPos(input);
 
@@ -40,6 +44,8 @@ function Cell(input) {
             colSector = 3;
         }
         sector = 3 * rowSector + colSector;
+
+        $(input).addClass(status);
     }
 
     this.getRow = function() {
@@ -67,6 +73,13 @@ function Cell(input) {
         status = newStatus;
 
         this.getElement().removeClass(oldStatus).addClass(newStatus);
+
+        if (newStatus == PuzzleStatus.RUNNING) {
+            this.getElement().bind("focus", unfocus);
+        }
+        if (oldStatus == PuzzleStatus.RUNNING && newStatus != PuzzleStatus.RUNNING) {
+            this.getElement().unbind("focus", unfocus);
+        }
     }
 
     this.toString = function() {
@@ -81,20 +94,20 @@ Cell.prototype.getValue = function() {
 }
 
 Cell.prototype.setValue = function(value) {
-    this.getElement.val(value);
+    this.getElement().val((!!value) ? value : "");
 }
 
 Cell.prototype.isFilled = function() {
-    return !!this.getValue();
-}
-/*
-Cell.prototype.addClass = function(classe) {
-    $(this.input).addClass(classe);
-}
-Cell.prototype.removeClass = function(classe) {
-    $(this.input).removeClass(classe);
-}
-*/
+        return !!this.getValue();
+    }
+    /*
+    Cell.prototype.addClass = function(classe) {
+        $(this.input).addClass(classe);
+    }
+    Cell.prototype.removeClass = function(classe) {
+        $(this.input).removeClass(classe);
+    }
+    */
 
 /**
  * Verifies if a Cell is in the same Row and Column. i.e. if this this the same Cell.

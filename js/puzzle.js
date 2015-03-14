@@ -86,7 +86,7 @@ function Puzzle(puzzleElement) {
 
             puzzleElement.removeClass(oldStatus).addClass(newStatus);
             this.cells.forEach(function(c) {
-                c.getElement().removeClass(oldStatus).addClass(newStatus);
+                c.setStatus(newStatus);
             });
         }
     }
