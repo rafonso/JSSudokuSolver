@@ -12,112 +12,78 @@ var CellStatus = {
  */
 function Cell(input) {
 
-    var row = -1;
-    var col = -1;
-    var sector = -1;
+    var pos = Cell.getCellPos(input);
+    var row = pos.row;
+    var col = pos.col;
+    var sector =
+        ((row > 6) ? 6 : ((row > 3) ? 3 : 0)) +
+        ((col > 6) ? 3 : ((col > 3) ? 2 : 1));
     var status = CellStatus.IDLE;
+    var element = $(input);
+
+    element.addClass(status);
 
     function unfocus() {
         $(this).blur();
     }
 
-    function init() {
-        var pos = Cell.getCellPos(input);
-
-        row = pos.row;
-        col = pos.col;
-
-        var rowSector;
-        if (row <= 3) {
-            rowSector = 0;
-        } else if (row <= 6) {
-            rowSector = 1;
-        } else {
-            rowSector = 2;
-        }
-        var colSector;
-        if (col <= 3) {
-            colSector = 1;
-        } else if (col <= 6) {
-            colSector = 2;
-        } else {
-            colSector = 3;
-        }
-        sector = 3 * rowSector + colSector;
-
-        $(input).addClass(status);
-    }
-
-    this.getRow = function() {
-        return row;
-    }
-
-    this.getCol = function() {
-        return col;
-    }
-
-    this.getSector = function() {
-        return sector;
-    }
-
-    this.getElement = function() {
-        return $(input);
-    }
-
-    this.getStatus = function() {
-        return status;
-    }
-
-    this.setStatus = function(newStatus) {
+    function changeStatus(newStatus) {
         var oldStatus = status;
         status = newStatus;
 
-        this.getElement().removeClass(oldStatus).addClass(newStatus);
+        element.removeClass(oldStatus).addClass(newStatus);
 
         if (newStatus == PuzzleStatus.RUNNING) {
-            this.getElement().bind("focus", unfocus);
+            element.bind("focus", unfocus);
         }
         if (oldStatus == PuzzleStatus.RUNNING && newStatus != PuzzleStatus.RUNNING) {
-            this.getElement().unbind("focus", unfocus);
+            element.unbind("focus", unfocus);
         }
     }
 
-    this.toString = function() {
-        return "[" + this.getRow() + ", " + this.getCol() + ", " + this.getSector() + ", " + (this.isFilled() ? this.getValue() : "-") + "]";
+    return {
+        get row() {
+            return row;
+        },
+        get col() {
+            return col;
+        },
+        get sector() {
+            return sector;
+        },
+        get puzzleStatus() {
+            return status;
+        },
+        set puzzleStatus(s) {
+            changeStatus(s);
+        },
+        get value() {
+            return parseInt(element.val());
+        },
+        set value(v) {
+            element.val((!!v) ? v : "");
+        },
+        get element() {
+            return element;
+        },
+        get filled() {
+            return !!this.value;
+        },
+        /**
+         * Verifies if a Cell is in the same Row and Column. i.e. if this this the same Cell.
+         *
+         * @param c Cell to be evaluated
+         * @return true if c is in the same Row and Column
+         */
+        sameCell: function(c) {
+            return (this.row === c.row) &&
+                (this.col === c.col);
+        },
+        toString: function() {
+            return "[" + this.row + ", " + this.col + ", " + this.sector + ", " + (this.filled ? this.value : "-") + "]";
+        }
+
     }
-
-    init();
-}
-
-Cell.prototype.getValue = function() {
-    return parseInt(this.getElement().val());
-}
-
-Cell.prototype.setValue = function(value) {
-    this.getElement().val((!!value) ? value : "");
-}
-
-Cell.prototype.isFilled = function() {
-        return !!this.getValue();
-    }
-    /*
-    Cell.prototype.addClass = function(classe) {
-        $(this.input).addClass(classe);
-    }
-    Cell.prototype.removeClass = function(classe) {
-        $(this.input).removeClass(classe);
-    }
-    */
-
-/**
- * Verifies if a Cell is in the same Row and Column. i.e. if this this the same Cell.
- *
- * @param c Cell to be evaluated
- * @return true if c is in the same Row and Column
- */
-Cell.prototype.sameCell = function(c) {
-    return (this.getRow() === c.getRow()) &&
-        (this.getCol() === c.getCol());
 }
 
 Cell.getCellPos = function(element) {

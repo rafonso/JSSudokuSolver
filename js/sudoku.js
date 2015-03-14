@@ -127,7 +127,19 @@ function handleKeyUp(e) {
     }
 }
 
-
+function handleError(err) {
+    if (!!err.stack) {
+        console.error(err.stack);
+    } else {
+        console.error(err);
+    }
+    $("#messages").addClass("ui-state-error").text((!!err.msg) ? err.msg : err);
+    if (!!err.invalidCells) {
+        err.invalidCells.forEach(function(c) {
+            c.element.effect("pulsate");
+        });
+    }
+}
 
 
 $(document).ready(function() {
@@ -151,13 +163,7 @@ $(document).ready(function() {
                 $("#messages").removeClass("ui-state-error").text("");
                 solver.solve();
             } catch (err) {
-                console.error(err);
-                $("#messages").addClass("ui-state-error").text((!!err.msg) ? err.msg : err);
-                if (!!err.invalidCells) {
-                    err.invalidCells.forEach(function(c) {
-                        c.getElement().effect("pulsate");
-                    });
-                }
+                handleError(err);
             }
         });
     $("#btnClean")
@@ -168,9 +174,9 @@ $(document).ready(function() {
         .attr("accesskey", "c")
         .click(function() {
             puzzle.cells.forEach(function(c) {
-                c.setValue("");
+                c.value = null;
             });
-            puzzle.setStatus(PuzzleStatus.WAITING);
+            puzzle.status = PuzzleStatus.WAITING;
             $("#messages").removeClass("ui-state-error").text("");
         });
     $("#btnStop")
@@ -182,7 +188,7 @@ $(document).ready(function() {
     $("#cell11").focus();
 
     puzzle = new Puzzle($("#puzzle"));
-    solver = new Solver(puzzle);
+    solver = Solver(puzzle);
 
 
     console.debug("Initializing finished");
