@@ -24,6 +24,9 @@ body {
     text-align: center;
     font-size: x-large;
 }
+#puzzle input.original {
+    font-weight: bolder;
+}
 #puzzle input:focus {
     background-color: green;
 }

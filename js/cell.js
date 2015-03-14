@@ -18,28 +18,12 @@ function Cell(input) {
     var sector =
         ((row > 6) ? 6 : ((row > 3) ? 3 : 0)) +
         ((col > 6) ? 3 : ((col > 3) ? 2 : 1));
-    var status = CellStatus.IDLE;
+    var puzzleStatus = PuzzleStatus.WAITING;
+    var cellStatus = CellStatus.IDLE;
     var element = $(input);
 
-    element.addClass(status);
-
-    function unfocus() {
-        $(this).blur();
-    }
-
-    function changeStatus(newStatus) {
-        var oldStatus = status;
-        status = newStatus;
-
-        element.removeClass(oldStatus).addClass(newStatus);
-
-        if (newStatus == PuzzleStatus.RUNNING) {
-            element.bind("focus", unfocus);
-        }
-        if (oldStatus == PuzzleStatus.RUNNING && newStatus != PuzzleStatus.RUNNING) {
-            element.unbind("focus", unfocus);
-        }
-    }
+    element.addClass(puzzleStatus).addClass(cellStatus);
+    input.changeClass = changeClass;
 
     return {
         get row() {
@@ -52,10 +36,22 @@ function Cell(input) {
             return sector;
         },
         get puzzleStatus() {
-            return status;
+            return puzzleStatus;
         },
-        set puzzleStatus(s) {
-            changeStatus(s);
+        set puzzleStatus(newStatus) {
+            var oldStatus = puzzleStatus;
+            puzzleStatus = newStatus;
+
+            input.changeClass(oldStatus, newStatus);
+        },
+        get cellStatus() {
+            return cellStatus;
+        },
+        set cellStatus(newStatus) {
+            var oldStatus = puzzleStatus;
+            cellStatus = newStatus;
+
+            input.changeClass(oldStatus, newStatus);
         },
         get value() {
             return parseInt(element.val());

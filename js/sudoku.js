@@ -127,6 +127,21 @@ function handleKeyUp(e) {
     }
 }
 
+
+function unfocus() {
+    $(this).blur();
+}
+
+function changeClass(oldClass, newClass) {
+    $(this).removeClass(oldClass).addClass(newClass);
+
+    if (newClass == PuzzleStatus.RUNNING) {
+        $(this).bind("focus", unfocus);
+    } else {
+        $(this).unbind("focus", unfocus);
+    }
+}
+
 function handleError(err) {
     if (!!err.stack) {
         console.error(err.stack);

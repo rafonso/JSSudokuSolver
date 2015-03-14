@@ -44,6 +44,19 @@ function Puzzle(puzzleElement) {
         cells.forEach(function(c) {
             c.puzzleStatus = newStatus;
         });
+        switch (newStatus) {
+            case PuzzleStatus.RUNNING:
+                cells.filter(function(c) {
+                    return c.filled;
+                }).forEach(function(c) {
+                    c.puzzleStatus = CellStatus.ORIGINAL;
+                });
+                break;
+            default:
+                cells.forEach(function(c) {
+                    c.puzzleStatus = CellStatus.IDLE;
+                });
+        }
     }
 
     return {
