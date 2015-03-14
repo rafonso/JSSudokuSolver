@@ -1,7 +1,7 @@
  function Solver(_puzzle) {
 
      function validate(cells, pos, description) {
-         // The found array has 10 position to not always subtract 1. the 0 position is simply not used.
+         // The found array has 10 positions to not always subtract 1. The 0th position is simply not used.
          var found = [false, false, false, false, false, false, false, false, false, false];
          cells.forEach(function(cell) {
              if (cell.filled) {
@@ -21,7 +21,7 @@
 
      function val(func, description) {
          _.range(1, 10).forEach(function(i) {
-             validate(_puzzle[func](i), i, description);
+             validate(func(i), i, description);
          })
      }
 
@@ -31,9 +31,11 @@
          },
          validatePuzzle: function() {
              this.puzzle.status = PuzzleStatus.VALIDATING;
-             val("getCellsRow", "Row");
-             val("getCellsCol", "Column");
-             val("getCellsSector", "Sector");
+
+             val(this.puzzle.getCellsRow, "Row");
+             val(this.puzzle.getCellsCol, "Column");
+             val(this.puzzle.getCellsSector, "Sector");
+
              this.puzzle.status = PuzzleStatus.READY;
          },
          solve: function() {

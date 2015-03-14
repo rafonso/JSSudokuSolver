@@ -12,9 +12,9 @@ function Puzzle(puzzleElement) {
 
     // PRIVATE ATTRIBUTES
 
-    var _status = PuzzleStatus.WAITING;
+    var status = PuzzleStatus.AITING;
 
-    var _cells = puzzleElement.children().children("input").toArray().map(function(input) {
+    var cells = puzzleElement.children().children("input").toArray().map(function(input) {
         return Cell(input);
     });
 
@@ -31,7 +31,7 @@ function Puzzle(puzzleElement) {
                 return true;
             }
 
-        return _cells.filter(predicate).filter(excluder);
+        return cells.filter(predicate).filter(excluder);
     }
 
     function changeStatus(newStatus) {
@@ -41,17 +41,17 @@ function Puzzle(puzzleElement) {
         console.debug("STATUS: " + oldStatus + " -> " + newStatus);
 
         puzzleElement.removeClass(oldStatus).addClass(newStatus);
-        _cells.forEach(function(c) {
+        cells.forEach(function(c) {
             c.puzzleStatus = newStatus;
         });
     }
 
     return {
         get cells() {
-            return _cells;
+            return cells;
         },
         get status() {
-            return _status;
+            return status;
         },
         set status(newStatus) {
             if (!!newStatus) {
