@@ -1,3 +1,5 @@
+"use strict";
+
 var CellStatus = {
     IDLE: "idle",
     ORIGINAL: "original",
@@ -24,6 +26,7 @@ function Cell(input) {
 
     element.addClass(puzzleStatus).addClass(cellStatus);
     input.changeCellClass = changeCellClass;
+    input.changePuzzleStatus = changePuzzleStatus;
 
     return {
         get row() {
@@ -42,16 +45,16 @@ function Cell(input) {
             var oldStatus = puzzleStatus;
             puzzleStatus = newStatus;
 
-            input.changeCellClass(oldStatus, newStatus);
+            input.changePuzzleStatus(oldStatus, newStatus, element);
         },
         get cellStatus() {
             return cellStatus;
         },
         set cellStatus(newStatus) {
-            var oldStatus = puzzleStatus;
+            var oldStatus = cellStatus;
             cellStatus = newStatus;
 
-            input.changeCellClass(oldStatus, newStatus);
+            input.changeCellClass(oldStatus, newStatus, element);
         },
         get value() {
             return parseInt(element.val());

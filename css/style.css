@@ -27,6 +27,9 @@ body {
 #puzzle input.original {
     font-weight: bolder;
 }
+#puzzle input.evaluating {
+    background-color: orange;
+}
 #puzzle input:focus {
     background-color: green;
 }

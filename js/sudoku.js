@@ -1,3 +1,5 @@
+"use strict";
+
 var puzzle = {};
 var solver = {};
 
@@ -162,12 +164,15 @@ function changePuzzleStatus(oldClass, newClass) {
     }
 }
 
-function changeCellClass(oldClass, newClass) {
+function changeCellClass(oldClass, newClass, element) {
     $(this).removeClass(oldClass).addClass(newClass);
 
     switch (newClass) {
         case PuzzleStatus.RUNNING:
             $(this).bind("focus", unfocus);
+            break;
+        case CellStatus.EVALUATING:
+            $("#messages").text((Date.now() - solver.starTime)); // + " ms");
             break;
         default:
             if (oldClass == PuzzleStatus.RUNNING) {
@@ -232,12 +237,11 @@ $(document).ready(function() {
         })
         .button("option", "label", "Stop")
         .click(function() {
-            puzzle.status = PuzzleStatus.WAITING;
+            puzzle.status = PuzzleStatus.STOPPED;
             $("#messages").removeClass("ui-state-error").text("");
         }).button("disable");
     $("#steptime").selectmenu({
         select: function(event, ui) {
-            // console.debug(getFormattedHour() + ui.item.value);
             solver.stepTime = parseInt(ui.item.value);
         }
     });

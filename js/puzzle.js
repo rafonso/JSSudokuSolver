@@ -1,3 +1,5 @@
+"use strict";
+
 var PuzzleStatus = {
     WAITING: "waiting",
     VALIDATING: "validating",
