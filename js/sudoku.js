@@ -148,13 +148,31 @@ function unfocus() {
     $(this).blur();
 }
 
-function changeClass(oldClass, newClass) {
+function changePuzzleStatus(oldClass, newClass) {
     $(this).removeClass(oldClass).addClass(newClass);
 
-    if (newClass == PuzzleStatus.RUNNING) {
-        $(this).bind("focus", unfocus);
-    } else {
-        $(this).unbind("focus", unfocus);
+    switch (newClass) {
+        case PuzzleStatus.RUNNING:
+            $("#btnRun, #btnClean").button("disable");
+            $("#btnStop").button("enable");
+            break;
+        default:
+            $("#btnRun, #btnClean").button("enable");
+            $("#btnStop").button("disable");
+    }
+}
+
+function changeCellClass(oldClass, newClass) {
+    $(this).removeClass(oldClass).addClass(newClass);
+
+    switch (newClass) {
+        case PuzzleStatus.RUNNING:
+            $(this).bind("focus", unfocus);
+            break;
+        default:
+            if (oldClass == PuzzleStatus.RUNNING) {
+                $(this).unbind("focus", unfocus);
+            }
     }
 }
 
@@ -175,6 +193,7 @@ function handleError(err) {
 
 $(document).ready(function() {
     console.info(getFormattedHour() + "Initializing");
+
     $("#puzzle input")
         .attr("size", 1)
         .attr("maxlength", 1)
@@ -204,9 +223,6 @@ $(document).ready(function() {
         .button("option", "label", "Clean")
         .attr("accesskey", "c")
         .click(function() {
-            puzzle.cells.forEach(function(c) {
-                c.value = null;
-            });
             puzzle.status = PuzzleStatus.WAITING;
             $("#messages").removeClass("ui-state-error").text("");
         });
@@ -214,8 +230,17 @@ $(document).ready(function() {
         .button("option", "icons", {
             primary: "ui-icon-stop"
         })
-        .button("option", "label", "Stop").hide();
-    $("#steptime").selectmenu()
+        .button("option", "label", "Stop")
+        .click(function() {
+            puzzle.status = PuzzleStatus.WAITING;
+            $("#messages").removeClass("ui-state-error").text("");
+        }).button("disable");
+    $("#steptime").selectmenu({
+        select: function(event, ui) {
+            // console.debug(getFormattedHour() + ui.item.value);
+            solver.stepTime = parseInt(ui.item.value);
+        }
+    });
     $("#cell11").focus();
 
     puzzle = new Puzzle($("#puzzle"));

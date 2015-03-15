@@ -25,9 +25,17 @@
          })
      }
 
+     var stepTime = 0;
+
      return {
          get puzzle() {
              return _puzzle;
+         },
+         get stepTime() {
+             return stepTime;
+         },
+         set stepTime(value) {
+             stepTime = value;
          },
          validatePuzzle: function() {
              this.puzzle.status = PuzzleStatus.VALIDATING;
@@ -49,11 +57,7 @@
              // this.puzzle.setStatus(PuzzleStatus.SOLVED);
 
          },
-         clean: function() {
-             this.puzzle.cells.forEach(function(c) {
-                 c.element.prop('readonly', false);
-             });
-         }
 
      };
  }
+

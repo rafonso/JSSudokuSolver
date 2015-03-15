@@ -18,6 +18,8 @@ function Puzzle(puzzleElement) {
         return Cell(input);
     });
 
+    puzzleElement.changePuzzleStatus = changePuzzleStatus;
+
     // PRIVATE METHODS
 
     function get(func, pos, excludeCell) {
@@ -35,12 +37,19 @@ function Puzzle(puzzleElement) {
     }
 
     function changeStatus(newStatus) {
+
+        function changeCellStatus(cellStatus) {
+            return function(c) {
+                c.cellStatus = cellStatus;
+            }
+        }
+
         var oldStatus = status;
         status = newStatus;
 
         console.debug(getFormattedHour() + "STATUS: " + oldStatus + " -> " + newStatus);
 
-        puzzleElement.removeClass(oldStatus).addClass(newStatus);
+        puzzleElement.changePuzzleStatus(oldStatus, newStatus);
         cells.forEach(function(c) {
             c.puzzleStatus = newStatus;
         });
@@ -48,14 +57,16 @@ function Puzzle(puzzleElement) {
             case PuzzleStatus.RUNNING:
                 cells.filter(function(c) {
                     return c.filled;
-                }).forEach(function(c) {
-                    c.puzzleStatus = CellStatus.ORIGINAL;
+                }).forEach(changeCellStatus(CellStatus.ORIGINAL));
+                break;
+            case PuzzleStatus.WAITING:
+                cells.forEach(function(c) {
+                    c.value = null;
                 });
+                cells.forEach(changeCellStatus(CellStatus.IDLE));
                 break;
             default:
-                cells.forEach(function(c) {
-                    c.puzzleStatus = CellStatus.IDLE;
-                });
+                cells.forEach(changeCellStatus(CellStatus.IDLE));
         }
     }
 

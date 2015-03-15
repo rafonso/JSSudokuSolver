@@ -23,7 +23,7 @@ function Cell(input) {
     var element = $(input);
 
     element.addClass(puzzleStatus).addClass(cellStatus);
-    input.changeClass = changeClass;
+    input.changeCellClass = changeCellClass;
 
     return {
         get row() {
@@ -42,7 +42,7 @@ function Cell(input) {
             var oldStatus = puzzleStatus;
             puzzleStatus = newStatus;
 
-            input.changeClass(oldStatus, newStatus);
+            input.changeCellClass(oldStatus, newStatus);
         },
         get cellStatus() {
             return cellStatus;
@@ -51,7 +51,7 @@ function Cell(input) {
             var oldStatus = puzzleStatus;
             cellStatus = newStatus;
 
-            input.changeClass(oldStatus, newStatus);
+            input.changeCellClass(oldStatus, newStatus);
         },
         get value() {
             return parseInt(element.val());
@@ -89,5 +89,7 @@ Cell.getCellPos = function(element) {
         col: parseInt(pos[2])
     };
 }
+
+
 
 Object.freeze(Cell);
