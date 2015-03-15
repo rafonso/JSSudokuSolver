@@ -1,6 +1,22 @@
 var puzzle = {};
 var solver = {};
 
+function getFormattedHour() {
+
+    function format(value, size, end) {
+        var string = value.toString();
+
+        while (string.length < size) {
+            string = '0' + string;
+        }
+
+        return string + end;
+    }
+
+    var d = new Date();
+    return "[" + format(d.getHours(), 2, ":") + format(d.getMinutes(), 2, ":") + format(d.getSeconds(), 2, '.') + format(d.getMilliseconds(), 3, ']') + " ";
+}
+
 var Movement = {
     TO_ROW_END: function(currentRow, currentCol) {
         return {
@@ -158,7 +174,7 @@ function handleError(err) {
 
 
 $(document).ready(function() {
-    console.debug("Initializing");
+    console.info(getFormattedHour() + "Initializing");
     $("#puzzle input")
         .attr("size", 1)
         .attr("maxlength", 1)
@@ -206,5 +222,5 @@ $(document).ready(function() {
     solver = Solver(puzzle);
 
 
-    console.debug("Initializing finished");
+    console.info(getFormattedHour() + "Initializing finished");
 });

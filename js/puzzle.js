@@ -12,7 +12,7 @@ function Puzzle(puzzleElement) {
 
     // PRIVATE ATTRIBUTES
 
-    var status = PuzzleStatus.AITING;
+    var status = PuzzleStatus.WAITING;
 
     var cells = puzzleElement.children().children("input").toArray().map(function(input) {
         return Cell(input);
@@ -38,7 +38,7 @@ function Puzzle(puzzleElement) {
         var oldStatus = status;
         status = newStatus;
 
-        console.debug("STATUS: " + oldStatus + " -> " + newStatus);
+        console.debug(getFormattedHour() + "STATUS: " + oldStatus + " -> " + newStatus);
 
         puzzleElement.removeClass(oldStatus).addClass(newStatus);
         cells.forEach(function(c) {
