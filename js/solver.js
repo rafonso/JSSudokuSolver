@@ -78,9 +78,10 @@ function Solver(_puzzle) {
         cellsToSolve.forEach(solveCell);
         var quantNotSolvedCells = _puzzle.cells.filter(isEmptyCell).length;
 
-        // if (quantCellsToSolve == quantNotSolvedCells) {
-        //     throw new Error("Guesses not implemented yet!");
-        // }
+        if (quantCellsToSolve == quantNotSolvedCells) {
+            puzzle.status = PuzzleStatus.INVALID;
+            throw new Error("Guesses not implemented yet!");
+        }
 
         return quantNotSolvedCells == 0;
     }
@@ -99,6 +100,9 @@ function Solver(_puzzle) {
         },
         get starTime() {
             return starTime;
+        },
+        get cycle() {
+            return cycle;
         },
         validatePuzzle: function() {
             this.puzzle.status = PuzzleStatus.VALIDATING;
@@ -119,9 +123,6 @@ function Solver(_puzzle) {
                 console.debug(getFormattedHour() + "Cycle " + cycle);
                 allCellsFilled = solveCicle();
                 cycle++;
-                if (cycle > 10) {
-                    break;
-                }
                 console.debug(" ");
             }
 

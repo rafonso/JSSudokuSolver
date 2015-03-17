@@ -25,8 +25,6 @@ function Cell(input) {
     var element = $(input);
 
     element.addClass(puzzleStatus).addClass(cellStatus);
-    input.changeCellClass = changeCellClass;
-    input.changePuzzleStatus = changePuzzleStatus;
 
     return {
         get row() {

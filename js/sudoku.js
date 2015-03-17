@@ -158,6 +158,10 @@ function changePuzzleStatus(oldClass, newClass) {
             $("#btnRun, #btnClean").button("disable");
             $("#btnStop").button("enable");
             break;
+        case PuzzleStatus.INVALID:
+            $("#btnRun, #btnStop").button("disable");
+            $("#btnClean").button("enable");
+            break;
         default:
             $("#btnRun, #btnClean").button("enable");
             $("#btnStop").button("disable");
@@ -172,7 +176,7 @@ function changeCellClass(oldClass, newClass, element) {
             $(this).bind("focus", unfocus);
             break;
         case CellStatus.EVALUATING:
-            $("#messages").text((Date.now() - solver.starTime)); // + " ms");
+            $("#messages").html("TOTAL TIME: " + (Date.now() - solver.starTime) + "<br/>CYCLES: " + solver.cycle); // + " ms");
             break;
         default:
             if (oldClass == PuzzleStatus.RUNNING) {
@@ -203,7 +207,11 @@ $(document).ready(function() {
         .attr("size", 1)
         .attr("maxlength", 1)
         .keydown(handleKey)
-        .keyup(handleKeyUp);
+        .keyup(handleKeyUp)
+        .each(function(index, element) {
+            element.changePuzzleStatus = changePuzzleStatus;
+            element.changeCellClass = changeCellClass;
+        });
 
     $("button").button();
     $("#btnRun")
