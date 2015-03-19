@@ -45,10 +45,13 @@ body {
 #cell91, #cell92, #cell93, #cell94, #cell95, #cell96, #cell97, #cell98, #cell99 {
     border-bottom-width: thick !important;
 }
-#cell31, #cell32, #cell33, #cell34, #cell35, #cell36, #cell37, #cell38, #cell39, #cell61, #cell62, #cell63, #cell64, #cell65, #cell66, #cell67, #cell68, #cell69 {
+
+#cell31, #cell32, #cell33, #cell34, #cell35, #cell36, #cell37, #cell38, #cell39, 
+#cell61, #cell62, #cell63, #cell64, #cell65, #cell66, #cell67, #cell68, #cell69 {
     border-bottom-width: medium !important;
 }
-#cell13, #cell23, #cell33, #cell43, #cell53, #cell63, #cell73, #cell83, #cell93, #cell16, #cell26, #cell36, #cell46, #cell56, #cell66, #cell76, #cell86, #cell96 {
+#cell13, #cell23, #cell33, #cell43, #cell53, #cell63, #cell73, #cell83, #cell93, 
+#cell16, #cell26, #cell36, #cell46, #cell56, #cell66, #cell76, #cell86, #cell96 {
     border-right-width: medium !important;
 }
 /* PUZZLE CONFIGURATION - END */
@@ -58,6 +61,7 @@ body {
 }
 #buttons {
     padding-top: 10px;
+      white-space: nowrap;
 }
 #buttons button {
     width: 100px;
@@ -68,6 +72,7 @@ body {
 
 #controls {
     margin-top: 10px;
+    width: 100%;
 }
 #controls > div {
     display: table;
