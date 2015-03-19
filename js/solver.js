@@ -88,52 +88,68 @@ function Solver(_puzzle) {
 
     // PRIVATE METHODS - END
 
-    return {
-        get puzzle() {
+    // PUBLIC PROPERTIES
+
+    Object.defineProperty(this, "puzzle", {
+        get: function() {
             return _puzzle;
-        },
-        get stepTime() {
+        }
+    });
+
+    Object.defineProperty(this, "stepTime", {
+        configurable: true,
+        get: function() {
             return stepTime;
         },
-        set stepTime(value) {
-            stepTime = value;
-        },
-        get starTime() {
+        set: function(value) {
+            var stepTime = value;
+        }
+    });
+
+    Object.defineProperty(this, "starTime", {
+        get: function() {
             return starTime;
-        },
-        get cycle() {
+        }
+    });
+
+    Object.defineProperty(this, "cycle", {
+        get: function() {
             return cycle;
-        },
-        validatePuzzle: function() {
-            this.puzzle.status = PuzzleStatus.VALIDATING;
+        }
+    });
 
-            val(this.puzzle.getCellsRow, "Row");
-            val(this.puzzle.getCellsCol, "Column");
-            val(this.puzzle.getCellsSector, "Sector");
+    // PUBLIC METHODS
 
-            this.puzzle.status = PuzzleStatus.READY;
-        },
-        solve: function() {
-            this.puzzle.status = PuzzleStatus.RUNNING;
-            starTime = Date.now();
-            cycle = 1;
+    this.validatePuzzle = function() {
+        this.puzzle.status = PuzzleStatus.VALIDATING;
 
-            var allCellsFilled = false;
-            while (!allCellsFilled && this.puzzle.status != PuzzleStatus.STOPPED) {
-                console.debug(getFormattedHour() + "Cycle " + cycle);
-                allCellsFilled = solveCicle();
-                cycle++;
-                console.debug(" ");
-            }
+        val(this.puzzle.getCellsRow, "Row");
+        val(this.puzzle.getCellsCol, "Column");
+        val(this.puzzle.getCellsSector, "Sector");
+
+        this.puzzle.status = PuzzleStatus.READY;
+    }
+
+    this.solve = function() {
+        this.puzzle.status = PuzzleStatus.RUNNING;
+        starTime = Date.now();
+        cycle = 1;
+
+        var allCellsFilled = false;
+        while (!allCellsFilled && this.puzzle.status != PuzzleStatus.STOPPED) {
+            console.debug(getFormattedHour() + "Cycle " + cycle);
+            allCellsFilled = solveCicle();
+            cycle++;
+            console.debug(" ");
+        }
 
 
-            // All Cells become readonly
-            // _.each(_puzzle.cells, function(c) {
-            //    c.getElement().prop('readonly', true);
-            // });
+        // All Cells become readonly
+        // _.each(_puzzle.cells, function(c) {
+        //    c.getElement().prop('readonly', true);
+        // });
 
-            this.puzzle.status = PuzzleStatus.SOLVED;
-        },
+        this.puzzle.status = PuzzleStatus.SOLVED;
+    }
 
-    };
 }

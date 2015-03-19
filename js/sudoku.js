@@ -256,7 +256,7 @@ $(document).ready(function() {
     $("#cell11").focus();
 
     puzzle = new Puzzle($("#puzzle"));
-    solver = Solver(puzzle);
+    solver = new Solver(puzzle);
 
 
     console.info(getFormattedHour() + "Initializing finished");

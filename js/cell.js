@@ -26,61 +26,90 @@ function Cell(input) {
 
     element.addClass(puzzleStatus).addClass(cellStatus);
 
-    return {
-        get row() {
+    // PUBLIC PROPERTIES
+
+    Object.defineProperty(this, "row", {
+        get: function() {
             return row;
-        },
-        get col() {
+        }
+    });
+
+    Object.defineProperty(this, "col", {
+        get: function() {
             return col;
-        },
-        get sector() {
+        }
+    });
+
+    Object.defineProperty(this, "sector", {
+        get: function() {
             return sector;
-        },
-        get puzzleStatus() {
+        }
+    });
+
+    Object.defineProperty(this, "puzzleStatus", {
+        configurable: true,
+        get: function() {
             return puzzleStatus;
         },
-        set puzzleStatus(newStatus) {
+        set: function(newStatus) {
             var oldStatus = puzzleStatus;
             puzzleStatus = newStatus;
-
             input.changePuzzleStatus(oldStatus, newStatus, element);
-        },
-        get cellStatus() {
+        }
+    });
+
+    Object.defineProperty(this, "cellStatus", {
+        configurable: true,
+        get: function() {
             return cellStatus;
         },
-        set cellStatus(newStatus) {
+        set: function(newStatus) {
             var oldStatus = cellStatus;
             cellStatus = newStatus;
 
-            input.changeCellClass(oldStatus, newStatus, element);
-        },
-        get value() {
+            input.changePuzzleStatus(oldStatus, newStatus, element);
+        }
+    });
+
+    Object.defineProperty(this, "value", {
+        configurable: true,
+        get: function() {
             return parseInt(element.val());
         },
-        set value(v) {
+        set: function(v) {
             element.val((!!v) ? v : "");
-        },
-        get element() {
-            return element;
-        },
-        get filled() {
-            return !!this.value;
-        },
-        /**
-         * Verifies if a Cell is in the same Row and Column. i.e. if this this the same Cell.
-         *
-         * @param c Cell to be evaluated
-         * @return true if c is in the same Row and Column
-         */
-        sameCell: function(c) {
-            return (this.row === c.row) &&
-                (this.col === c.col);
-        },
-        toString: function() {
-            return "[" + this.row + ", " + this.col + ", " + this.sector + ", " + (this.filled ? this.value : "-") + "]";
         }
+    });
 
+    Object.defineProperty(this, "element", {
+        get: function() {
+            return element;
+        }
+    });
+
+    Object.defineProperty(this, "filled", {
+        get: function() {
+            return !!this.value;
+        }
+    });
+
+    // PUBLIC METHODS
+
+    /**
+     * Verifies if a Cell is in the same Row and Column. i.e. if this this the same Cell.
+     *
+     * @param c Cell to be evaluated
+     * @return true if c is in the same Row and Column
+     */
+    this.sameCell = function(c) {
+        return (this.row === c.row) &&
+            (this.col === c.col);
     }
+
+    this.toString = function() {
+        return "[" + this.row + ", " + this.col + ", " + this.sector + ", " + (this.filled ? this.value : "-") + "]";
+    }
+
 }
 
 Cell.getCellPos = function(element) {

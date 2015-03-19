@@ -17,7 +17,7 @@ function Puzzle(puzzleElement) {
     var status = PuzzleStatus.WAITING;
 
     var cells = puzzleElement.children().children("input").toArray().map(function(input) {
-        return Cell(input);
+        return new Cell(input);
     });
 
     puzzleElement.changePuzzleStatus = changePuzzleStatus;
@@ -72,51 +72,63 @@ function Puzzle(puzzleElement) {
         }
     }
 
-    return {
-        get cells() {
+    // PUBLIC PROPERTIES
+
+    Object.defineProperty(this, "cells", {
+        get: function() {
             return cells;
-        },
-        get status() {
+        }
+    });
+
+    Object.defineProperty(this, "status", {
+        configurable: true,
+        get: function() {
             return status;
         },
-        set status(newStatus) {
+        set: function(newStatus) {
             if (!!newStatus) {
                 changeStatus(newStatus);
             }
-        },
-        /**
-         * Returns the Cells who are in determinated Row. It is possible exclude a Cell which (presumively) is in this Row.
-         *
-         * @param row solicited Row
-         * @param excludeCell Cell to be excluded in result.
-         * @return Cells which are in the solicitated Row. If excludeCell is defined, this will not be present in result.
-         */
-        getCellsRow: function(row, excludeCell) {
-            return get("row", row, excludeCell);
-        },
-        /**
-         * Returns the Cells who are in determinated Column. It is possible exclude a Cell which (presumively) is in this Column.
-         *
-         * @param col solicited Column
-         * @param excludeCell Cell to be excluded in result.
-         * @return Cells which are in the solicitated Column. If excludeCell is defined, this will not be present in result.
-         */
-        getCellsCol: function(col, excludeCell) {
-            return get("col", col, excludeCell);
-        },
-        /**
-         * Returns the Cells who are in determinated Sector. It is possible exclude a Cell which (presumively) is in this Sector.
-         *
-         * @param sector solicited Sector
-         * @param excludeCell Cell to be excluded in result.
-         * @return Cells which are in the solicitated Sector. If excludeCell is defined, this will not be present in result.
-         */
-        getCellsSector: function(sec, excludeCell) {
-            return get("sector", sec, excludeCell);
-        },
-        toString: function() {
-            return "Puzzle[status: " + this.status + ", cells: " + this.cells + "]";
         }
+    });
+
+    // PUBLIC METHODS
+
+    /**
+     * Returns the Cells who are in determinated Row. It is possible exclude a Cell which (presumively) is in this Row.
+     *
+     * @param row solicited Row
+     * @param excludeCell Cell to be excluded in result.
+     * @return Cells which are in the solicitated Row. If excludeCell is defined, this will not be present in result.
+     */
+    this.getCellsRow = function(row, excludeCell) {
+        return get("row", row, excludeCell);
+    }
+
+    /**
+     * Returns the Cells who are in determinated Column. It is possible exclude a Cell which (presumively) is in this Column.
+     *
+     * @param col solicited Column
+     * @param excludeCell Cell to be excluded in result.
+     * @return Cells which are in the solicitated Column. If excludeCell is defined, this will not be present in result.
+     */
+    this.getCellsCol = function(col, excludeCell) {
+        return get("col", col, excludeCell);
+    }
+
+    /**
+     * Returns the Cells who are in determinated Sector. It is possible exclude a Cell which (presumively) is in this Sector.
+     *
+     * @param sector solicited Sector
+     * @param excludeCell Cell to be excluded in result.
+     * @return Cells which are in the solicitated Sector. If excludeCell is defined, this will not be present in result.
+     */
+    this.getCellsSector = function(sec, excludeCell) {
+        return get("sector", sec, excludeCell);
+    }
+
+    this.toString = function() {
+        return "Puzzle[status: " + this.status + ", cells: " + this.cells + "]";
     }
 
 }
