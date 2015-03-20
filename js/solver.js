@@ -153,3 +153,10 @@ function Solver(_puzzle) {
     }
 
 }
+
+
+onmessage = function(e) {
+    console.info(e);
+    console.info(e.data);
+}
+

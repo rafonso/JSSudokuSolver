@@ -2,6 +2,7 @@
 
 var puzzle = {};
 var solver = {};
+var worker = new Worker('js/solver.js');
 
 function getFormattedHour() {
 
@@ -58,6 +59,8 @@ var Movement = {
     },
 };
 
+var cellRegex = /^cell(\d)(\d)$/;
+
 function moveTo(e, movement, preventDefault) {
     var pos = Cell.getCellPos(e.target);
     var nextPos = movement(pos.row, pos.col);
@@ -65,6 +68,16 @@ function moveTo(e, movement, preventDefault) {
     if (preventDefault) {
         e.preventDefault();
     }
+}
+
+function notifyCellChange(cellId, number) {
+    var pos = cellRegex.exec(cellId);
+    worker.postMessage({
+        type: MessageToSolver.FILL_CELL, //
+        row: parseInt(pos[1]), //
+        col: parseInt(pos[2]), //
+        value: number //
+    });
 }
 
 function createMovementAction(movement) {
@@ -75,6 +88,12 @@ function createMovementAction(movement) {
 
 function gotoNextCell(e) {
     moveTo(e, Movement.TO_RIGHT, true);
+    notifyCellChange(e.target.id, null);
+}
+
+function changeInputValue(e, number) {
+    e.target.value = number;
+    notifyCellChange(e.target.id, number);
 }
 
 var noAction = function(e) {};
@@ -82,15 +101,16 @@ var numberAction = function(e) {
     if (e.shiftKey) {
         e.preventDefault();
     } else {
-        e.target.value = (e.keyCode - 48);
+        changeInputValue(e, e.keyCode - 48);
     }
 };
 var numberPadAction = function(e) {
-    e.target.value = (e.keyCode - 96);
+    changeInputValue(e, e.keyCode - 96)
 };
 var cleanAndGotoPrevious = function(e) {
     if (!e.target.value) {
         moveTo(e, Movement.TO_LEFT, true);
+        notifyCellChange(e.target.id, null);
     }
 };
 
@@ -126,7 +146,7 @@ var actionByKeyCode = {
     102: numberPadAction, // numpad 6 
     103: numberPadAction, // numpad 7 
     104: numberPadAction, // numpad 8 
-    105: numberPadAction, // numpad 9 
+    105: numberPadAction // numpad 9 
 }
 
 function handleKey(e) {
@@ -199,8 +219,7 @@ function handleError(err) {
     }
 }
 
-
-$(document).ready(function() {
+function initSudoku() {
     console.info(getFormattedHour() + "Initializing");
 
     $("#puzzle input")
@@ -208,10 +227,17 @@ $(document).ready(function() {
         .attr("maxlength", 1)
         .keydown(handleKey)
         .keyup(handleKeyUp)
-        .each(function(index, element) {
-            element.changePuzzleStatus = changePuzzleStatus;
-            element.changeCellClass = changeCellClass;
-        });
+        // .change(function() {
+        //     console.debug($(this).val() + " - " + this.id);
+        // })
+    ;
+    // .each(function(index, element) {
+    //     $(element).change(function() {
+    //         console.debug(this);
+    //     });
+    //     // element.changePuzzleStatus = changePuzzleStatus;
+    //     // element.changeCellClass = changeCellClass;
+    // });
 
     $("button").button();
     $("#btnRun")
@@ -221,13 +247,18 @@ $(document).ready(function() {
         .button("option", "label", "Run")
         .attr("accesskey", "r")
         .click(function() {
-            try {
-                solver.validatePuzzle();
-                $("#messages").removeClass("ui-state-error").text("");
-                solver.solve();
-            } catch (err) {
-                handleError(err);
-            }
+            worker.postMessage({
+                type: MessageToSolver.START
+            });
+            /*
+                        try {
+                            solver.validatePuzzle();
+                            $("#messages").removeClass("ui-state-error").text("");
+                            solver.solve();
+                        } catch (err) {
+                            handleError(err);
+                        }
+            */
         });
     $("#btnClean")
         .button("option", "icons", {
@@ -236,17 +267,23 @@ $(document).ready(function() {
         .button("option", "label", "Clean")
         .attr("accesskey", "c")
         .click(function() {
-            puzzle.status = PuzzleStatus.WAITING;
-            $("#messages").removeClass("ui-state-error").text("");
-        });
+            worker.postMessage({
+                type: MessageToSolver.CLEAN
+            });
+            // puzzle.status = PuzzleStatus.WAITING;
+            // $("#messages").removeClass("ui-state-error").text("");
+        }); // 
     $("#btnStop")
         .button("option", "icons", {
             primary: "ui-icon-stop"
         })
         .button("option", "label", "Stop")
         .click(function() {
-            puzzle.status = PuzzleStatus.STOPPED;
-            $("#messages").removeClass("ui-state-error").text("");
+            worker.postMessage({
+                type: MessageToSolver.CLEAN
+            });
+            // puzzle.status = PuzzleStatus.STOPPED;
+            // $("#messages").removeClass("ui-state-error").text("");
         }).button("disable");
     $("#steptime").selectmenu({
         select: function(event, ui) {
@@ -260,4 +297,41 @@ $(document).ready(function() {
 
 
     console.info(getFormattedHour() + "Initializing finished");
-});
+}
+
+
+$(document).ready(initSudoku);
+/*
+(function(global) {
+    // http://stackoverflow.com/questions/5408406/web-workers-without-a-separate-javascript-file
+    var is_worker = !global.document;
+    var script_path = is_worker ? null : (function() {
+        // append random number and time to ID
+        var id = (Math.random()+''+(new Date()).substring(2);
+        document.write('<script id="wts' + id + '"></script>');
+        return document.getElementById('wts' + id).
+            previousSibling.src;
+    })();
+    function msg_parent(e) {
+        // event handler for parent -> worker messages
+    }
+    function msg_worker(e) {
+        // event handler for worker -> parent messages
+    }
+    function new_worker() {
+        var w = new Worker(script_path);
+        w.addEventListener('message', msg_worker, false);
+        return w;
+    }
+    if (is_worker)
+        global.addEventListener('message', msg_parent, false);
+
+    // put the rest of your library here
+    // to spawn a worker, use new_worker()
+var worker =  new_worker();
+
+})(this);
+3461-1722
+9 6792-7182
+neusa
+*/

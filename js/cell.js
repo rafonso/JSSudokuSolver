@@ -22,6 +22,7 @@ function Cell(input) {
         ((col > 6) ? 3 : ((col > 3) ? 2 : 1));
     var puzzleStatus = PuzzleStatus.WAITING;
     var cellStatus = CellStatus.IDLE;
+    var value = null;
     var element = $(input);
 
     element.addClass(puzzleStatus).addClass(cellStatus);
@@ -43,6 +44,18 @@ function Cell(input) {
     Object.defineProperty(this, "sector", {
         get: function() {
             return sector;
+        }
+    });
+
+    Object.defineProperty(this, "val", {
+        configurable: true,
+        get: function() {
+            return value;
+        },
+        set: function(v) {
+            var old = value;
+            value = v;
+            // input.changePuzzleStatus(old, v, element);
         }
     });
 
