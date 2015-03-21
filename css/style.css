@@ -2,7 +2,7 @@ body {
     font-family: sans-serif;
 }
 
-body > div:visible {
+body > div {
     width: 300px;
 }
 
