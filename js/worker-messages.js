@@ -1,17 +1,17 @@
 var MessageToSolver = {
     FILL_CELL: "fillCell",
-    START:     "start",
-    CLEAN:     "clean", 
-    STOP:      "stop",
+    START: "start",
+    CLEAN: "clean",
+    STOP: "stop",
     STEP_TIME: "stepTime"
 };
 
-var MessageFomSolver = {
+var MessageFromSolver = {
     INVALID_SOLVER: "puzzleInvalid",
-    PUZZLE_STATUS:  "puzzleStatus",
-    CELL_STATUS:    "cellStatus", 
-    CELL_VALUE:     "cellValue", 
-    ERROR:          "error"
+    PUZZLE_STATUS: "puzzleStatus",
+    CELL_STATUS: "cellStatus",
+    CELL_VALUE: "cellValue",
+    ERROR: "error"
 };
 
 var PuzzleStatus = {
@@ -21,5 +21,23 @@ var PuzzleStatus = {
     INVALID: "invalid",
     RUNNING: "running",
     STOPPED: "stopped",
-    SOLVED: "solved",
+    SOLVED: "solved"
+};
+
+var CellStatus = {
+    IDLE: "idle",
+    ORIGINAL: "original",
+    FILLED: "filled",
+    EVALUATING: "evaluating",
+    GUESSING: "guessing",
+    ERROR: "error",
+};
+
+function objectToString(obj) {
+    var str = "{";
+    
+    Object.keys(obj).forEach(function(key, index, array) {
+        str += key + "=" + obj[key] + (index < (array.length - 1)? ", ": "}");
+    });
+    return str;
 }

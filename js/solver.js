@@ -3,8 +3,8 @@
 var actionByMessageToSolver = [];
 
 // See http://stackoverflow.com/questions/14500091/uncaught-referenceerror-importscripts-is-not-defined
-if( 'function' === typeof importScripts) {
-    importScripts("worker-messages.js");
+if ('function' === typeof importScripts) {
+    importScripts("worker-messages.js", "underscore.js");
     addEventListener('message', function(e) {
         actionByMessageToSolver[e.data.type](e.data);
     });
@@ -12,34 +12,42 @@ if( 'function' === typeof importScripts) {
 }
 
 function initializeActions() {
-    actionByMessageToSolver[MessageToSolver.START] = function (data) {
+    actionByMessageToSolver[MessageToSolver.START] = function(data) {
         // Validate
         // Run Puzzle
         postMessage({
-            type: MessageFomSolver.PUZZLE_STATUS,
-            value: PuzzleStatus.RUNNING,
+            type: MessageFromSolver.PUZZLE_STATUS,
+            status: PuzzleStatus.RUNNING,
             time: Date.now()
         });
     };
-    actionByMessageToSolver[MessageToSolver.CLEAN] = function (data) {
+    actionByMessageToSolver[MessageToSolver.CLEAN] = function(data) {
         // clean all filled Cells
         postMessage({
-            type: MessageFomSolver.PUZZLE_STATUS,
-            value: PuzzleStatus.WAITING,
+            type: MessageFromSolver.PUZZLE_STATUS,
+            status: PuzzleStatus.WAITING,
             time: Date.now()
         });
     };
-    actionByMessageToSolver[MessageToSolver.STOP] = function (data) {
+    actionByMessageToSolver[MessageToSolver.STOP] = function(data) {
         postMessage({
-            type: MessageFomSolver.PUZZLE_STATUS,
-            value: PuzzleStatus.STOPPED,
+            type: MessageFromSolver.PUZZLE_STATUS,
+            status: PuzzleStatus.STOPPED,
             time: Date.now()
         });
     };
-    actionByMessageToSolver[MessageToSolver.FILL_CELL] = function (data) {
-        console.debug("FILL_CELL: " + data);
+    actionByMessageToSolver[MessageToSolver.FILL_CELL] = function(data) {
+        // Fill Cell Value        
+        console.debug("FILL_CELL: " + objectToString(data));
+        postMessage({
+            type: MessageFromSolver.CELL_STATUS,
+            status: (!!data.value)? CellStatus.ORIGINAL: null,
+            row: data.row,
+            col: data.col,
+            value: data.value
+        });
     };
-    actionByMessageToSolver[MessageToSolver.STEP_TIME] = function (data) {
+    actionByMessageToSolver[MessageToSolver.STEP_TIME] = function(data) {
         console.debug("STEP_TIME: " + data.value);
     };
 }
@@ -54,7 +62,7 @@ function Solver(_puzzle) {
     // PRIVATE METHODS - BEGIN
 
     function validate(cells, pos, description) {
-        // The found array has 10 positions to not always subtract 1. The 0th position is simply not used.
+        // The found array has 10 positions to avoid always subtract 1. The 0th position is simply not used.
         var found = [false, false, false, false, false, false, false, false, false, false];
         cells.forEach(function(cell) {
             if (cell.filled) {
@@ -192,4 +200,3 @@ function Solver(_puzzle) {
     }
 
 }
-

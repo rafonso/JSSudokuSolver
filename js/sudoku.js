@@ -1,7 +1,5 @@
 "use strict";
 
-// var puzzle = {};
-// var solver = {};
 var worker = new Worker('js/solver.js');
 
 function getFormattedHour() {
@@ -56,14 +54,14 @@ var Movement = {
             row: (currentRow < 9) ? (currentRow + 1) : 1,
             col: (currentRow < 9) ? currentCol : ((currentCol < 9) ? (currentCol + 1) : 1)
         };
-    },
+    }
 };
 
 var cellRegex = /^cell(\d)(\d)$/;
 
 function moveTo(e, movement, preventDefault) {
-    var pos = Cell.getCellPos(e.target);
-    var nextPos = movement(pos.row, pos.col);
+    var pos = cellRegex.exec(e.target.id);
+    var nextPos = movement(parseInt(pos[1]), parseInt(pos[2]));
     $("#cell" + nextPos.row + nextPos.col).focus();
     if (preventDefault) {
         e.preventDefault();
@@ -258,8 +256,6 @@ function initSudoku() {
             worker.postMessage({
                 type: MessageToSolver.CLEAN
             });
-            // puzzle.status = PuzzleStatus.WAITING;
-            // $("#messages").removeClass("ui-state-error").text("");
         }); // 
     $("#btnStop")
         .button("option", "icons", {
@@ -270,8 +266,6 @@ function initSudoku() {
             worker.postMessage({
                 type: MessageToSolver.STOP
             });
-            // puzzle.status = PuzzleStatus.STOPPED;
-            // $("#messages").removeClass("ui-state-error").text("");
         }); //.button("disable");
     $("#steptime").selectmenu({
         select: function(event, ui) {
@@ -284,43 +278,60 @@ function initSudoku() {
     });
     $("#cell11").focus();
 
-    // puzzle = new Puzzle($("#puzzle"));
-    // solver = new Solver(puzzle);
-
-
     console.info(getFormattedHour() + "Initializing finished");
 }
 
-
 var actionByPuzzleStatus = [];
+actionByPuzzleStatus[PuzzleStatus.WAITING] = function(data) {
+    $("#puzzle input").val("");
+    $("#puzzle input").unbind("focus", unfocus);
+};
+actionByPuzzleStatus[PuzzleStatus.VALIDATING] = function(data) {
+    console.error("PuzzleStatus.VALIDATING: " + objectToString(data));
+};
+actionByPuzzleStatus[PuzzleStatus.INVALID] = function(data) {
+    console.error("PuzzleStatus.INVALID: " +  objectToString(data));
+};
 actionByPuzzleStatus[PuzzleStatus.RUNNING] = function(data) {
     $("#btnRun, #btnClean").button("disable");
     $("#btnStop").button("enable");
     $("#puzzle input").bind("focus", unfocus);
 };
-actionByPuzzleStatus[PuzzleStatus.WAITING] = function(data) {
-    $("#puzzle input").val("");
-    $("#puzzle input").unbind("focus", unfocus);
-};
 actionByPuzzleStatus[PuzzleStatus.STOPPED] = function(data) {
     $("#btnRun, #btnClean").button("enable");
     $("#btnStop").button("disable");
 };
+actionByPuzzleStatus[PuzzleStatus.SOLVED] = function(data) {
+console.error("PuzzleStatus.SOLVED: " +  objectToString(data));
+}
 
-
-
+var actionByMessageFromSolver = [];
+actionByMessageFromSolver[MessageFromSolver.INVALID_SOLVER] = function(data) {
+    console.error("INVALID_SOLVER: " +  objectToString(data));
+};
+actionByMessageFromSolver[MessageFromSolver.PUZZLE_STATUS] = function(data) {
+    console.debug("MessageFromSolver.PUZZLE_STATUS: " +  objectToString(data));
+    $("#puzzle").removeClass().addClass(data.status);
+    actionByPuzzleStatus[data.status](data);
+};
+actionByMessageFromSolver[MessageFromSolver.CELL_STATUS] = function(data) {
+    console.info("CELL_STATUS: " + objectToString(data) );
+    var cell = $("#cell" + data.row + data.col);
+    cell.removeClass().addClass(data.status);
+};
+actionByMessageFromSolver[MessageFromSolver.CELL_VALUE] = function(data) {
+    console.info("CELL_VALUE: " +  objectToString(data));
+};
+actionByMessageFromSolver[MessageFromSolver.ERROR] = function(data) {
+    console.error("ERROR: " +  objectToString(data));
+};
 
 worker.onmessage = function(e) {
-    if(!!e.data.type) {
-        console.debug(e.data.type);
-        switch(e.data.type) {
-        case MessageFomSolver.PUZZLE_STATUS:
-            $("#puzzle").removeClass().addClass(e.data.value);
-            actionByPuzzleStatus[e.data.value](e.data);
-            break;
-        }
-        
-    }
+    if (!!e.data.type) {
+        actionByMessageFromSolver[e.data.type](e.data);
+    } else {
+		console.info(e.toString());
+	}
 }
 
 

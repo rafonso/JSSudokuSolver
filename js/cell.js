@@ -1,14 +1,5 @@
 "use strict";
 
-var CellStatus = {
-    IDLE: "idle",
-    ORIGINAL: "original",
-    FILLED: "filled",
-    EVALUATING: "evaluating",
-    GUESSING: "guessing",
-    ERROR: "error",
-};
-
 /**
  *
  */
