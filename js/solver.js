@@ -1,5 +1,50 @@
 "use strict";
 
+var actionByMessageToSolver = [];
+
+// See http://stackoverflow.com/questions/14500091/uncaught-referenceerror-importscripts-is-not-defined
+if( 'function' === typeof importScripts) {
+    importScripts("worker-messages.js");
+    addEventListener('message', function(e) {
+        actionByMessageToSolver[e.data.type](e.data);
+    });
+    initializeActions();
+}
+
+function initializeActions() {
+    actionByMessageToSolver[MessageToSolver.START] = function (data) {
+        // Validate
+        // Run Puzzle
+        postMessage({
+            type: MessageFomSolver.PUZZLE_STATUS,
+            value: PuzzleStatus.RUNNING,
+            time: Date.now()
+        });
+    };
+    actionByMessageToSolver[MessageToSolver.CLEAN] = function (data) {
+        // clean all filled Cells
+        postMessage({
+            type: MessageFomSolver.PUZZLE_STATUS,
+            value: PuzzleStatus.WAITING,
+            time: Date.now()
+        });
+    };
+    actionByMessageToSolver[MessageToSolver.STOP] = function (data) {
+        postMessage({
+            type: MessageFomSolver.PUZZLE_STATUS,
+            value: PuzzleStatus.STOPPED,
+            time: Date.now()
+        });
+    };
+    actionByMessageToSolver[MessageToSolver.FILL_CELL] = function (data) {
+        console.debug("FILL_CELL: " + data);
+    };
+    actionByMessageToSolver[MessageToSolver.STEP_TIME] = function (data) {
+        console.debug("STEP_TIME: " + data.value);
+    };
+}
+
+
 function Solver(_puzzle) {
 
     var stepTime = 0;
@@ -143,20 +188,8 @@ function Solver(_puzzle) {
             console.debug(" ");
         }
 
-
-        // All Cells become readonly
-        // _.each(_puzzle.cells, function(c) {
-        //    c.getElement().prop('readonly', true);
-        // });
-
         this.puzzle.status = PuzzleStatus.SOLVED;
     }
 
-}
-
-
-onmessage = function(e) {
-    console.info(e);
-    console.info(e.data);
 }
 

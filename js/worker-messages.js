@@ -13,3 +13,13 @@ var MessageFomSolver = {
     CELL_VALUE:     "cellValue", 
     ERROR:          "error"
 };
+
+var PuzzleStatus = {
+    WAITING: "waiting",
+    VALIDATING: "validating",
+    READY: "ready",
+    INVALID: "invalid",
+    RUNNING: "running",
+    STOPPED: "stopped",
+    SOLVED: "solved",
+}

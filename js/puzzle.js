@@ -1,14 +1,5 @@
 "use strict";
 
-var PuzzleStatus = {
-    WAITING: "waiting",
-    VALIDATING: "validating",
-    READY: "ready",
-    INVALID: "invalid",
-    RUNNING: "running",
-    STOPPED: "stopped",
-    SOLVED: "solved",
-}
 
 function Puzzle(puzzleElement) {
 

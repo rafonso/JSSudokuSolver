@@ -1,7 +1,7 @@
 "use strict";
 
-var puzzle = {};
-var solver = {};
+// var puzzle = {};
+// var solver = {};
 var worker = new Worker('js/solver.js');
 
 function getFormattedHour() {
@@ -88,7 +88,6 @@ function createMovementAction(movement) {
 
 function gotoNextCell(e) {
     moveTo(e, Movement.TO_RIGHT, true);
-    notifyCellChange(e.target.id, null);
 }
 
 function changeInputValue(e, number) {
@@ -108,10 +107,19 @@ var numberPadAction = function(e) {
     changeInputValue(e, e.keyCode - 96)
 };
 var cleanAndGotoPrevious = function(e) {
-    if (!e.target.value) {
+    if (e.target.value) {
+        e.target.value = null;
+        notifyCellChange(e.target.id, null);
+    } else {
         moveTo(e, Movement.TO_LEFT, true);
+    }
+};
+var cleanAndGotoNext = function(e) {
+    if (e.target.value) {
+        e.target.value = null;
         notifyCellChange(e.target.id, null);
     }
+    gotoNextCell(e)
 };
 
 var actionByKeyCode = {
@@ -119,7 +127,7 @@ var actionByKeyCode = {
     9: noAction, // Tab
     13: noAction, // Enter
     27: noAction, // Esc
-    32: gotoNextCell, // space
+    32: cleanAndGotoNext, // space
     35: createMovementAction(Movement.TO_ROW_END), // end
     36: createMovementAction(Movement.TO_ROW_START), // home
     37: createMovementAction(Movement.TO_LEFT), // left arrow 
@@ -127,7 +135,7 @@ var actionByKeyCode = {
     39: gotoNextCell, // right arrow
     40: createMovementAction(Movement.TO_DOWN), // down arrow
     46: noAction, // Delete
-    48: gotoNextCell, // 0
+    48: cleanAndGotoNext, // 0
     49: numberAction, // 1
     50: numberAction, // 2
     51: numberAction, // 3
@@ -137,7 +145,7 @@ var actionByKeyCode = {
     55: numberAction, // 7
     56: numberAction, // 8
     57: numberAction, // 9
-    96: gotoNextCell, // numpad 0
+    96: cleanAndGotoNext, // numpad 0
     97: numberPadAction, // numpad 1 
     98: numberPadAction, // numpad 2
     99: numberPadAction, // numpad 3 
@@ -226,18 +234,7 @@ function initSudoku() {
         .attr("size", 1)
         .attr("maxlength", 1)
         .keydown(handleKey)
-        .keyup(handleKeyUp)
-        // .change(function() {
-        //     console.debug($(this).val() + " - " + this.id);
-        // })
-    ;
-    // .each(function(index, element) {
-    //     $(element).change(function() {
-    //         console.debug(this);
-    //     });
-    //     // element.changePuzzleStatus = changePuzzleStatus;
-    //     // element.changeCellClass = changeCellClass;
-    // });
+        .keyup(handleKeyUp);
 
     $("button").button();
     $("#btnRun")
@@ -250,15 +247,6 @@ function initSudoku() {
             worker.postMessage({
                 type: MessageToSolver.START
             });
-            /*
-                        try {
-                            solver.validatePuzzle();
-                            $("#messages").removeClass("ui-state-error").text("");
-                            solver.solve();
-                        } catch (err) {
-                            handleError(err);
-                        }
-            */
         });
     $("#btnClean")
         .button("option", "icons", {
@@ -280,58 +268,60 @@ function initSudoku() {
         .button("option", "label", "Stop")
         .click(function() {
             worker.postMessage({
-                type: MessageToSolver.CLEAN
+                type: MessageToSolver.STOP
             });
             // puzzle.status = PuzzleStatus.STOPPED;
             // $("#messages").removeClass("ui-state-error").text("");
-        }).button("disable");
+        }); //.button("disable");
     $("#steptime").selectmenu({
         select: function(event, ui) {
-            solver.stepTime = parseInt(ui.item.value);
+            // solver.stepTime = parseInt(ui.item.value);
+            worker.postMessage({
+                type: MessageToSolver.STEP_TIME,
+                value: parseInt(ui.item.value)
+            });
         }
     });
     $("#cell11").focus();
 
-    puzzle = new Puzzle($("#puzzle"));
-    solver = new Solver(puzzle);
+    // puzzle = new Puzzle($("#puzzle"));
+    // solver = new Solver(puzzle);
 
 
     console.info(getFormattedHour() + "Initializing finished");
 }
 
 
+var actionByPuzzleStatus = [];
+actionByPuzzleStatus[PuzzleStatus.RUNNING] = function(data) {
+    $("#btnRun, #btnClean").button("disable");
+    $("#btnStop").button("enable");
+    $("#puzzle input").bind("focus", unfocus);
+};
+actionByPuzzleStatus[PuzzleStatus.WAITING] = function(data) {
+    $("#puzzle input").val("");
+    $("#puzzle input").unbind("focus", unfocus);
+};
+actionByPuzzleStatus[PuzzleStatus.STOPPED] = function(data) {
+    $("#btnRun, #btnClean").button("enable");
+    $("#btnStop").button("disable");
+};
+
+
+
+
+worker.onmessage = function(e) {
+    if(!!e.data.type) {
+        console.debug(e.data.type);
+        switch(e.data.type) {
+        case MessageFomSolver.PUZZLE_STATUS:
+            $("#puzzle").removeClass().addClass(e.data.value);
+            actionByPuzzleStatus[e.data.value](e.data);
+            break;
+        }
+        
+    }
+}
+
+
 $(document).ready(initSudoku);
-/*
-(function(global) {
-    // http://stackoverflow.com/questions/5408406/web-workers-without-a-separate-javascript-file
-    var is_worker = !global.document;
-    var script_path = is_worker ? null : (function() {
-        // append random number and time to ID
-        var id = (Math.random()+''+(new Date()).substring(2);
-        document.write('<script id="wts' + id + '"></script>');
-        return document.getElementById('wts' + id).
-            previousSibling.src;
-    })();
-    function msg_parent(e) {
-        // event handler for parent -> worker messages
-    }
-    function msg_worker(e) {
-        // event handler for worker -> parent messages
-    }
-    function new_worker() {
-        var w = new Worker(script_path);
-        w.addEventListener('message', msg_worker, false);
-        return w;
-    }
-    if (is_worker)
-        global.addEventListener('message', msg_parent, false);
-
-    // put the rest of your library here
-    // to spawn a worker, use new_worker()
-var worker =  new_worker();
-
-})(this);
-3461-1722
-9 6792-7182
-neusa
-*/
