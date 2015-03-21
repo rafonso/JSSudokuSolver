@@ -2,6 +2,10 @@
 
 var worker = new Worker('js/solver.js');
 
+function centralize() {
+    $("body > div:visible").position({of: "body"});
+}
+
 function getFormattedHour() {
 
     function format(value, size, end) {
@@ -228,6 +232,8 @@ function handleError(err) {
 function initSudoku() {
     console.info(getFormattedHour() + "Initializing");
 
+    $( window ).resize(centralize);
+
     $("#puzzle input")
         .attr("size", 1)
         .attr("maxlength", 1)
@@ -277,6 +283,7 @@ function initSudoku() {
         }
     });
     $("#cell11").focus();
+    centralize();
 
     console.info(getFormattedHour() + "Initializing finished");
 }
