@@ -15,9 +15,9 @@
 </head>
 
 <body>
-    <div>
+    <div id="main">
         <h1>JS Sudoku Solver</h1>
-        <div id="puzzle">
+        <div id="puzzle"> 
             <div id="row1" class="puzzle-row">
                 <input id="cell11" />
                 <input id="cell12" />
@@ -119,6 +119,10 @@
             </div>
         </div>
         <div id="messages" class="ui-widget">
+            <div id="errorMessages" class="ui-state-error ui-corner-all">
+                <span class="ui-icon ui-icon-alert icon"></span>
+                <span id="errorText"></span>
+            </div>
         </div>
         <div id="buttons">
             <button id="btnRun" />

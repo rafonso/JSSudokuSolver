@@ -3,7 +3,7 @@
 var worker = new Worker('js/solver.js');
 
 function centralize() {
-    $("body > div:visible").position({of: "body"});
+    $("#main").position({of: "body"});
 }
 
 function getFormattedHour() {
@@ -279,14 +279,15 @@ var actionByPuzzleStatus = [];
 actionByPuzzleStatus[PuzzleStatus.WAITING] = function(data) {
     $("#puzzle input").val("");
     $("#puzzle input").unbind("focus", unfocus);
-    $("#messages").removeClass().text("");
+    $("#errorMessages").text("").hide();
 };
 actionByPuzzleStatus[PuzzleStatus.VALIDATING] = function(data) {
     console.error("PuzzleStatus.VALIDATING: " + objectToString(data));
 };
 actionByPuzzleStatus[PuzzleStatus.INVALID] = function(err) {
     console.error(objectToString(err));
-    $("#messages").addClass("ui-state-error").text((!!err.message) ? err.message : err);
+    $("#errorMessages").show();
+    $("#errorText").text((!!err.message) ? err.message : err);
     if (!!err.cells) {
         err.cells
         .map(function(c){
@@ -301,6 +302,8 @@ actionByPuzzleStatus[PuzzleStatus.RUNNING] = function(data) {
     $("#btnRun, #btnClean").button("disable");
     $("#btnStop").button("enable");
     $("#puzzle input").bind("focus", unfocus);
+    $("#errorMessages").hide();
+    $("#errorText").text("");
 };
 actionByPuzzleStatus[PuzzleStatus.STOPPED] = function(data) {
     $("#btnRun, #btnClean").button("enable");

@@ -2,7 +2,7 @@ body {
     font-family: sans-serif;
 }
 
-body > div {
+#main {
     width: 300px;
 }
 
@@ -61,7 +61,16 @@ h1 {
 
 #messages {
     margin-top: 10px;
-    height: 32px;
+    height: 64px;
+    text-align: justify;
+}
+#messages #errorMessages {
+    height: 100%;
+    display: none;
+}
+#messages #errorMessages .icon {
+    float: left;
+    margin-right: .3em;
 }
 #buttons {
     padding-top: 10px;
