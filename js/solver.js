@@ -2,6 +2,7 @@
 
 var actionByMessageToSolver = [];
 var puzzle = {};
+var stepTime = 0;
 
 // See http://stackoverflow.com/questions/14500091/uncaught-referenceerror-importscripts-is-not-defined
 if ('function' === typeof importScripts) {
@@ -73,7 +74,8 @@ function initializeActions() {
         });
     };
     actionByMessageToSolver[MessageToSolver.STEP_TIME] = function(data) {
-        console.debug("STEP_TIME: " + data.value);
+        stepTime = data.value;
+        console.debug("STEP_TIME: " + stepTime);
     };
 }
 
