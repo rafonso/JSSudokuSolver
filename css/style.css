@@ -64,14 +64,32 @@ h1 {
     height: 64px;
     text-align: justify;
 }
-#messages #errorMessages {
+#errorMessages {
     height: 100%;
     display: none;
 }
-#messages #errorMessages .icon {
+#errorMessages .icon {
     float: left;
     margin-right: .3em;
 }
+
+#runningMessages {
+    display: table;
+}
+#runningMessages > div {
+    display: table-row;
+}
+#runningMessages > div > * {
+    display: table-cell;
+    padding-right: 5px;
+}
+#runningMessages label {
+/*    width: 90px;*/
+}
+#runningMessages #timeText, #runningMessages #cycleText {
+    text-align: right;
+}
+
 #buttons {
     padding-top: 10px;
     white-space: nowrap;

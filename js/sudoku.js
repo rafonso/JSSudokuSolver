@@ -227,6 +227,8 @@ function initSudoku() {
         .keydown(handleKey)
         .keyup(handleKeyUp);
 
+    $("#runningMessages").hide();
+    
     $("button").button();
     $("#btnRun")
         .button("option", "icons", {
@@ -279,21 +281,23 @@ var actionByPuzzleStatus = [];
 actionByPuzzleStatus[PuzzleStatus.WAITING] = function(data) {
     $("#puzzle input").val("");
     $("#puzzle input").unbind("focus", unfocus);
-    $("#errorMessages").text("").hide();
+    $("#errorMessages, #runningMessages").hide();
 };
 actionByPuzzleStatus[PuzzleStatus.VALIDATING] = function(data) {
     console.error("PuzzleStatus.VALIDATING: " + objectToString(data));
 };
 actionByPuzzleStatus[PuzzleStatus.INVALID] = function(err) {
-    console.error(objectToString(err));
+    console.warn(objectToString(err));
+    $("#runningMessages").hide();
     $("#errorMessages").show();
     $("#errorText").text((!!err.message) ? err.message : err);
     if (!!err.cells) {
         err.cells
-        .map(function(c){
-            return "#cell" + c.row + c.col;
-        })
-        .forEach(function(id) {
+        .map(function(c) { return "#cell" + c.row + c.col; })
+        .forEach(function(id, index) {
+            if (index == 0) {
+                $(id).focus();
+            }
             $(id).effect("pulsate");
         });
     }
@@ -303,6 +307,7 @@ actionByPuzzleStatus[PuzzleStatus.RUNNING] = function(data) {
     $("#btnStop").button("enable");
     $("#puzzle input").bind("focus", unfocus);
     $("#errorMessages").hide();
+    $("#runningMessages").show();
     $("#errorText").text("");
 };
 actionByPuzzleStatus[PuzzleStatus.STOPPED] = function(data) {
