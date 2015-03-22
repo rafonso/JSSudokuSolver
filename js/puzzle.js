@@ -18,6 +18,7 @@ function Puzzle() {
 
     // PRIVATE METHODS
 
+    var cls = this.cells;
     function get(func, pos, excludeCell) {
         var predicate = function(c) {
             return c[func] === pos;
@@ -29,7 +30,7 @@ function Puzzle() {
                 return true;
             }
 
-        return cells.filter(predicate).filter(excluder);
+        return cls.filter(predicate).filter(excluder);
     }
 
     function changeStatus(newStatus) {

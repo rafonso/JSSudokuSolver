@@ -37,7 +37,10 @@ function objectToString(obj) {
     var str = "{";
     
     Object.keys(obj).forEach(function(key, index, array) {
-        str += key + "=" + obj[key] + (index < (array.length - 1)? ", ": "}");
+        var value = obj[key];
+        str += (key + "="
+        + ((typeof value === "object")? objectToString(value): value)
+        + (index < (array.length - 1)? ", ": "}"));
     });
     return str;
 }

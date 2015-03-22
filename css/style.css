@@ -60,14 +60,15 @@ h1 {
 /* PUZZLE CONFIGURATION - END */
 
 #messages {
+    margin-top: 10px;
     height: 32px;
 }
 #buttons {
     padding-top: 10px;
-      white-space: nowrap;
+    white-space: nowrap;
 }
 #buttons button {
-    width: 100px;
+    width: 90px;
     margin-left: 5px;
     margin-right: 5px;
 }

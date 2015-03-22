@@ -215,19 +215,6 @@ function changeCellClass(oldClass, newClass, element) {
     }
 }
 
-function handleError(err) {
-    if (!!err.stack) {
-        console.error(err.stack);
-    } else {
-        console.error(err);
-    }
-    $("#messages").addClass("ui-state-error").text((!!err.msg) ? err.msg : err);
-    if (!!err.invalidCells) {
-        err.invalidCells.forEach(function(c) {
-            c.element.effect("pulsate");
-        });
-    }
-}
 
 function initSudoku() {
     console.info(getFormattedHour() + "Initializing");
@@ -292,12 +279,23 @@ var actionByPuzzleStatus = [];
 actionByPuzzleStatus[PuzzleStatus.WAITING] = function(data) {
     $("#puzzle input").val("");
     $("#puzzle input").unbind("focus", unfocus);
+    $("#messages").removeClass().text("");
 };
 actionByPuzzleStatus[PuzzleStatus.VALIDATING] = function(data) {
     console.error("PuzzleStatus.VALIDATING: " + objectToString(data));
 };
-actionByPuzzleStatus[PuzzleStatus.INVALID] = function(data) {
-    console.error("PuzzleStatus.INVALID: " +  objectToString(data));
+actionByPuzzleStatus[PuzzleStatus.INVALID] = function(err) {
+    console.error(objectToString(err));
+    $("#messages").addClass("ui-state-error").text((!!err.message) ? err.message : err);
+    if (!!err.cells) {
+        err.cells
+        .map(function(c){
+            return "#cell" + c.row + c.col;
+        })
+        .forEach(function(id) {
+            $(id).effect("pulsate");
+        });
+    }
 };
 actionByPuzzleStatus[PuzzleStatus.RUNNING] = function(data) {
     $("#btnRun, #btnClean").button("disable");
@@ -337,8 +335,8 @@ worker.onmessage = function(e) {
     if (!!e.data.type) {
         actionByMessageFromSolver[e.data.type](e.data);
     } else {
-		console.info(e.toString());
-	}
+	console.info(e.toString());
+    }
 }
 
 

@@ -18,13 +18,26 @@ if ('function' === typeof importScripts) {
 
 function initializeActions() {
     actionByMessageToSolver[MessageToSolver.START] = function(data) {
-        // Validate
-        // Run Puzzle
-        postMessage({
-            type: MessageFromSolver.PUZZLE_STATUS,
-            status: PuzzleStatus.RUNNING,
-            time: Date.now()
-        });
+        try {
+            validatePuzzle();
+            // Run Puzzle
+            postMessage({
+                type: MessageFromSolver.PUZZLE_STATUS,
+                status: PuzzleStatus.RUNNING,
+                time: Date.now()
+            });
+        } catch(e) {
+            if (!!e.msg && !!e.invalidCells) {
+                postMessage({
+                    type: MessageFromSolver.PUZZLE_STATUS,
+                    status: PuzzleStatus.INVALID,
+                    message: e.msg,
+                    cells: e.invalidCells.map(function(c) { return {col: c.col, row: c.row}; })
+                });
+            } else {
+                throw e;
+            }
+        }
     };
     actionByMessageToSolver[MessageToSolver.CLEAN] = function(data) {
         // clean all filled Cells
@@ -64,14 +77,9 @@ function initializeActions() {
     };
 }
 
-function Solver(_puzzle) {
 
-    var stepTime = 0;
-    var starTime = 0;
-    var cycle = 0;
-
-    // PRIVATE METHODS - BEGIN
-
+function validatePuzzle() {
+    
     function validate(cells, pos, description) {
         // The found array has 10 positions to avoid always subtract 1. The 0th position is simply not used.
         var found = [false, false, false, false, false, false, false, false, false, false];
@@ -79,7 +87,7 @@ function Solver(_puzzle) {
             if (cell.filled) {
                 var value = cell.value;
                 if (found[value]) {
-                    _puzzle.status = PuzzleStatus.INVALID;
+                    puzzle.status = PuzzleStatus.INVALID;
                     throw {
                         msg: description + " " + pos + ". Repeated value: " + value,
                         invalidCells: cells
@@ -97,15 +105,22 @@ function Solver(_puzzle) {
         })
     }
 
-    this.validatePuzzle = function() {
-        this.puzzle.status = PuzzleStatus.VALIDATING;
+    puzzle.status = PuzzleStatus.VALIDATING;
 
-        val(this.puzzle.getCellsRow, "Row");
-        val(this.puzzle.getCellsCol, "Column");
-        val(this.puzzle.getCellsSector, "Sector");
+    val(puzzle.getCellsRow, "Row");
+    val(puzzle.getCellsCol, "Column");
+    val(puzzle.getCellsSector, "Sector");
 
-        this.puzzle.status = PuzzleStatus.READY;
-    }
+    puzzle.status = PuzzleStatus.READY;
+}
+
+function Solver(_puzzle) {
+
+    var stepTime = 0;
+    var starTime = 0;
+    var cycle = 0;
+
+    // PRIVATE METHODS - BEGIN
 
     function isEmptyCell(c) {
         return !c.filled;
