@@ -1,17 +1,20 @@
 "use strict";
 
+/**
+ *
+ */
+function Puzzle() {
 
-function Puzzle(puzzleElement) {
+    // PUBLIC PROPERTIES
 
-    // PRIVATE ATTRIBUTES
+    this.status = PuzzleStatus.WAITING;
 
-    var status = PuzzleStatus.WAITING;
-
-    var cells = puzzleElement.children().children("input").toArray().map(function(input) {
-        return new Cell(input);
-    });
-
-    puzzleElement.changePuzzleStatus = changePuzzleStatus;
+    this.cells = [];
+    for(var row = 1; row <= 9; row ++) {
+        for(var col = 1; col <= 9; col ++) {
+            this.cells.push(new Cell(row, col));
+        }
+    }
 
     // PRIVATE METHODS
 
@@ -63,26 +66,6 @@ function Puzzle(puzzleElement) {
         }
     }
 
-    // PUBLIC PROPERTIES
-
-    Object.defineProperty(this, "cells", {
-        get: function() {
-            return cells;
-        }
-    });
-
-    Object.defineProperty(this, "status", {
-        configurable: true,
-        get: function() {
-            return status;
-        },
-        set: function(newStatus) {
-            if (!!newStatus) {
-                changeStatus(newStatus);
-            }
-        }
-    });
-
     // PUBLIC METHODS
 
     /**
@@ -116,6 +99,12 @@ function Puzzle(puzzleElement) {
      */
     this.getCellsSector = function(sec, excludeCell) {
         return get("sector", sec, excludeCell);
+    }
+    
+    this.getCell = function(row, col) {
+        return _.find(this.cells, function(c) {
+            return (c.row === row) && (c.col === col);
+        });
     }
 
     this.toString = function() {

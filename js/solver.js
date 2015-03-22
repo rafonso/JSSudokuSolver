@@ -1,14 +1,19 @@
 "use strict";
 
 var actionByMessageToSolver = [];
+var puzzle = {};
 
 // See http://stackoverflow.com/questions/14500091/uncaught-referenceerror-importscripts-is-not-defined
 if ('function' === typeof importScripts) {
-    importScripts("worker-messages.js", "underscore.js");
+    importScripts("worker-messages.js", "underscore.js", "puzzle.js", "cell.js");
     addEventListener('message', function(e) {
         actionByMessageToSolver[e.data.type](e.data);
+        console.debug(puzzle.cells.toString());
     });
     initializeActions();
+    
+    puzzle = new Puzzle();
+    console.info(puzzle);
 }
 
 function initializeActions() {
@@ -37,21 +42,27 @@ function initializeActions() {
         });
     };
     actionByMessageToSolver[MessageToSolver.FILL_CELL] = function(data) {
-        // Fill Cell Value        
+        var cell = puzzle.getCell(data.row, data.col);
+        if (!!data.value) {
+            cell.value = data.value;
+            cell.status = CellStatus.ORIGINAL;
+        } else {
+            cell.value = null;
+            cell.status = null;
+        }
         console.debug("FILL_CELL: " + objectToString(data));
         postMessage({
             type: MessageFromSolver.CELL_STATUS,
-            status: (!!data.value)? CellStatus.ORIGINAL: null,
-            row: data.row,
-            col: data.col,
-            value: data.value
+            status: cell.status,
+            row: cell.row,
+            col: cell.col,
+            value: cell.value
         });
     };
     actionByMessageToSolver[MessageToSolver.STEP_TIME] = function(data) {
         console.debug("STEP_TIME: " + data.value);
     };
 }
-
 
 function Solver(_puzzle) {
 
@@ -84,6 +95,16 @@ function Solver(_puzzle) {
         _.range(1, 10).forEach(function(i) {
             validate(func(i), i, description);
         })
+    }
+
+    this.validatePuzzle = function() {
+        this.puzzle.status = PuzzleStatus.VALIDATING;
+
+        val(this.puzzle.getCellsRow, "Row");
+        val(this.puzzle.getCellsCol, "Column");
+        val(this.puzzle.getCellsSector, "Sector");
+
+        this.puzzle.status = PuzzleStatus.READY;
     }
 
     function isEmptyCell(c) {
@@ -173,15 +194,6 @@ function Solver(_puzzle) {
 
     // PUBLIC METHODS
 
-    this.validatePuzzle = function() {
-        this.puzzle.status = PuzzleStatus.VALIDATING;
-
-        val(this.puzzle.getCellsRow, "Row");
-        val(this.puzzle.getCellsCol, "Column");
-        val(this.puzzle.getCellsSector, "Sector");
-
-        this.puzzle.status = PuzzleStatus.READY;
-    }
 
     this.solve = function() {
         this.puzzle.status = PuzzleStatus.RUNNING;
