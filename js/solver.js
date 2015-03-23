@@ -3,13 +3,16 @@
 var actionByMessageToSolver = [];
 var puzzle = {};
 var stepTime = 0;
+var accumulatedTime;
+var startTme;
+var cycle;
 
 // See http://stackoverflow.com/questions/14500091/uncaught-referenceerror-importscripts-is-not-defined
 if ('function' === typeof importScripts) {
     importScripts("worker-messages.js", "underscore.js", "puzzle.js", "cell.js");
     addEventListener('message', function(e) {
         actionByMessageToSolver[e.data.type](e.data);
-        console.debug(puzzle.cells.toString());
+//        console.debug(puzzle.cells.toString());
     });
     initializeActions();
     
@@ -17,68 +20,47 @@ if ('function' === typeof importScripts) {
     console.info(puzzle);
 }
 
-function initializeActions() {
-    actionByMessageToSolver[MessageToSolver.START] = function(data) {
-        try {
-            validatePuzzle();
-            // Run Puzzle
-            postMessage({
-                type: MessageFromSolver.PUZZLE_STATUS,
-                status: PuzzleStatus.RUNNING,
-                time: Date.now()
-            });
-        } catch(e) {
-            if (!!e.msg && !!e.invalidCells) {
-                postMessage({
-                    type: MessageFromSolver.PUZZLE_STATUS,
-                    status: PuzzleStatus.INVALID,
-                    message: e.msg,
-                    cells: e.invalidCells.map(function(c) { return {col: c.col, row: c.row}; })
-                });
-            } else {
-                throw e;
-            }
-        }
-    };
-    actionByMessageToSolver[MessageToSolver.CLEAN] = function(data) {
-        // clean all filled Cells
-        postMessage({
-            type: MessageFromSolver.PUZZLE_STATUS,
-            status: PuzzleStatus.WAITING,
-            time: Date.now()
-        });
-    };
-    actionByMessageToSolver[MessageToSolver.STOP] = function(data) {
-        postMessage({
-            type: MessageFromSolver.PUZZLE_STATUS,
-            status: PuzzleStatus.STOPPED,
-            time: Date.now()
-        });
-    };
-    actionByMessageToSolver[MessageToSolver.FILL_CELL] = function(data) {
-        var cell = puzzle.getCell(data.row, data.col);
-        if (!!data.value) {
-            cell.value = data.value;
-            cell.status = CellStatus.ORIGINAL;
-        } else {
-            cell.value = null;
-            cell.status = null;
-        }
-        console.debug("FILL_CELL: " + objectToString(data));
-        postMessage({
-            type: MessageFromSolver.CELL_STATUS,
-            status: cell.status,
-            row: cell.row,
-            col: cell.col,
-            value: cell.value
-        });
-    };
-    actionByMessageToSolver[MessageToSolver.STEP_TIME] = function(data) {
-        stepTime = data.value;
-        console.debug("STEP_TIME: " + stepTime);
-    };
+function getRunningTime() {
+    return (Date.now() - startTme) + accumulatedTime;
 }
 
+function changeCellStatus(cell, status) {
+    if (cell.status === status) {
+        return;
+    }
+    
+    cell.status = status;
+
+    postMessage({
+        type: MessageFromSolver.CELL_STATUS,
+        status: cell.status,
+        row: cell.row,
+        col: cell.col,
+        value: cell.value
+    });
+}
+
+function changeCellValue(cell, value, status) {
+    if (cell.value === value) {
+        return;
+    }
+
+    if (!!value) {
+        cell.value = value;
+        cell.status = status;
+    } else {
+        cell.value = null;
+        cell.status = null;
+    }
+
+    postMessage({
+        type: MessageFromSolver.CELL_STATUS,
+        status: cell.status,
+        row: cell.row,
+        col: cell.col,
+        value: cell.value
+    });
+}
 
 function validatePuzzle() {
     
@@ -116,14 +98,7 @@ function validatePuzzle() {
     puzzle.status = PuzzleStatus.READY;
 }
 
-function Solver(_puzzle) {
-
-    var stepTime = 0;
-    var starTime = 0;
-    var cycle = 0;
-
-    // PRIVATE METHODS - BEGIN
-
+function solve() {
     function isEmptyCell(c) {
         return !c.filled;
     }
@@ -138,9 +113,27 @@ function Solver(_puzzle) {
             });
         }
 
-        console.debug(getFormattedHour() + "\tEvaluating cell " + cell);
-        cell.cellStatus = CellStatus.EVALUATING;
+        function revertStatus() {
+            if (cell.status == CellStatus.EVALUATING) {
+                changeCellStatus(cell, null);
+            }
+        }
 
+        function pause() {
+            var t0 = Date.now();
+            while((Date.now() - t0) < stepTime) {
+                _.noop();
+            }
+        }
+        
+        if(puzzle.status === PuzzleStatus.STOPPED) {
+            return;
+        }
+        
+        console.debug(getFormattedHour() + "\tEvaluating cell " + cell);
+        changeCellStatus(cell, CellStatus.EVALUATING);
+
+        
         // Here I compare with other cells
         var diff = _.difference(_.range(1, 10), getValues(puzzle.getCellsRow, cell.row));
         diff = _.difference(diff, getValues(puzzle.getCellsCol, cell.col));
@@ -152,22 +145,26 @@ function Solver(_puzzle) {
                 invalidCells: [cell]
             };
         } else if (diff.length == 1) {
-            cell.value = diff[0];
-            cell.cellStatus = CellStatus.FILLED;
+            changeCellValue(cell, diff[0], CellStatus.FILLED);
         } else {
-            cell.cellStatus = null;
+            changeCellValue(cell, null);
         }
+        
+        // console.debug(getFormattedHour() + "STEP TIME " + stepTime);
+pause();
+revertStatus();
 
-        if (stepTime > 0) {
-            setTimeout(_.noop, stepTime);
-        }
+         // setTimeout(revertStatus, 100);
     }
 
     function solveCicle() {
-        var cellsToSolve = _puzzle.cells.filter(isEmptyCell);
+        var cellsToSolve = puzzle.cells.filter(isEmptyCell);
         var quantCellsToSolve = cellsToSolve.length;
         cellsToSolve.forEach(solveCell);
-        var quantNotSolvedCells = _puzzle.cells.filter(isEmptyCell).length;
+        
+//        return false;
+        
+        var quantNotSolvedCells = puzzle.cells.filter(isEmptyCell).length;
 
         if (quantCellsToSolve == quantNotSolvedCells) {
             puzzle.status = PuzzleStatus.INVALID;
@@ -175,57 +172,86 @@ function Solver(_puzzle) {
         }
 
         return quantNotSolvedCells == 0;
+        
     }
-
-    // PRIVATE METHODS - END
-
-    // PUBLIC PROPERTIES
-
-    Object.defineProperty(this, "puzzle", {
-        get: function() {
-            return _puzzle;
-        }
-    });
-
-    Object.defineProperty(this, "stepTime", {
-        configurable: true,
-        get: function() {
-            return stepTime;
-        },
-        set: function(value) {
-            var stepTime = value;
-        }
-    });
-
-    Object.defineProperty(this, "starTime", {
-        get: function() {
-            return starTime;
-        }
-    });
-
-    Object.defineProperty(this, "cycle", {
-        get: function() {
-            return cycle;
-        }
-    });
-
-    // PUBLIC METHODS
-
-
-    this.solve = function() {
-        this.puzzle.status = PuzzleStatus.RUNNING;
-        starTime = Date.now();
-        cycle = 1;
-
-        var allCellsFilled = false;
-        while (!allCellsFilled && this.puzzle.status != PuzzleStatus.STOPPED) {
-            console.debug(getFormattedHour() + "Cycle " + cycle);
-            allCellsFilled = solveCicle();
-            cycle++;
-            console.debug(" ");
-        }
-
-        this.puzzle.status = PuzzleStatus.SOLVED;
+    
+    if (puzzle.status === PuzzleStatus.WAITING) {
+        cycle = 0;
+        accumulatedTime = 0;
+        startTme = Date.now();
     }
+    puzzle.status = PuzzleStatus.RUNNING;
+    postMessage({
+        type: MessageFromSolver.PUZZLE_STATUS,
+        status: puzzle.status,
+        time: getRunningTime(),
+        cycle: cycle
+    });
 
+    var allCellsFilled = false;
+    
+    while (!allCellsFilled && (puzzle.status != PuzzleStatus.STOPPED)) {
+        cycle++;
+        // console.debug(getFormattedHour() + "Cycle " + cycle);
+        allCellsFilled = solveCicle();
+        // console.debug(" ");
+    }
+    
+    if (puzzle.status !== PuzzleStatus.STOPPED) {
+        puzzle.status = PuzzleStatus.SOLVED;
+        postMessage({
+            type: MessageFromSolver.PUZZLE_STATUS,
+            status: puzzle.status,
+            time: getRunningTime(),
+            cycle: cycle
+        });
+    }
+}
+
+
+function initializeActions() {
+    actionByMessageToSolver[MessageToSolver.START] = function(data) {
+        try {
+            validatePuzzle();
+            solve();
+        } catch(e) {
+            if (!!e.msg && !!e.invalidCells) {
+                postMessage({
+                    type: MessageFromSolver.PUZZLE_STATUS,
+                    status: PuzzleStatus.INVALID,
+                    message: e.msg,
+                    cells: e.invalidCells.map(function(c) { return {col: c.col, row: c.row}; })
+                });
+            } else {
+                throw e;
+            }
+        }
+    };
+    actionByMessageToSolver[MessageToSolver.CLEAN] = function(data) {
+        // clean all filled Cells
+        puzzle.cells.forEach(function(cell) {changeCellValue(cell, null); });
+//        accumulatedTime = 0;
+//        startTme = null;
+        postMessage({
+            type: MessageFromSolver.PUZZLE_STATUS,
+            status: PuzzleStatus.WAITING
+        });
+    };
+    actionByMessageToSolver[MessageToSolver.STOP] = function(data) {
+        puzzle.status = PuzzleStatus.STOPPED;
+        accumulatedTime = getRunningTime();
+        postMessage({
+            type: MessageFromSolver.PUZZLE_STATUS,
+            status: PuzzleStatus.STOPPED,
+            time: accumulatedTime
+        });
+    };
+    actionByMessageToSolver[MessageToSolver.FILL_CELL] = function(data) {
+        var cell = puzzle.getCell(data.row, data.col);
+        changeCellValue(cell, data.value, CellStatus.ORIGINAL);
+    };
+    actionByMessageToSolver[MessageToSolver.STEP_TIME] = function(data) {
+        stepTime = data.value;
+        console.debug("STEP_TIME: " + stepTime);
+    };
 }

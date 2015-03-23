@@ -1,25 +1,10 @@
 "use strict";
 
-var worker = new Worker('js/solver.js');
+var worker = {};
+var actionByMessageFromSolver = [];
 
 function centralize() {
     $("#main").position({of: "body"});
-}
-
-function getFormattedHour() {
-
-    function format(value, size, end) {
-        var string = value.toString();
-
-        while (string.length < size) {
-            string = '0' + string;
-        }
-
-        return string + end;
-    }
-
-    var d = new Date();
-    return "[" + format(d.getHours(), 2, ":") + format(d.getMinutes(), 2, ":") + format(d.getSeconds(), 2, '.') + format(d.getMilliseconds(), 3, ']') + " ";
 }
 
 var Movement = {
@@ -180,45 +165,7 @@ function unfocus() {
     $(this).blur();
 }
 
-function changePuzzleStatus(oldClass, newClass) {
-    $(this).removeClass(oldClass).addClass(newClass);
-
-    switch (newClass) {
-        case PuzzleStatus.RUNNING:
-            $("#btnRun, #btnClean").button("disable");
-            $("#btnStop").button("enable");
-            break;
-        case PuzzleStatus.INVALID:
-            $("#btnRun, #btnStop").button("disable");
-            $("#btnClean").button("enable");
-            break;
-        default:
-            $("#btnRun, #btnClean").button("enable");
-            $("#btnStop").button("disable");
-    }
-}
-
-function changeCellClass(oldClass, newClass, element) {
-    $(this).removeClass(oldClass).addClass(newClass);
-
-    switch (newClass) {
-        case PuzzleStatus.RUNNING:
-            $(this).bind("focus", unfocus);
-            break;
-        case CellStatus.EVALUATING:
-            $("#messages").html("TOTAL TIME: " + (Date.now() - solver.starTime) + "<br/>CYCLES: " + solver.cycle); // + " ms");
-            break;
-        default:
-            if (oldClass == PuzzleStatus.RUNNING) {
-                $(this).unbind("focus", unfocus);
-            }
-    }
-}
-
-
-function initSudoku() {
-    console.info(getFormattedHour() + "Initializing");
-
+function initComponents() {
     $( window ).resize(centralize);
 
     $("#puzzle input")
@@ -261,7 +208,8 @@ function initSudoku() {
             worker.postMessage({
                 type: MessageToSolver.STOP
             });
-        }); //.button("disable");
+        })
+        .button("disable");
     $("#steptime").selectmenu({
         select: function(event, ui) {
             // solver.stepTime = parseInt(ui.item.value);
@@ -274,78 +222,104 @@ function initSudoku() {
     $("#cell11").focus();
     centralize();
 
-    console.info(getFormattedHour() + "Initializing finished");
 }
 
-var actionByPuzzleStatus = [];
-actionByPuzzleStatus[PuzzleStatus.WAITING] = function(data) {
-    $("#puzzle input").val("");
-    $("#puzzle input").unbind("focus", unfocus);
-    $("#errorMessages, #runningMessages").hide();
-};
-actionByPuzzleStatus[PuzzleStatus.VALIDATING] = function(data) {
-    console.error("PuzzleStatus.VALIDATING: " + objectToString(data));
-};
-actionByPuzzleStatus[PuzzleStatus.INVALID] = function(err) {
-    console.warn(objectToString(err));
-    $("#runningMessages").hide();
-    $("#errorMessages").show();
-    $("#errorText").text((!!err.message) ? err.message : err);
-    if (!!err.cells) {
-        err.cells
-        .map(function(c) { return "#cell" + c.row + c.col; })
-        .forEach(function(id, index) {
-            if (index == 0) {
-                $(id).focus();
-            }
-            $(id).effect("pulsate");
-        });
+function initWorkerHandlers() {
+    var actionByPuzzleStatus = [];
+    actionByPuzzleStatus[PuzzleStatus.WAITING] = function(data) {
+        $("#puzzle input").val("");
+        $("#puzzle input").unbind("focus", unfocus);
+        $("#errorMessages, #runningMessages").hide();
+    };
+    actionByPuzzleStatus[PuzzleStatus.VALIDATING] = function(data) {
+        console.error("PuzzleStatus.VALIDATING: " + objectToString(data));
+    };
+    actionByPuzzleStatus[PuzzleStatus.INVALID] = function(err) {
+        console.warn(objectToString(err));
+        $("#runningMessages").hide();
+        $("#errorMessages").show();
+        $("#errorText").text((!!err.message) ? err.message : err);
+        if (!!err.cells) {
+            err.cells
+            .map(function(c) { return "#cell" + c.row + c.col; })
+            .forEach(function(id, index) {
+                if (index == 0) {
+                    $(id).focus();
+                }
+                $(id).effect("pulsate");
+            });
+        }
+    };
+    actionByPuzzleStatus[PuzzleStatus.RUNNING] = function(data) {
+        $("#btnRun, #btnClean").button("disable");
+        $("#btnStop").button("enable");
+        $("#puzzle input").bind("focus", unfocus);
+        $("#errorMessages").hide();
+        $("#runningMessages").show();
+        $("#errorText").text("");
+    };
+    actionByPuzzleStatus[PuzzleStatus.STOPPED] = function(data) {
+        $("#btnRun, #btnClean").button("enable");
+        $("#btnStop").button("disable");
+    };
+    actionByPuzzleStatus[PuzzleStatus.SOLVED] = function(data) {
+        console.info("PuzzleStatus.SOLVED: " +  objectToString(data));
+        $("#btnStop").button("disable");
+        $("#btnClean").button("enable");
     }
-};
-actionByPuzzleStatus[PuzzleStatus.RUNNING] = function(data) {
-    $("#btnRun, #btnClean").button("disable");
-    $("#btnStop").button("enable");
-    $("#puzzle input").bind("focus", unfocus);
-    $("#errorMessages").hide();
-    $("#runningMessages").show();
-    $("#errorText").text("");
-};
-actionByPuzzleStatus[PuzzleStatus.STOPPED] = function(data) {
-    $("#btnRun, #btnClean").button("enable");
-    $("#btnStop").button("disable");
-};
-actionByPuzzleStatus[PuzzleStatus.SOLVED] = function(data) {
-console.error("PuzzleStatus.SOLVED: " +  objectToString(data));
+
+
+
+    actionByMessageFromSolver[MessageFromSolver.INVALID_SOLVER] = function(data) {
+        console.error("INVALID_SOLVER: " +  objectToString(data));
+    };
+    actionByMessageFromSolver[MessageFromSolver.PUZZLE_STATUS] = function(data) {
+        // console.debug("MessageFromSolver.PUZZLE_STATUS: " +  objectToString(data));
+        $("#puzzle").removeClass().addClass(data.status);
+        actionByPuzzleStatus[data.status](data);
+    };
+    actionByMessageFromSolver[MessageFromSolver.CELL_STATUS] = function(data) {
+        // console.info("CELL_STATUS: " + objectToString(data) );
+        var cell = $("#cell" + data.row + data.col);
+        cell.removeClass().addClass(data.status).val(data.value);
+    };
+    actionByMessageFromSolver[MessageFromSolver.CELL_VALUE] = function(data) {
+        // console.info("CELL_VALUE: " +  objectToString(data));
+    };
+    actionByMessageFromSolver[MessageFromSolver.ERROR] = function(data) {
+        console.error("ERROR: " +  objectToString(data));
+    };
 }
 
-var actionByMessageFromSolver = [];
-actionByMessageFromSolver[MessageFromSolver.INVALID_SOLVER] = function(data) {
-    console.error("INVALID_SOLVER: " +  objectToString(data));
-};
-actionByMessageFromSolver[MessageFromSolver.PUZZLE_STATUS] = function(data) {
-    console.debug("MessageFromSolver.PUZZLE_STATUS: " +  objectToString(data));
-    $("#puzzle").removeClass().addClass(data.status);
-    actionByPuzzleStatus[data.status](data);
-};
-actionByMessageFromSolver[MessageFromSolver.CELL_STATUS] = function(data) {
-    console.info("CELL_STATUS: " + objectToString(data) );
-    var cell = $("#cell" + data.row + data.col);
-    cell.removeClass().addClass(data.status);
-};
-actionByMessageFromSolver[MessageFromSolver.CELL_VALUE] = function(data) {
-    console.info("CELL_VALUE: " +  objectToString(data));
-};
-actionByMessageFromSolver[MessageFromSolver.ERROR] = function(data) {
-    console.error("ERROR: " +  objectToString(data));
-};
-
-worker.onmessage = function(e) {
-    if (!!e.data.type) {
-        actionByMessageFromSolver[e.data.type](e.data);
+function initWorker() {
+    if(!!window.Worker) {
+        worker = new Worker('js/solver.js');
+        worker.onmessage =  
+            function(e) {
+                if (!!e.data.type) {
+                    actionByMessageFromSolver[e.data.type](e.data);
+                } else {
+                    console.info(e.toString());
+                }
+            };
+        initWorkerHandlers();
     } else {
-	console.info(e.toString());
+        console.warn("Browser not compatible. Web Worker is not present.")
+        $("input").prop('disabled', true);
+        $("#buttons").hide();
+        $("#versionMessage").show();
+//        $("input,button,#steptime").disable();
     }
 }
+
+function initSudoku() {
+    console.info(getFormattedHour() + "Initializing");
+
+    initComponents();
+    initWorker();
+
+    console.info(getFormattedHour() + "Initializing finished");
+}-
 
 
 $(document).ready(initSudoku);
