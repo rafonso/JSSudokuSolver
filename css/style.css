@@ -68,7 +68,7 @@ h1 {
     height: 100%;
     display: none;
 }
-#errorMessages .icon {
+.icon {
     float: left;
     margin-right: .3em;
 }
