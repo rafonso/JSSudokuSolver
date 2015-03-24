@@ -28,7 +28,7 @@ function Puzzle() {
                 return !excludeCell.sameCell(c);
             } : function() {
                 return true;
-            }
+            };
 
         return cls.filter(predicate).filter(excluder);
     }
@@ -38,7 +38,7 @@ function Puzzle() {
         function changeCellStatus(cellStatus) {
             return function(c) {
                 c.cellStatus = cellStatus;
-            }
+            };
         }
 
         var oldStatus = status;
@@ -78,7 +78,7 @@ function Puzzle() {
      */
     this.getCellsRow = function(row, excludeCell) {
         return get("row", row, excludeCell);
-    }
+    };
 
     /**
      * Returns the Cells who are in determinated Column. It is possible exclude a Cell which (presumively) is in this Column.
@@ -89,7 +89,7 @@ function Puzzle() {
      */
     this.getCellsCol = function(col, excludeCell) {
         return get("col", col, excludeCell);
-    }
+    };
 
     /**
      * Returns the Cells who are in determinated Sector. It is possible exclude a Cell which (presumively) is in this Sector.
@@ -100,16 +100,16 @@ function Puzzle() {
      */
     this.getCellsSector = function(sec, excludeCell) {
         return get("sector", sec, excludeCell);
-    }
+    };
     
     this.getCell = function(row, col) {
         return _.find(this.cells, function(c) {
             return (c.row === row) && (c.col === col);
         });
-    }
+    };
 
     this.toString = function() {
         return "Puzzle[status: " + this.status + ", cells: " + this.cells + "]";
-    }
+    };
 
 }

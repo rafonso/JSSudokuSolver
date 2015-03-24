@@ -36,11 +36,11 @@ function Cell(row, col) {
     this.sameCell = function(c) {
         return (this.row === c.row) &&
             (this.col === c.col);
-    }
+    };
 
     this.toString = function() {
         return "[" + this.row + ", " + this.col + ", " + this.sector + ", " + (this.filled ? this.value : "-") + "]";
-    }
+    };
 
 }
 

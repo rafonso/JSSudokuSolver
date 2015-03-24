@@ -7,19 +7,6 @@ var accumulatedTime;
 var startTme;
 var cycle;
 
-// See http://stackoverflow.com/questions/14500091/uncaught-referenceerror-importscripts-is-not-defined
-if ('function' === typeof importScripts) {
-    importScripts("worker-messages.js", "underscore.js", "puzzle.js", "cell.js");
-    addEventListener('message', function(e) {
-        actionByMessageToSolver[e.data.type](e.data);
-//        console.debug(puzzle.cells.toString());
-    });
-    initializeActions();
-    
-    puzzle = new Puzzle();
-    console.info(puzzle);
-}
-
 function getRunningTime() {
     return (Date.now() - startTme) + accumulatedTime;
 }
@@ -83,7 +70,7 @@ function validatePuzzle() {
                     throw {
                         msg: description + " " + pos + ". Repeated value: " + value,
                         invalidCells: cells
-                    }
+                    };
                 } else {
                     found[value] = true;
                 }
@@ -94,7 +81,7 @@ function validatePuzzle() {
     function val(func, description) {
         _.range(1, 10).forEach(function(i) {
             validate(func(i), i, description);
-        })
+        });
     }
 
     puzzle.status = PuzzleStatus.VALIDATING;
@@ -102,7 +89,7 @@ function validatePuzzle() {
     if (_.every(puzzle.cells, isEmptyCell)) {
         throw {
             msg: "All Cells are empty!"
-        }
+        };
     }
 
     val(puzzle.getCellsRow, "Row");
@@ -144,7 +131,7 @@ function solve() {
         diff = _.difference(diff, getValues(puzzle.getCellsCol, cell.col));
         diff = _.difference(diff, getValues(puzzle.getCellsSector, cell.sector));
 
-        if (diff.length == 0) {
+        if (diff.length === 0) {
             throw {
                 msg: "Alghoritm error: Cell with no values remaining.",
                 invalidCells: [cell]
@@ -176,7 +163,7 @@ function solve() {
             throw new Error("Guesses not implemented yet!");
         }
 
-        return quantNotSolvedCells == 0;        
+        return quantNotSolvedCells === 0;        
     }
     
     if (puzzle.status === PuzzleStatus.READY) {
@@ -266,4 +253,17 @@ function initializeActions() {
         stepTime = data.value;
         console.debug("STEP_TIME: " + stepTime);
     };
+}
+
+// See http://stackoverflow.com/questions/14500091/uncaught-referenceerror-importscripts-is-not-defined
+if ('function' === typeof importScripts) {
+    importScripts("worker-messages.js", "underscore.js", "puzzle.js", "cell.js");
+    addEventListener('message', function(e) {
+        actionByMessageToSolver[e.data.type](e.data);
+//        console.debug(puzzle.cells.toString());
+    });
+    initializeActions();
+    
+    puzzle = new Puzzle();
+    console.info(puzzle);
 }

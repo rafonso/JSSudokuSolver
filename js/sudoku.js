@@ -64,7 +64,7 @@ function initComponents() {
     
     function moveTo(e, movement, preventDefault) {
         var pos = cellRegex.exec(e.target.id);
-        var nextPos = movement(parseInt(pos[1]), parseInt(pos[2]));
+        var nextPos = movement(parseInt(pos[1], 10), parseInt(pos[2], 10));
         $("#cell" + nextPos.row + nextPos.col).focus();
         if (preventDefault) {
             e.preventDefault();
@@ -75,8 +75,8 @@ function initComponents() {
         var pos = cellRegex.exec(cellId);
         worker.postMessage({
             type: MessageToSolver.FILL_CELL, //
-            row: parseInt(pos[1]), //
-            col: parseInt(pos[2]), //
+            row: parseInt(pos[1], 10), //
+            col: parseInt(pos[2], 10), //
             value: number //
         });
     }
@@ -84,7 +84,7 @@ function initComponents() {
     function createMovementAction(movement) {
         return function(e) {
             moveTo(e, movement, false);
-        }
+        };
     }
     
     function gotoNextCell(e) {
@@ -105,7 +105,7 @@ function initComponents() {
         }
     };
     var numberPadAction = function(e) {
-        changeInputValue(e, e.keyCode - 96)
+        changeInputValue(e, e.keyCode - 96);
     };
     var cleanAndGotoPrevious = function(e) {
         if (e.target.value) {
@@ -120,7 +120,7 @@ function initComponents() {
             e.target.value = null;
             notifyCellChange(e.target.id, null);
         }
-        gotoNextCell(e)
+        gotoNextCell(e);
     };
     
     var actionByKeyCode = {
@@ -156,7 +156,7 @@ function initComponents() {
         103: numberPadAction, // numpad 7 
         104: numberPadAction, // numpad 8 
         105: numberPadAction // numpad 9 
-    }
+    };
     
     function handleKey(e) {
         var action = actionByKeyCode[e.keyCode];
@@ -223,7 +223,7 @@ function initComponents() {
         select: function(event, ui) {
             worker.postMessage({
                 type: MessageToSolver.STEP_TIME,
-                value: parseInt(ui.item.value)
+                value: parseInt(ui.item.value, 10)
             });
         }
     });
@@ -257,7 +257,7 @@ function initWorkerHandlers() {
             err.cells
             .map(function(c) { return "#cell" + c.row + c.col; })
             .forEach(function(id, index) {
-                if (index == 0) {
+                if (index === 0) {
                     $(id).focus();
                 }
                 $(id).effect("pulsate");
@@ -283,7 +283,7 @@ function initWorkerHandlers() {
         $("#btnStop").button("disable");
         $("#btnClean").button("enable");
         fillRunningMessages(data.time, data.cycle, data.status);
-    }
+    };
 
     actionByMessageFromSolver[MessageFromSolver.INVALID_SOLVER] = function(data) {
         console.error("INVALID_SOLVER: " +  objectToString(data));
@@ -321,7 +321,7 @@ function initWorker() {
             };
         initWorkerHandlers();
     } else {
-        console.warn("Browser not compatible. Web Worker is not present.")
+        console.warn("Browser not compatible. Web Worker is not present.");
         $("input").prop('disabled', true);
         $("#buttons").hide();
         $("#versionMessage").show();

@@ -30,7 +30,7 @@ var CellStatus = {
     FILLED: "filled",
     EVALUATING: "evaluating",
     GUESSING: "guessing",
-    ERROR: "error",
+    ERROR: "error"
 };
 
 function getFormattedHour() {
@@ -46,7 +46,9 @@ function getFormattedHour() {
     }
 
     var d = new Date();
-    return "[" + format(d.getHours(), 2, ":") + format(d.getMinutes(), 2, ":") + format(d.getSeconds(), 2, '.') + format(d.getMilliseconds(), 3, ']') + " ";
+    return "[" + format(d.getHours(), 2, ":") + 
+    	format(d.getMinutes(), 2, ":") + format(d.getSeconds(), 2, '.') + 
+    	format(d.getMilliseconds(), 3, ']') + " ";
 }
 
 function objectToString(obj) {
@@ -54,9 +56,9 @@ function objectToString(obj) {
     if (!!obj) {
         Object.keys(obj).forEach(function(key, index, array) {
             var value = obj[key];
-            str += (key + "="
-            + ((typeof value === "object")? objectToString(value): value)
-            + (index < (array.length - 1)? ", ": "}"));
+            str += (key + "=" +
+            	((typeof value === "object")? objectToString(value): value) +
+            	(index < (array.length - 1)? ", ": "}"));
         });
     } else {
         str += "}";
