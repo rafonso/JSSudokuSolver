@@ -24,6 +24,10 @@ function getRunningTime() {
     return (Date.now() - startTme) + accumulatedTime;
 }
 
+function isEmptyCell(c) {
+    return !c.filled;
+}
+
 function changeCellStatus(cell, status) {
     if (cell.status === status) {
         return;
@@ -36,7 +40,9 @@ function changeCellStatus(cell, status) {
         status: cell.status,
         row: cell.row,
         col: cell.col,
-        value: cell.value
+        value: cell.value,
+        time: getRunningTime(),
+        cycle: cycle
     });
 }
 
@@ -58,7 +64,9 @@ function changeCellValue(cell, value, status) {
         status: cell.status,
         row: cell.row,
         col: cell.col,
-        value: cell.value
+        value: cell.value,
+        time: getRunningTime(),
+        cycle: cycle
     });
 }
 
@@ -90,6 +98,12 @@ function validatePuzzle() {
     }
 
     puzzle.status = PuzzleStatus.VALIDATING;
+    
+    if (_.every(puzzle.cells, isEmptyCell)) {
+        throw {
+            msg: "All Cells are empty!"
+        }
+    }
 
     val(puzzle.getCellsRow, "Row");
     val(puzzle.getCellsCol, "Column");
@@ -99,9 +113,6 @@ function validatePuzzle() {
 }
 
 function solve() {
-    function isEmptyCell(c) {
-        return !c.filled;
-    }
 
     function solveCell(cell) {
 
@@ -111,12 +122,6 @@ function solve() {
             }).map(function(c) {
                 return c.value;
             });
-        }
-
-        function revertStatus() {
-            if (cell.status == CellStatus.EVALUATING) {
-                changeCellStatus(cell, null);
-            }
         }
 
         function pause() {
@@ -130,7 +135,7 @@ function solve() {
             return;
         }
         
-        console.debug(getFormattedHour() + "\tEvaluating cell " + cell);
+//        console.debug(getFormattedHour() + "\tEvaluating cell " + cell);
         changeCellStatus(cell, CellStatus.EVALUATING);
 
         
@@ -147,12 +152,11 @@ function solve() {
         } else if (diff.length == 1) {
             changeCellValue(cell, diff[0], CellStatus.FILLED);
         } else {
-            changeCellValue(cell, null);
+            changeCellStatus(cell, null);
         }
         
         // console.debug(getFormattedHour() + "STEP TIME " + stepTime);
-pause();
-revertStatus();
+        pause();
 
          // setTimeout(revertStatus, 100);
     }
@@ -175,12 +179,13 @@ revertStatus();
         
     }
     
-    if (puzzle.status === PuzzleStatus.WAITING) {
+    if (puzzle.status === PuzzleStatus.READY) {
         cycle = 0;
         accumulatedTime = 0;
         startTme = Date.now();
     }
     puzzle.status = PuzzleStatus.RUNNING;
+    
     postMessage({
         type: MessageFromSolver.PUZZLE_STATUS,
         status: puzzle.status,
@@ -215,12 +220,12 @@ function initializeActions() {
             validatePuzzle();
             solve();
         } catch(e) {
-            if (!!e.msg && !!e.invalidCells) {
+            if (!!e.msg) {
                 postMessage({
                     type: MessageFromSolver.PUZZLE_STATUS,
                     status: PuzzleStatus.INVALID,
                     message: e.msg,
-                    cells: e.invalidCells.map(function(c) { return {col: c.col, row: c.row}; })
+                    cells: (!!e.invalidCells)? e.invalidCells.map(function(c) { return {col: c.col, row: c.row}; }): null
                 });
             } else {
                 throw e;
