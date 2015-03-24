@@ -164,6 +164,7 @@ function solve() {
     function solveCicle() {
         var cellsToSolve = puzzle.cells.filter(isEmptyCell);
         var quantCellsToSolve = cellsToSolve.length;
+        
         cellsToSolve.forEach(solveCell);
         
 //        return false;
@@ -175,8 +176,7 @@ function solve() {
             throw new Error("Guesses not implemented yet!");
         }
 
-        return quantNotSolvedCells == 0;
-        
+        return quantNotSolvedCells == 0;        
     }
     
     if (puzzle.status === PuzzleStatus.READY) {
@@ -228,7 +228,14 @@ function initializeActions() {
                     cells: (!!e.invalidCells)? e.invalidCells.map(function(c) { return {col: c.col, row: c.row}; }): null
                 });
             } else {
-                throw e;
+                postMessage({
+                    type: MessageFromSolver.PUZZLE_STATUS,
+                    status: PuzzleStatus.INVALID,
+                    message: e.message
+                });
+                console.error(e);
+
+                // throw e;
             }
         }
     };

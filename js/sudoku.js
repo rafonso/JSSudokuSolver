@@ -3,10 +3,6 @@
 var worker = {};
 var actionByMessageFromSolver = [];
 
-function unfocus() {
-    $(this).blur();
-}
-
 function fillRunningMessages(time, cycle, puzzleStatus) {
     if (!!time) {
         $("#timeText").text(time);
@@ -225,7 +221,6 @@ function initComponents() {
         .button("disable");
     $("#steptime").selectmenu({
         select: function(event, ui) {
-            // solver.stepTime = parseInt(ui.item.value);
             worker.postMessage({
                 type: MessageToSolver.STEP_TIME,
                 value: parseInt(ui.item.value)
@@ -237,9 +232,12 @@ function initComponents() {
 
 }
 
-
-
 function initWorkerHandlers() {
+    
+    function unfocus() {
+        $(this).blur();
+    }
+
     var actionByPuzzleStatus = [];
     actionByPuzzleStatus[PuzzleStatus.WAITING] = function(data) {
         $("#puzzle input").val("");
@@ -327,7 +325,6 @@ function initWorker() {
         $("input").prop('disabled', true);
         $("#buttons").hide();
         $("#versionMessage").show();
-//        $("input,button,#steptime").disable();
     }
 }
 
