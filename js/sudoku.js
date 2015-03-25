@@ -213,14 +213,14 @@ function initComponents() {
             primary: "ui-icon-stop"
         })
         .button("option", "label", "Stop")
-        .click(function() {
+        .click(function () {
             worker.postMessage({
                 type: MessageToSolver.STOP
             });
         })
         .button("disable");
     $("#steptime").selectmenu({
-        select: function(event, ui) {
+        select: function (event, ui) {
             worker.postMessage({
                 type: MessageToSolver.STEP_TIME,
                 value: parseInt(ui.item.value, 10)
@@ -240,8 +240,8 @@ function initWorkerHandlers() {
 
     var actionByPuzzleStatus = [];
     actionByPuzzleStatus[PuzzleStatus.WAITING] = function(data) {
-        $("#puzzle input").val("");
-        $("#puzzle input").unbind("focus", unfocus);
+        $("#puzzle input").val("").unbind("focus", unfocus);
+        $("#puzzle input:first").focus();
         $("#btnRun").button("enable");
         $("#errorMessages, #runningMessages").hide();
     };
@@ -250,6 +250,8 @@ function initWorkerHandlers() {
     };
     actionByPuzzleStatus[PuzzleStatus.INVALID] = function(err) {
         console.warn(objectToString(err));
+        $("#btnClean").button("enable");
+        $("#btnStop").button("disable");
         $("#runningMessages").hide();
         $("#errorMessages").show();
         $("#errorText").text((!!err.message) ? err.message : err);
@@ -329,12 +331,10 @@ function initWorker() {
 }
 
 function initSudoku() {
-    console.info(getFormattedHour() + "Initializing");
-
+    console.debug(getFormattedHour() + "Initializing");
     initComponents();
     initWorker();
-
-    console.info(getFormattedHour() + "Initializing finished");
+    console.debug(getFormattedHour() + "Initializing finished");
 }
 
 $(document).ready(initSudoku);
