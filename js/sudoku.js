@@ -246,12 +246,13 @@ function initWorkerHandlers() {
         $("#errorMessages, #runningMessages").hide();
     };
     actionByPuzzleStatus[PuzzleStatus.VALIDATING] = function(data) {
-        console.error("PuzzleStatus.VALIDATING: " + objectToString(data));
+        console.info("PuzzleStatus.VALIDATING: " + objectToString(data));
     };
     actionByPuzzleStatus[PuzzleStatus.INVALID] = function(err) {
         console.warn(objectToString(err));
         $("#btnClean").button("enable");
         $("#btnStop").button("disable");
+        $("#btnRun").button("enable"); // Just for debug!
         $("#runningMessages").hide();
         $("#errorMessages").show();
         $("#errorText").text((!!err.message) ? err.message : err);
@@ -266,6 +267,8 @@ function initWorkerHandlers() {
             });
         }
     };
+    actionByPuzzleStatus[PuzzleStatus.READY] = function(data) {
+    }
     actionByPuzzleStatus[PuzzleStatus.RUNNING] = function(data) {
         $("#btnRun, #btnClean").button("disable");
         $("#btnStop").button("enable");
@@ -291,7 +294,7 @@ function initWorkerHandlers() {
         console.error("INVALID_SOLVER: " +  objectToString(data));
     };
     actionByMessageFromSolver[MessageFromSolver.PUZZLE_STATUS] = function(data) {
-        // console.debug("MessageFromSolver.PUZZLE_STATUS: " +  objectToString(data));
+        console.debug("MessageFromSolver.PUZZLE_STATUS: " +  objectToString(data));
         $("#puzzle").removeClass().addClass(data.status);
         actionByPuzzleStatus[data.status](data);
     };
