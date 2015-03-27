@@ -6,6 +6,7 @@ var stepTime = 0;
 var accumulatedTime;
 var startTme;
 var cycle;
+var stopRequested = false;
 
 function getRunningTime() {
     return (Date.now() - startTme) + accumulatedTime;
@@ -84,9 +85,7 @@ function validatePuzzle() {
             if (cell.filled) {
                 var value = cell.value;
                 if (found[value]) {
-                    var err = new Error(description + " " + pos + ". Repeated value: " + value);
-                    err.invalidCells = cells;
-                    throw err;
+                    throw _.extend(new Error(description + " " + pos + ". Repeated value: " + value), { invalidCells: cells });
                 } else {
                     found[value] = true;
                 }
@@ -115,15 +114,15 @@ function validatePuzzle() {
 
 function solve() {
 
-    function solveCell(cell) {
+    function getValues(func, pos) {
+        return func(pos).filter(function(c) {
+            return c.filled;
+        }).map(function(c) {
+            return c.value;
+        });
+    }
 
-        function getValues(func, pos) {
-            return func(pos).filter(function(c) {
-                return c.filled;
-            }).map(function(c) {
-                return c.value;
-            });
-        }
+    function solveCell(cell) {
 
         function pause() {
             var t0 = Date.now();
@@ -136,7 +135,6 @@ function solve() {
             return;
         }
         
-//        console.debug(getFormattedHour() + "\tEvaluating cell " + cell);
         changeCellStatus(cell, CellStatus.EVALUATING);
 
         
@@ -146,36 +144,77 @@ function solve() {
         diff = _.difference(diff, getValues(puzzle.getCellsSector, cell.sector));
 
         if (diff.length === 0) {
-            var err = new Error("Alghoritm error: Cell with no values remaining.");
-            err.invalidCells = [cell];
-            throw err;
+            throw _.extend(new Error("Alghoritm error: Cell with no values remaining."), { invalidCells: [cell] });
         } else if (diff.length == 1) {
             changeCellValue(cell, diff[0], CellStatus.FILLED);
+            // NEXT CELL
         } else {
             changeCellStatus(cell, null);
+            // NEXT CELL
         }
         
-        // console.debug(getFormattedHour() + "STEP TIME " + stepTime);
         pause();
-
-         // setTimeout(revertStatus, 100);
     }
 
     function solveCicle() {
+        cycle ++;
         var cellsToSolve = puzzle.cells.filter(isEmptyCell);
         var quantCellsToSolve = cellsToSolve.length;
         
         cellsToSolve.forEach(solveCell);
         
-//        return false;
-        
         var quantNotSolvedCells = puzzle.cells.filter(isEmptyCell).length;
 
-        if (quantCellsToSolve == quantNotSolvedCells) {
-            throw new Error("Guesses not implemented yet!");
+        if(quantNotSolvedCells === 0) {
+            changePuzzleStatus(PuzzleStatus.SOLVED, { cycle: cycle, time: getRunningTime() });
+        } else if ((quantCellsToSolve === quantNotSolvedCells) && (puzzle.status !== PuzzleStatus.STOPPED)) {
+            throw new Error("Guesses not yet implemented!");
+        } else if(puzzle.status !== PuzzleStatus.STOPPED) {
+            setTimeout(solveCicle);
+        }
+    }
+
+
+    function solveCell1(emptyCells, pos) {
+        if(pos >= emptyCells.length) {
+            setTimeout(function() {
+                solveCycle1(emptyCells);
+            });
         }
 
-        return quantNotSolvedCells === 0;        
+        var cell = emptyCells[pos];
+
+        changeCellStatus(cell, CellStatus.EVALUATING);
+        
+        // Here I compare with other cells
+        var diff = _.difference(_.range(1, 10), getValues(puzzle.getCellsRow, cell.row));
+        diff = _.difference(diff, getValues(puzzle.getCellsCol, cell.col));
+        diff = _.difference(diff, getValues(puzzle.getCellsSector, cell.sector));
+
+        if (diff.length === 0) {
+            throw _.extend(new Error("Alghoritm error: Cell with no values remaining."), { invalidCells: [cell] });
+        } 
+
+        else if (diff.length == 1) {
+            changeCellValue(cell, diff[0], CellStatus.FILLED);
+        } else {
+            changeCellStatus(cell, null);
+        }
+        setTimeout(function() {
+            solveCell1(emptyCells, pos + 1);
+        }, stepTime);
+    }
+
+    function solveCicle1(priorEmptyCells) {
+        var emptyCells = puzzle.cells.filter(isEmptyCell);
+        if(emptyCells.length === 0) {
+            changePuzzleStatus(PuzzleStatus.SOLVED, { cycle: cycle, time: getRunningTime() });
+        } else if(emptyCells.length === priorEmptyCells.length) {
+            throw new Error("Guesses not yet implemented!");
+        } else if(puzzle.status !== PuzzleStatus.STOPPED) {
+            cycle ++;
+            solveCell1(emptyCells, 0);
+        }
     }
 
     if (puzzle.status !== PuzzleStatus.READY) {
@@ -186,18 +225,8 @@ function solve() {
     accumulatedTime = 0;
     startTme = Date.now();
     changePuzzleStatus(PuzzleStatus.RUNNING, {cycle: cycle, time: getRunningTime()});
-    var allCellsFilled = false;
     
-    while (!allCellsFilled && (puzzle.status != PuzzleStatus.STOPPED)) {
-        cycle++;
-        // console.debug(getFormattedHour() + "Cycle " + cycle);
-        allCellsFilled = solveCicle();
-        // console.debug(" ");
-    }
-    
-    if (puzzle.status !== PuzzleStatus.STOPPED) {
-        changePuzzleStatus(PuzzleStatus.SOLVED, {cycle: cycle, time: getRunningTime()});
-    }
+    setTimeout(solveCicle);
 }
 
 
@@ -220,7 +249,7 @@ function initializeActions() {
         changePuzzleStatus(PuzzleStatus.WAITING);
     };
     actionByMessageToSolver[MessageToSolver.STOP] = function(data) {
-        // Isso nAo tA bom ...        
+        console.warn("STOP REQUESTED!!!!");
         accumulatedTime = getRunningTime();
         changePuzzleStatus(PuzzleStatus.STOPPED, {cycle: cycle, time: getRunningTime()});
     };
