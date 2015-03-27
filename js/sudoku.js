@@ -218,7 +218,7 @@ function initComponents() {
                 type: MessageToSolver.STOP
             });
         })
-        .button("disable");
+//        .button("disable");
     $("#steptime").selectmenu({
         select: function (event, ui) {
             worker.postMessage({
@@ -318,10 +318,14 @@ function initWorker() {
         worker = new Worker('js/solver.js');
         worker.onmessage =  
             function(e) {
-                if (!!e.data.type) {
-                    actionByMessageFromSolver[e.data.type](e.data);
-                } else {
-                    console.info(e.toString());
+                try {
+                    if (!!e.data.type) {
+                        actionByMessageFromSolver[e.data.type](e.data);
+                    } else {
+                        console.info(e.toString());
+                    }
+                } catch(e) {
+                    console.error(e);
                 }
             };
         initWorkerHandlers();

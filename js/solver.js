@@ -15,18 +15,22 @@ function isEmptyCell(c) {
     return !c.filled;
 }
 
-function changePuzzleStatus(status, showDataRunning) {
+function changePuzzleStatus(status, extras) {
     if (puzzle.status === status) {
         return;
     }
     
     puzzle.status = status;
-    postMessage({
+
+    var message = {
         type: MessageFromSolver.PUZZLE_STATUS,
-        status: puzzle.status,
-        time: showDataRunning? getRunningTime(): null,
-        cycle: showDataRunning? cycle: null
-    });
+        status: puzzle.status
+    };
+    for(var key in extras) {
+        message[key] = extras[key];
+    }
+
+    postMessage(message);
 }
 
 function changeCellStatus(cell, status) {
@@ -173,15 +177,15 @@ function solve() {
 
         return quantNotSolvedCells === 0;        
     }
-    
-    if (puzzle.status === PuzzleStatus.READY) {
-        cycle = 0;
-        accumulatedTime = 0;
-        startTme = Date.now();
+
+    if (puzzle.status !== PuzzleStatus.READY) {
+        throw new Error("Puzzle not ready to run! Status: " + puzzle.status);
     }
     
-    changePuzzleStatus(PuzzleStatus.RUNNING, true);
-
+    cycle = 0;
+    accumulatedTime = 0;
+    startTme = Date.now();
+    changePuzzleStatus(PuzzleStatus.RUNNING, {cycle: cycle, time: getRunningTime()});
     var allCellsFilled = false;
     
     while (!allCellsFilled && (puzzle.status != PuzzleStatus.STOPPED)) {
@@ -192,7 +196,7 @@ function solve() {
     }
     
     if (puzzle.status !== PuzzleStatus.STOPPED) {
-        changePuzzleStatus(PuzzleStatus.SOLVED, true);
+        changePuzzleStatus(PuzzleStatus.SOLVED, {cycle: cycle, time: getRunningTime()});
     }
 }
 
@@ -203,10 +207,7 @@ function initializeActions() {
             validatePuzzle();
             solve();
         } catch(e) {
-            puzzle.status = PuzzleStatus.INVALID;
-            postMessage({
-                type: MessageFromSolver.PUZZLE_STATUS,
-                status: puzzle.status,
+            changePuzzleStatus(PuzzleStatus.INVALID, {
                 message: e.message,
                 cells: (!!e.invalidCells)? e.invalidCells.map(function(c) { return {col: c.col, row: c.row}; }): null
             });
@@ -219,9 +220,9 @@ function initializeActions() {
         changePuzzleStatus(PuzzleStatus.WAITING);
     };
     actionByMessageToSolver[MessageToSolver.STOP] = function(data) {
-        // Isso não tá bom ...        
+        // Isso nAo tA bom ...        
         accumulatedTime = getRunningTime();
-        changePuzzleStatus(PuzzleStatus.STOPPED, true);
+        changePuzzleStatus(PuzzleStatus.STOPPED, {cycle: cycle, time: getRunningTime()});
     };
     actionByMessageToSolver[MessageToSolver.FILL_CELL] = function(data) {
         var cell = puzzle.getCell(data.row, data.col);
@@ -235,7 +236,7 @@ function initializeActions() {
 
 // See http://stackoverflow.com/questions/14500091/uncaught-referenceerror-importscripts-is-not-defined
 if ('function' === typeof importScripts) {
-    importScripts("worker-messages.js", "underscore.js", "puzzle.js", "cell.js");
+    importScripts("underscore.js", "utils.js", "worker-messages.js", "puzzle.js", "cell.js");
     addEventListener('message', function(e) {
         actionByMessageToSolver[e.data.type](e.data);
 //        console.debug(puzzle.cells.toString());
