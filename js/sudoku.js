@@ -18,9 +18,11 @@ function fillRunningMessages(time, cycle, puzzleStatus) {
 function initComponents() {
 
     function centralize() {
-        $("#main").position({of: "body"});
+        $("#main").position({
+            of: "body"
+        });
     }
-    
+
     var Movement = {
         TO_ROW_END: function(currentRow, currentCol) {
             return {
@@ -59,9 +61,9 @@ function initComponents() {
             };
         }
     };
-    
+
     var cellRegex = /^cell(\d)(\d)$/;
-    
+
     function moveTo(e, movement, preventDefault) {
         var pos = cellRegex.exec(e.target.id);
         var nextPos = movement(parseInt(pos[1], 10), parseInt(pos[2], 10));
@@ -70,7 +72,7 @@ function initComponents() {
             e.preventDefault();
         }
     }
-    
+
     function notifyCellChange(cellId, number) {
         var pos = cellRegex.exec(cellId);
         worker.postMessage({
@@ -80,22 +82,22 @@ function initComponents() {
             value: number //
         });
     }
-    
+
     function createMovementAction(movement) {
         return function(e) {
             moveTo(e, movement, false);
         };
     }
-    
+
     function gotoNextCell(e) {
         moveTo(e, Movement.TO_RIGHT, true);
     }
-    
+
     function changeInputValue(e, number) {
         e.target.value = number;
         notifyCellChange(e.target.id, number);
     }
-    
+
     var noAction = function(e) {};
     var numberAction = function(e) {
         if (e.shiftKey) {
@@ -122,7 +124,7 @@ function initComponents() {
         }
         gotoNextCell(e);
     };
-    
+
     var actionByKeyCode = {
         8: cleanAndGotoPrevious, // Backspace
         9: noAction, // Tab
@@ -157,7 +159,7 @@ function initComponents() {
         104: numberPadAction, // numpad 8 
         105: numberPadAction // numpad 9 
     };
-    
+
     function handleKey(e) {
         var action = actionByKeyCode[e.keyCode];
         if (action) {
@@ -166,7 +168,7 @@ function initComponents() {
             e.preventDefault();
         }
     }
-    
+
     function handleKeyUp(e) {
         if (((e.keyCode >= 49) && (e.keyCode <= 57)) ||
             ((e.keyCode >= 97) && (e.keyCode <= 105))) {
@@ -175,7 +177,7 @@ function initComponents() {
     }
 
 
-    $( window ).resize(centralize);
+    $(window).resize(centralize);
 
     $("#puzzle input")
         .attr("size", 1)
@@ -184,7 +186,7 @@ function initComponents() {
         .keyup(handleKeyUp);
 
     $("#runningMessages").hide();
-    
+
     $("button").button();
     $("#btnRun")
         .button("option", "icons", {
@@ -213,14 +215,14 @@ function initComponents() {
             primary: "ui-icon-stop"
         })
         .button("option", "label", "Stop")
-        .click(function () {
+        .click(function() {
             worker.postMessage({
                 type: MessageToSolver.STOP
             });
         })
-//        .button("disable");
+        //        .button("disable");
     $("#steptime").selectmenu({
-        select: function (event, ui) {
+        select: function(event, ui) {
             worker.postMessage({
                 type: MessageToSolver.STEP_TIME,
                 value: parseInt(ui.item.value, 10)
@@ -233,7 +235,7 @@ function initComponents() {
 }
 
 function initWorkerHandlers() {
-    
+
     function unfocus() {
         $(this).blur();
     }
@@ -258,17 +260,18 @@ function initWorkerHandlers() {
         $("#errorText").text((!!err.message) ? err.message : err);
         if (!!err.cells) {
             err.cells
-            .map(function(c) { return "#cell" + c.row + c.col; })
-            .forEach(function(id, index) {
-                if (index === 0) {
-                    $(id).focus();
-                }
-                $(id).effect("pulsate");
-            });
+                .map(function(c) {
+                    return "#cell" + c.row + c.col;
+                })
+                .forEach(function(id, index) {
+                    if (index === 0) {
+                        $(id).focus();
+                    }
+                    $(id).effect("pulsate");
+                });
         }
     };
-    actionByPuzzleStatus[PuzzleStatus.READY] = function(data) {
-    }
+    actionByPuzzleStatus[PuzzleStatus.READY] = function(data) {}
     actionByPuzzleStatus[PuzzleStatus.RUNNING] = function(data) {
         $("#btnRun, #btnClean").button("disable");
         $("#btnStop").button("enable");
@@ -284,17 +287,17 @@ function initWorkerHandlers() {
         fillRunningMessages(data.time, data.cycle, data.status);
     };
     actionByPuzzleStatus[PuzzleStatus.SOLVED] = function(data) {
-        console.info("PuzzleStatus.SOLVED: " +  objectToString(data));
+        console.info("PuzzleStatus.SOLVED: " + objectToString(data));
         $("#btnStop").button("disable");
         $("#btnClean").button("enable");
         fillRunningMessages(data.time, data.cycle, data.status);
     };
 
     actionByMessageFromSolver[MessageFromSolver.INVALID_SOLVER] = function(data) {
-        console.error("INVALID_SOLVER: " +  objectToString(data));
+        console.error("INVALID_SOLVER: " + objectToString(data));
     };
     actionByMessageFromSolver[MessageFromSolver.PUZZLE_STATUS] = function(data) {
-        console.debug("MessageFromSolver.PUZZLE_STATUS: " +  objectToString(data));
+        console.debug("MessageFromSolver.PUZZLE_STATUS: " + objectToString(data));
         $("#puzzle").removeClass().addClass(data.status);
         actionByPuzzleStatus[data.status](data);
     };
@@ -308,26 +311,25 @@ function initWorkerHandlers() {
         // console.info("CELL_VALUE: " +  objectToString(data));
     };
     actionByMessageFromSolver[MessageFromSolver.ERROR] = function(data) {
-        console.error("ERROR: " +  objectToString(data));
+        console.error("ERROR: " + objectToString(data));
         fillRunningMessages(data.time, data.cycle, data.status);
     };
 }
 
 function initWorker() {
-    if(!!window.Worker) {
+    if (!!window.Worker) {
         worker = new Worker('js/solver.js');
-        worker.onmessage =  
-            function(e) {
-                try {
-                    if (!!e.data.type) {
-                        actionByMessageFromSolver[e.data.type](e.data);
-                    } else {
-                        console.info(e.toString());
-                    }
-                } catch(e) {
-                    console.error(e);
+        worker.onmessage = function(e) {
+            try {
+                if (!!e.data.type) {
+                    actionByMessageFromSolver[e.data.type](e.data);
+                } else {
+                    console.info(e.toString());
                 }
-            };
+            } catch (e) {
+                console.error(e);
+            }
+        };
         initWorkerHandlers();
     } else {
         console.warn("Browser not compatible. Web Worker is not present.");

@@ -6,7 +6,13 @@ var stepTime = 0;
 var accumulatedTime;
 var startTme;
 var cycle;
-var stopRequested = false;
+
+function serializeCell(c) {
+    return {
+        col: c.col,
+        row: c.row
+    };
+}
 
 function getRunningTime() {
     return (Date.now() - startTme) + accumulatedTime;
@@ -20,25 +26,29 @@ function changePuzzleStatus(status, extras) {
     if (puzzle.status === status) {
         return;
     }
-    
+
     puzzle.status = status;
 
     var message = {
         type: MessageFromSolver.PUZZLE_STATUS,
         status: puzzle.status
     };
-    for(var key in extras) {
+    for (var key in extras) {
         message[key] = extras[key];
     }
 
+    console.warn("changePuzzleStatus(): " + objectToString(message));
     postMessage(message);
 }
 
 function changeCellStatus(cell, status) {
+    if (!!!cell) {
+        console.error("Empty cell!");
+    }
     if (cell.status === status) {
         return;
     }
-    
+
     cell.status = status;
 
     postMessage({
@@ -57,13 +67,8 @@ function changeCellValue(cell, value, status) {
         return;
     }
 
-    if (!!value) {
-        cell.value = value;
-        cell.status = status;
-    } else {
-        cell.value = null;
-        cell.status = null;
-    }
+    cell.value = (!!value) ? value : null;
+    cell.status = (!!value) ? status : null;
 
     postMessage({
         type: MessageFromSolver.CELL_STATUS,
@@ -77,7 +82,7 @@ function changeCellValue(cell, value, status) {
 }
 
 function validatePuzzle() {
-    
+
     function validate(cells, pos, description) {
         // The found array has 10 positions to avoid always subtract 1. The 0th position is simply not used.
         var found = [false, false, false, false, false, false, false, false, false, false];
@@ -85,7 +90,9 @@ function validatePuzzle() {
             if (cell.filled) {
                 var value = cell.value;
                 if (found[value]) {
-                    throw _.extend(new Error(description + " " + pos + ". Repeated value: " + value), { invalidCells: cells });
+                    throw _.extend(new Error(description + " " + pos + ". Repeated value: " + value), {
+                        invalidCells: cells
+                    });
                 } else {
                     found[value] = true;
                 }
@@ -100,7 +107,7 @@ function validatePuzzle() {
     }
 
     changePuzzleStatus(PuzzleStatus.VALIDATING);
-    
+
     if (_.every(puzzle.cells, isEmptyCell)) {
         throw new Error("All Cells are empty!");
     }
@@ -114,6 +121,12 @@ function validatePuzzle() {
 
 function solve() {
 
+    /**
+     * Extract the values from filled cells.
+     *
+     * @param Function which extract the Cells from the puzzle
+     * @param 
+     */
     function getValues(func, pos) {
         return func(pos).filter(function(c) {
             return c.filled;
@@ -122,136 +135,115 @@ function solve() {
         });
     }
 
-    function solveCell(cell) {
-
-        function pause() {
-            var t0 = Date.now();
-            while((Date.now() - t0) < stepTime) {
-                _.noop();
-            }
+    function solveNextCell(emptyCells, pos) {
+        if (puzzle.status === PuzzleStatus.STOPPED) {
+            return;
+        } else if (pos >= emptyCells.length) {
+            setTimeout(function() {
+                solveCycle(emptyCells);
+            });
+        } else {
+            var cell = emptyCells[pos];
+            console.debug(cell);
+            changeCellStatus(cell, CellStatus.EVALUATING);
+            setTimeout(function() {
+                solveCell(cell, emptyCells, pos);
+            }, stepTime);
         }
-        
-        if(puzzle.status === PuzzleStatus.STOPPED) {
+    }
+
+    function solveCell(cell, emptyCells, pos) {
+        console.info("solveCell(..., " + pos + ")")
+
+        // Here I compare with other cells
+        var diff = _.difference(_.range(1, 10), getValues(puzzle.getCellsRow, cell.row));
+        diff = _.difference(diff, getValues(puzzle.getCellsCol, cell.col));
+        diff = _.difference(diff, getValues(puzzle.getCellsSector, cell.sector));
+
+        if (diff.length === 0) {
+            changePuzzleStatus(PuzzleStatus.INVALID, {
+                message: "Cell with no values remaining. Probably the puzzle was mistaken written.",
+                cells: serializeCell(cell)
+            });
             return;
         }
-        
-        changeCellStatus(cell, CellStatus.EVALUATING);
 
-        
-        // Here I compare with other cells
-        var diff = _.difference(_.range(1, 10), getValues(puzzle.getCellsRow, cell.row));
-        diff = _.difference(diff, getValues(puzzle.getCellsCol, cell.col));
-        diff = _.difference(diff, getValues(puzzle.getCellsSector, cell.sector));
-
-        if (diff.length === 0) {
-            throw _.extend(new Error("Alghoritm error: Cell with no values remaining."), { invalidCells: [cell] });
-        } else if (diff.length == 1) {
-            changeCellValue(cell, diff[0], CellStatus.FILLED);
-            // NEXT CELL
-        } else {
-            changeCellStatus(cell, null);
-            // NEXT CELL
-        }
-        
-        pause();
-    }
-
-    function solveCicle() {
-        cycle ++;
-        var cellsToSolve = puzzle.cells.filter(isEmptyCell);
-        var quantCellsToSolve = cellsToSolve.length;
-        
-        cellsToSolve.forEach(solveCell);
-        
-        var quantNotSolvedCells = puzzle.cells.filter(isEmptyCell).length;
-
-        if(quantNotSolvedCells === 0) {
-            changePuzzleStatus(PuzzleStatus.SOLVED, { cycle: cycle, time: getRunningTime() });
-        } else if ((quantCellsToSolve === quantNotSolvedCells) && (puzzle.status !== PuzzleStatus.STOPPED)) {
-            throw new Error("Guesses not yet implemented!");
-        } else if(puzzle.status !== PuzzleStatus.STOPPED) {
-            setTimeout(solveCicle);
-        }
-    }
-
-
-    function solveCell1(emptyCells, pos) {
-        if(pos >= emptyCells.length) {
-            setTimeout(function() {
-                solveCycle1(emptyCells);
-            });
-        }
-
-        var cell = emptyCells[pos];
-
-        changeCellStatus(cell, CellStatus.EVALUATING);
-        
-        // Here I compare with other cells
-        var diff = _.difference(_.range(1, 10), getValues(puzzle.getCellsRow, cell.row));
-        diff = _.difference(diff, getValues(puzzle.getCellsCol, cell.col));
-        diff = _.difference(diff, getValues(puzzle.getCellsSector, cell.sector));
-
-        if (diff.length === 0) {
-            throw _.extend(new Error("Alghoritm error: Cell with no values remaining."), { invalidCells: [cell] });
-        } 
-
-        else if (diff.length == 1) {
+        if (diff.length === 1) {
             changeCellValue(cell, diff[0], CellStatus.FILLED);
         } else {
             changeCellStatus(cell, null);
         }
-        setTimeout(function() {
-            solveCell1(emptyCells, pos + 1);
-        }, stepTime);
+        solveNextCell(emptyCells, pos + 1)
     }
 
-    function solveCicle1(priorEmptyCells) {
+    function solveCycle(priorEmptyCells) {
+        cycle++;
+        console.info("solveCycle(" + priorEmptyCells + ")")
         var emptyCells = puzzle.cells.filter(isEmptyCell);
-        if(emptyCells.length === 0) {
-            changePuzzleStatus(PuzzleStatus.SOLVED, { cycle: cycle, time: getRunningTime() });
-        } else if(emptyCells.length === priorEmptyCells.length) {
-            throw new Error("Guesses not yet implemented!");
-        } else if(puzzle.status !== PuzzleStatus.STOPPED) {
-            cycle ++;
-            solveCell1(emptyCells, 0);
+        if (emptyCells.length === 0) {
+            changePuzzleStatus(PuzzleStatus.SOLVED, {
+                cycle: cycle,
+                time: getRunningTime()
+            });
+        } else if (emptyCells.length === priorEmptyCells.length) {
+            console.info("PENDENT CELLS: " + emptyCells);
+            changePuzzleStatus(PuzzleStatus.INVALID, {
+                message: "Guesses not yet implemented!"
+            });
+        } else if (puzzle.status !== PuzzleStatus.STOPPED) {
+            solveNextCell(emptyCells, 0);
         }
     }
 
-    if (puzzle.status !== PuzzleStatus.READY) {
+    if (puzzle.status !== PuzzleStatus.READY && puzzle.status !== PuzzleStatus.STOPPED) {
         throw new Error("Puzzle not ready to run! Status: " + puzzle.status);
     }
-    
-    cycle = 0;
-    accumulatedTime = 0;
+    if (puzzle.status === PuzzleStatus.READY) {
+        cycle = 0;
+        accumulatedTime = 0;
+    }
+
     startTme = Date.now();
-    changePuzzleStatus(PuzzleStatus.RUNNING, {cycle: cycle, time: getRunningTime()});
-    
-    setTimeout(solveCicle);
+    changePuzzleStatus(PuzzleStatus.RUNNING, {
+        cycle: cycle,
+        time: getRunningTime()
+    });
+
+    setTimeout(function() {
+        solveCycle([])
+    });
 }
 
 
 function initializeActions() {
     actionByMessageToSolver[MessageToSolver.START] = function(data) {
         try {
-            validatePuzzle();
+            if (puzzle.status == PuzzleStatus.WAITING || puzzle.status == PuzzleStatus.INVALID) {
+                validatePuzzle();
+            }
             solve();
-        } catch(e) {
+        } catch (e) {
             changePuzzleStatus(PuzzleStatus.INVALID, {
                 message: e.message,
-                cells: (!!e.invalidCells)? e.invalidCells.map(function(c) { return {col: c.col, row: c.row}; }): null
+                cells: (!!e.invalidCells) ? e.invalidCells.map(serializeCell) : null
             });
             console.error(e);
         }
     };
     actionByMessageToSolver[MessageToSolver.CLEAN] = function(data) {
         // clean all filled Cells
-        puzzle.cells.forEach(function(cell) {changeCellValue(cell, null); });
+        puzzle.cells.forEach(function(cell) {
+            changeCellValue(cell, null);
+        });
         changePuzzleStatus(PuzzleStatus.WAITING);
     };
     actionByMessageToSolver[MessageToSolver.STOP] = function(data) {
         console.warn("STOP REQUESTED!!!!");
         accumulatedTime = getRunningTime();
-        changePuzzleStatus(PuzzleStatus.STOPPED, {cycle: cycle, time: getRunningTime()});
+        changePuzzleStatus(PuzzleStatus.STOPPED, {
+            cycle: cycle,
+            time: getRunningTime()
+        });
     };
     actionByMessageToSolver[MessageToSolver.FILL_CELL] = function(data) {
         var cell = puzzle.getCell(data.row, data.col);
@@ -268,10 +260,10 @@ if ('function' === typeof importScripts) {
     importScripts("underscore.js", "utils.js", "worker-messages.js", "puzzle.js", "cell.js");
     addEventListener('message', function(e) {
         actionByMessageToSolver[e.data.type](e.data);
-//        console.debug(puzzle.cells.toString());
+        //        console.debug(puzzle.cells.toString());
     });
     initializeActions();
-    
+
     puzzle = new Puzzle();
     console.info(puzzle);
 }

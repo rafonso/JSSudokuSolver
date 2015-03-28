@@ -14,19 +14,19 @@ function getFormattedHour() {
     }
 
     var d = new Date();
-    return "[" + format(d.getHours(), 2, ":") + 
-    	format(d.getMinutes(), 2, ":") + format(d.getSeconds(), 2, '.') + 
-    	format(d.getMilliseconds(), 3, ']') + " ";
+    return "[" + format(d.getHours(), 2, ":") +
+        format(d.getMinutes(), 2, ":") + format(d.getSeconds(), 2, '.') +
+        format(d.getMilliseconds(), 3, ']') + " ";
 }
 
 function objectToString(obj) {
     var str = "{";
-    if (!!obj) {
+    if ( !! obj) {
         Object.keys(obj).forEach(function(key, index, array) {
             var value = obj[key];
             str += (key + "=" +
-            	((typeof value === "object")? objectToString(value): value) +
-            	(index < (array.length - 1)? ", ": "}"));
+                ((typeof value === "object") ? objectToString(value) : value) +
+                (index < (array.length - 1) ? ", " : "}"));
         });
     } else {
         str += "}";
