@@ -176,8 +176,31 @@ function initComponents() {
         }
     }
 
+    function handleKeyboardShortcut(e) {
+        if (e.altKey && e.ctrlKey) {
+            switch (e.keyCode) {
+                case 67: // (C)lean
+                    $("#btnClean").click();
+                    $("#puzzle input:first").focus();
+                    break;
+                case 82: // (R)un
+                    $("#btnRun").click();
+                    $("#puzzle input:focus").blur();
+                    break;
+                case 83: // (S)top
+                    $("#btnStop").click();
+                    break;
+                case 84: // Step (T)ime
+                    $("#steptime-button").focus();
+                    break;
+            }
+        }
+    }
 
-    $(window).resize(centralize);
+
+    $(window)
+        .resize(centralize)
+        .keyup(handleKeyboardShortcut);
 
     $("#puzzle input")
         .attr("size", 1)
@@ -215,12 +238,12 @@ function initComponents() {
             primary: "ui-icon-stop"
         })
         .button("option", "label", "Stop")
+        .button("disable")
         .click(function() {
             worker.postMessage({
                 type: MessageToSolver.STOP
             });
-        })
-        //        .button("disable");
+        });
     $("#steptime").selectmenu({
         select: function(event, ui) {
             worker.postMessage({
@@ -231,7 +254,6 @@ function initComponents() {
     });
     $("#cell11").focus();
     centralize();
-
 }
 
 function initWorkerHandlers() {
@@ -243,9 +265,9 @@ function initWorkerHandlers() {
     var actionByPuzzleStatus = [];
     actionByPuzzleStatus[PuzzleStatus.WAITING] = function(data) {
         $("#puzzle input").val("").unbind("focus", unfocus);
-        $("#puzzle input:first").focus();
         $("#btnRun").button("enable");
         $("#errorMessages, #runningMessages").hide();
+        $("#puzzle input:first").focus();
     };
     actionByPuzzleStatus[PuzzleStatus.VALIDATING] = function(data) {
         console.info("PuzzleStatus.VALIDATING: " + objectToString(data));
@@ -297,7 +319,7 @@ function initWorkerHandlers() {
         console.error("INVALID_SOLVER: " + objectToString(data));
     };
     actionByMessageFromSolver[MessageFromSolver.PUZZLE_STATUS] = function(data) {
-        console.debug("MessageFromSolver.PUZZLE_STATUS: " + objectToString(data));
+        // console.debug("MessageFromSolver.PUZZLE_STATUS: " + objectToString(data));
         $("#puzzle").removeClass().addClass(data.status);
         actionByPuzzleStatus[data.status](data);
     };

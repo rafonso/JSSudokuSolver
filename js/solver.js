@@ -37,7 +37,7 @@ function changePuzzleStatus(status, extras) {
         message[key] = extras[key];
     }
 
-    console.warn("changePuzzleStatus(): " + objectToString(message));
+    // console.warn("changePuzzleStatus(): " + objectToString(message));
     postMessage(message);
 }
 
@@ -144,7 +144,7 @@ function solve() {
             });
         } else {
             var cell = emptyCells[pos];
-            console.debug(cell);
+            // console.debug(cell);
             changeCellStatus(cell, CellStatus.EVALUATING);
             setTimeout(function() {
                 solveCell(cell, emptyCells, pos);
@@ -153,7 +153,7 @@ function solve() {
     }
 
     function solveCell(cell, emptyCells, pos) {
-        console.info("solveCell(..., " + pos + ")")
+        // console.info("solveCell(..., " + pos + ")")
 
         // Here I compare with other cells
         var diff = _.difference(_.range(1, 10), getValues(puzzle.getCellsRow, cell.row));
@@ -178,7 +178,7 @@ function solve() {
 
     function solveCycle(priorEmptyCells) {
         cycle++;
-        console.info("solveCycle(" + priorEmptyCells + ")")
+        // console.info("solveCycle(" + priorEmptyCells + ")")
         var emptyCells = puzzle.cells.filter(isEmptyCell);
         if (emptyCells.length === 0) {
             changePuzzleStatus(PuzzleStatus.SOLVED, {
@@ -186,7 +186,7 @@ function solve() {
                 time: getRunningTime()
             });
         } else if (emptyCells.length === priorEmptyCells.length) {
-            console.info("PENDENT CELLS: " + emptyCells);
+            // console.info("PENDENT CELLS: " + emptyCells);
             changePuzzleStatus(PuzzleStatus.INVALID, {
                 message: "Guesses not yet implemented!"
             });
@@ -265,5 +265,5 @@ if ('function' === typeof importScripts) {
     initializeActions();
 
     puzzle = new Puzzle();
-    console.info(puzzle);
+    // console.info(puzzle);
 }

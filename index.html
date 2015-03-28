@@ -119,12 +119,33 @@
                 <input id="cell99" />
             </div>
         </div>
+        <div id="controls">
+            <div id="buttons">
+                <button id="btnRun" />
+                <button id="btnClean" />
+                <button id="btnStop" />
+            </div>
+            <div id="rowSteptime">
+                <label for="steptime">Step Time</label>
+                <select id="steptime">
+                    <option>0</option>
+                    <option>1</option>
+                    <option>5</option>
+                    <option>10</option>
+                    <option>50</option>
+                    <option>100 </option>
+                    <option>500 </option>
+                    <option value="1000">1000</option>
+                </select>
+                <span id="ms">ms</span>
+            </div>
+        </div>
         <div id="messages" class="ui-widget">
-            <div id="errorMessages" class="ui-state-error ui-corner-all">
+            <div id="errorMessages" class="ui-widget ui-state-error ui-corner-all">
                 <span class="ui-icon ui-icon-alert icon"></span>
                 <span id="errorText"></span>
             </div>
-            <div id="runningMessages" >
+            <div id="runningMessages" class="ui-widget">
                 <div id="time">
                     <label id="timeLabel" for="timeText">Time:</label>
                     <span id="timeText" class="value">8.888.888</span>
@@ -139,7 +160,7 @@
                     <span id="statusText">Fooooooooo</span>
                 </div>
             </div>
-            <div id="versionMessage" class="ui-state-error ui-corner-all" style="display: none">
+            <div id="versionMessage" class="ui-widget ui-state-error ui-corner-all" style="display: none">
                 <span class="ui-icon ui-icon-alert icon"></span>
                 <span id="versionText">
                     Sorry, but your browser is not appropriate to run this Sudoku Solver. 
@@ -148,29 +169,6 @@
                 </span>
             </div>
         </div>
-        <div id="buttons">
-            <button id="btnRun" />
-            <button id="btnClean" />
-            <button id="btnStop" />
-        </div>
-        <fieldset id="controls">
-            <legend>Controls</legend>
-            <div id="rowSteptime">
-                <label for="steptime">Step Time</label>
-                <select id="steptime">
-                    <option value="0">0</option>
-                    <option value="1">1</option>
-                    <option value="5">5</option>
-                    <option value="10">10</option>
-                    <option value="50">50</option>
-                    <option value="100">100 </option>
-                    <option value="500">500 </option>
-                    <option value="1000">1000</option>
-                </select>
-                <span id="ms">ms</span>
-            </div>
-        </fieldset>
-        </fieldset>
     </div>
 </body>
 
