@@ -5,7 +5,6 @@ function getFormattedHour() {
 
     function format(value, size, end) {
         var string = value.toString();
-
         while (string.length < size) {
             string = '0' + string;
         }
@@ -15,21 +14,36 @@ function getFormattedHour() {
 
     var d = new Date();
     return "[" + format(d.getHours(), 2, ":") +
-        format(d.getMinutes(), 2, ":") + format(d.getSeconds(), 2, '.') +
-        format(d.getMilliseconds(), 3, ']') + " ";
+    format(d.getMinutes(), 2, ":") + format(d.getSeconds(), 2, '.') +
+    format(d.getMilliseconds(), 3, ']') + " ";
 }
 
 function objectToString(obj) {
     var str = "{";
-    if ( !! obj) {
-        Object.keys(obj).forEach(function(key, index, array) {
+    if (!!obj) {
+        Object.keys(obj).forEach(function (key, index, array) {
             var value = obj[key];
-            str += (key + "=" +
-                ((typeof value === "object") ? objectToString(value) : value) +
-                (index < (array.length - 1) ? ", " : "}"));
+            if (!_.isFunction(value)) {
+                str += (key + "=");
+                if (_.isArray(value)) {
+                    str += "[";
+                    for (var i = 0; i < value.length; i++) {
+                        str += objectToString(value[i]);
+                        str += (i < value.length - 1) ? ", " : "";
+                    }
+                    str += "]";
+                } else if (_.isObject(value)) {
+                    str += objectToString(value);
+                } else {
+                    str += value;
+                }
+                if (index < array.length - 1) {
+                    str += ", ";
+                }
+            }
         });
-    } else {
-        str += "}";
     }
+    str += "}";
+
     return str;
 }

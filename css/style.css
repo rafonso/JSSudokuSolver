@@ -33,6 +33,10 @@ h1 {
 #puzzle input.evaluating {
     background-color: orange;
 }
+#puzzle input.guessing {
+    background-color: pink;
+    font-style: italic;
+}
 #puzzle input:focus {
     background-color: green;
 }

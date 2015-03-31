@@ -117,7 +117,7 @@ function validatePuzzle() {
 }
 
 function solve() {
-    
+
     var memento = [];
 
     /**
@@ -164,11 +164,15 @@ function solve() {
         var diff = getPendentValues(cell);
 
         if (diff.length === 0) {
-            changePuzzleStatus(PuzzleStatus.INVALID, {
-                message : "Cell with no values remaining. Probably the puzzle was mistaken written.",
-                cells : serializeCell(cell)
-            });
-            return;
+            if(memento.length == 0) {
+                changePuzzleStatus(PuzzleStatus.INVALID, {
+                    message : "Cell with no values remaining. Probably the puzzle was mistaken written.",
+                    cells : serializeCell(cell)
+                });
+                return;
+            } else {
+                // Get top Memento ...
+            }
         }
 
         if (diff.length === 1) {
@@ -177,10 +181,6 @@ function solve() {
             changeCellStatus(cell, null);
         }
         solveNextCell(emptyCells, pos + 1)
-    }
-
-    function isNotOriginal(c) {
-        return c.status !== CellStatus.ORIGINAL;
     }
 
     function solveCycle(priorEmptyCells) {
@@ -192,22 +192,27 @@ function solve() {
                 time : getRunningTime()
             });
         } else if (emptyCells.length === priorEmptyCells.length) {
-            var pendentCells = puzzle.cells.filter(isNotOriginal).map(function(c) { return c.clone(); });
-//            console.debug(pendentCells.toString());
+            var pendentCells = (memento.length === 0) ?
+                puzzle.cells.filter(isEmptyCell).map(_.clone) :
+                _.last(memento.cells).map(_.clone);
             var firstEmptyCell = pendentCells.filter(isEmptyCell)[0];
-//            console.debug(firstEmptyCell.toString());
             var pendentValues = getPendentValues(firstEmptyCell);
-//            console.debug(pendentValues);
+            changeCellValue(puzzle.getCell(firstEmptyCell.row, firstEmptyCell.col), pendentValues[0], CellStatus.GUESSING);
+            pendentValues = _.rest(pendentValues);
             memento.push({
-                cell: firstEmptyCell,
-                pendentValues: pendentValues,
-                cells: pendentCells
+                cell : firstEmptyCell,
+                pendentValues : pendentValues,
+                cells : pendentCells
             });
-            console.debug(memento[0].toString());
-            changePuzzleStatus(PuzzleStatus.INVALID, {
+            console.debug(objectToString(_.last(memento)));
+            
+            cycle++;
+            solveNextCell(_.rest(pendentCells), 0);
+
+/*             changePuzzleStatus(PuzzleStatus.INVALID, {
                 message : "Guesses not yet implemented!"
             });
-        } else if (puzzle.status !== PuzzleStatus.STOPPED) {
+ */        } else if (puzzle.status !== PuzzleStatus.STOPPED) {
             cycle++;
             solveNextCell(emptyCells, 0);
         }
