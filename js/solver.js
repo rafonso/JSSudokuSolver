@@ -164,7 +164,7 @@ function solve() {
         var diff = getPendentValues(cell);
 
         if (diff.length === 0) {
-            if(memento.length == 0) {
+            if (memento.length == 0) {
                 changePuzzleStatus(PuzzleStatus.INVALID, {
                     message : "Cell with no values remaining. Probably the puzzle was mistaken written.",
                     cells : serializeCell(cell)
@@ -192,10 +192,8 @@ function solve() {
                 time : getRunningTime()
             });
         } else if (emptyCells.length === priorEmptyCells.length) {
-            var pendentCells = (memento.length === 0) ?
-                puzzle.cells.filter(isEmptyCell).map(_.clone) :
-                _.last(memento.cells).map(_.clone);
-            var firstEmptyCell = pendentCells.filter(isEmptyCell)[0];
+            var pendentCells = puzzle.cells.filter(isEmptyCell).map(_.clone);
+            var firstEmptyCell = pendentCells[0];
             var pendentValues = getPendentValues(firstEmptyCell);
             changeCellValue(puzzle.getCell(firstEmptyCell.row, firstEmptyCell.col), pendentValues[0], CellStatus.GUESSING);
             pendentValues = _.rest(pendentValues);
@@ -204,15 +202,16 @@ function solve() {
                 pendentValues : pendentValues,
                 cells : pendentCells
             });
-            console.debug(objectToString(_.last(memento)));
-            
-            cycle++;
-            solveNextCell(_.rest(pendentCells), 0);
+            console.debug(objectToString(memento));
 
-/*             changePuzzleStatus(PuzzleStatus.INVALID, {
-                message : "Guesses not yet implemented!"
+            cycle++;
+            solveNextCell(puzzle.cells.filter(isEmptyCell), 0);
+
+            /*             changePuzzleStatus(PuzzleStatus.INVALID, {
+            message : "Guesses not yet implemented!"
             });
- */        } else if (puzzle.status !== PuzzleStatus.STOPPED) {
+             */
+        } else if (puzzle.status !== PuzzleStatus.STOPPED) {
             cycle++;
             solveNextCell(emptyCells, 0);
         }
