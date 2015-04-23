@@ -1,175 +1,177 @@
 <!DOCTYPE html>
 <html>
-
-<head>
-    <title>JS Sudoku Solver</title>
-    <link rel="stylesheet" type="text/css" href="css/style.css">
-    <link rel="stylesheet" type="text/css" href="css/jquery-ui.min.css">
-    <link rel="stylesheet" type="text/css" href="css/jquery-ui.structure.min.css">
-    <link rel="stylesheet" type="text/css" href="css/jquery-ui.theme.min.css">
-    <script type="text/javascript" src="./js/jquery-1.11.2.min.js"></script>
-    <script type="text/javascript" src="./js/jquery-ui.min.js"></script>
-    <script type="text/javascript" src="./js/underscore-min.js"></script>
-    <script type="text/javascript" src="./js/worker-messages.js"></script>
-    <script type="text/javascript" src="./js/utils.js"></script>
-    <script type="text/javascript" src="./js/sudoku.js"></script>
-</head>
-
-<body>
-    <div id="main">
-        <h1>JS Sudoku Solver</h1>
-        <div id="puzzle"> 
-            <div id="row1" class="puzzle-row">
-                <input id="cell11" />
-                <input id="cell12" />
-                <input id="cell13" />
-                <input id="cell14" />
-                <input id="cell15" />
-                <input id="cell16" />
-                <input id="cell17" />
-                <input id="cell18" />
-                <input id="cell19" />
-            </div>
+    
+    <head>
+        <title>JS Sudoku Solver</title>
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.css">
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.2/jquery-ui.structure.min.css">
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.2/jquery-ui.theme.min.css">
+        <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css">
+        <link rel="stylesheet" type="text/css" href="css/style.css">
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+        <script type="text/javascript" src="./js/underscore-min.js"></script>
+        <script type="text/javascript" src="./js/worker-messages.js"></script>
+        <script type="text/javascript" src="./js/utils.js"></script>
+        <script type="text/javascript" src="./js/sudoku.js"></script>
+    </head>
+    
+    <body>
+        <div id="main">
+            <h1>JS Sudoku Solver</h1>
+            <div id="puzzle"> 
+                <div id="row1" class="puzzle-row">
+                    <input id="cell11" />
+                    <input id="cell12" />
+                    <input id="cell13" />
+                    <input id="cell14" />
+                    <input id="cell15" />
+                    <input id="cell16" />
+                    <input id="cell17" />
+                    <input id="cell18" />
+                    <input id="cell19" />
+                </div>
             <div id="row2" class="puzzle-row">
-                <input id="cell21" />
-                <input id="cell22" />
-                <input id="cell23" />
-                <input id="cell24" />
-                <input id="cell25" />
-                <input id="cell26" />
-                <input id="cell27" />
-                <input id="cell28" />
-                <input id="cell29" />
+            <input id="cell21" />
+            <input id="cell22" />
+            <input id="cell23" />
+            <input id="cell24" />
+            <input id="cell25" />
+            <input id="cell26" />
+            <input id="cell27" />
+            <input id="cell28" />
+            <input id="cell29" />
             </div>
             <div id="row3" class="puzzle-row">
-                <input id="cell31" />
-                <input id="cell32" />
-                <input id="cell33" />
-                <input id="cell34" />
-                <input id="cell35" />
-                <input id="cell36" />
-                <input id="cell37" />
-                <input id="cell38" />
-                <input id="cell39" />
+            <input id="cell31" />
+            <input id="cell32" />
+            <input id="cell33" />
+            <input id="cell34" />
+            <input id="cell35" />
+            <input id="cell36" />
+            <input id="cell37" />
+            <input id="cell38" />
+            <input id="cell39" />
             </div>
             <div id="row4" class="puzzle-row">
-                <input id="cell41" />
-                <input id="cell42" />
-                <input id="cell43" />
-                <input id="cell44" />
-                <input id="cell45" />
-                <input id="cell46" />
-                <input id="cell47" />
-                <input id="cell48" />
-                <input id="cell49" />
+            <input id="cell41" />
+            <input id="cell42" />
+            <input id="cell43" />
+            <input id="cell44" />
+            <input id="cell45" />
+            <input id="cell46" />
+            <input id="cell47" />
+            <input id="cell48" />
+            <input id="cell49" />
             </div>
             <div id="row5" class="puzzle-row">
-                <input id="cell51" />
-                <input id="cell52" />
-                <input id="cell53" />
-                <input id="cell54" />
-                <input id="cell55" />
-                <input id="cell56" />
-                <input id="cell57" />
-                <input id="cell58" />
-                <input id="cell59" />
+            <input id="cell51" />
+            <input id="cell52" />
+            <input id="cell53" />
+            <input id="cell54" />
+            <input id="cell55" />
+            <input id="cell56" />
+            <input id="cell57" />
+            <input id="cell58" />
+            <input id="cell59" />
             </div>
             <div id="row6" class="puzzle-row">
-                <input id="cell61" />
-                <input id="cell62" />
-                <input id="cell63" />
-                <input id="cell64" />
-                <input id="cell65" />
-                <input id="cell66" />
-                <input id="cell67" />
-                <input id="cell68" />
-                <input id="cell69" />
+            <input id="cell61" />
+            <input id="cell62" />
+            <input id="cell63" />
+            <input id="cell64" />
+            <input id="cell65" />
+            <input id="cell66" />
+            <input id="cell67" />
+            <input id="cell68" />
+            <input id="cell69" />
             </div>
             <div id="row7" class="puzzle-row">
-                <input id="cell71" />
-                <input id="cell72" />
-                <input id="cell73" />
-                <input id="cell74" />
-                <input id="cell75" />
-                <input id="cell76" />
-                <input id="cell77" />
-                <input id="cell78" />
-                <input id="cell79" />
+            <input id="cell71" />
+            <input id="cell72" />
+            <input id="cell73" />
+            <input id="cell74" />
+            <input id="cell75" />
+            <input id="cell76" />
+            <input id="cell77" />
+            <input id="cell78" />
+            <input id="cell79" />
             </div>
             <div id="row8" class="puzzle-row">
-                <input id="cell81" />
-                <input id="cell82" />
-                <input id="cell83" />
-                <input id="cell84" />
-                <input id="cell85" />
-                <input id="cell86" />
-                <input id="cell87" />
-                <input id="cell88" />
-                <input id="cell89" />
+            <input id="cell81" />
+            <input id="cell82" />
+            <input id="cell83" />
+            <input id="cell84" />
+            <input id="cell85" />
+            <input id="cell86" />
+            <input id="cell87" />
+            <input id="cell88" />
+            <input id="cell89" />
             </div>
             <div id="row9" class="puzzle-row">
-                <input id="cell91" />
-                <input id="cell92" />
-                <input id="cell93" />
-                <input id="cell94" />
-                <input id="cell95" />
-                <input id="cell96" />
-                <input id="cell97" />
-                <input id="cell98" />
-                <input id="cell99" />
+            <input id="cell91" />
+            <input id="cell92" />
+            <input id="cell93" />
+            <input id="cell94" />
+            <input id="cell95" />
+            <input id="cell96" />
+            <input id="cell97" />
+            <input id="cell98" />
+            <input id="cell99" />
             </div>
-        </div>
-        <div id="controls">
+            </div>
+            <div id="controls">
             <div id="buttons">
-                <button id="btnRun" />
-                <button id="btnClean" />
-                <button id="btnStop" />
+            <button id="btnRun" />
+            <button id="btnClean" />
+            <button id="btnStop" />
             </div>
             <div id="rowSteptime">
-                <label for="steptime">Step Time</label>
-                <select id="steptime">
-                    <option>0</option>
-                    <option>1</option>
-                    <option>5</option>
-                    <option>10</option>
-                    <option>50</option>
-                    <option>100 </option>
-                    <option>500 </option>
-                    <option value="1000">1000</option>
-                </select>
-                <span id="ms">ms</span>
+            <label for="steptime">Step Time</label>
+            <select id="steptime">
+            <option>0</option>
+            <option>1</option>
+            <option>5</option>
+            <option>10</option>
+            <option>50</option>
+            <option>100 </option>
+            <option>500 </option>
+            <option value="1000">1000</option>
+            </select>
+            <span id="ms">ms</span>
             </div>
-        </div>
-        <div id="messages" class="ui-widget">
+            </div>
+            <div id="messages" class="ui-widget">
             <div id="errorMessages" class="ui-widget ui-state-error ui-corner-all">
-                <span class="ui-icon ui-icon-alert icon"></span>
-                <span id="errorText"></span>
+            <span class="ui-icon ui-icon-alert icon"></span>
+            <span id="errorText"></span>
             </div>
             <div id="runningMessages" class="ui-widget">
-                <div id="time">
-                    <label id="timeLabel" for="timeText">Time:</label>
-                    <span id="timeText" class="value">8.888.888</span>
-                    <span id="timeMs">ms</span>
-                </div>
-                <div id="cycle">
-                    <label id="cycleLabel" for="cycleText">Cycles:</label>
-                    <span id="cycleText" class="value">8.888.888</span>
-                </div>
-                <div id="status">
-                    <label id="statusLabel" for="statusText">Status:</label>
-                    <span id="statusText">Fooooooooo</span>
-                </div>
+            <div id="time">
+            <label id="timeLabel" for="timeText">Time:</label>
+            <span id="timeText" class="value">8.888.888</span>
+            <span id="timeMs">ms</span>
+            </div>
+            <div id="cycle">
+            <label id="cycleLabel" for="cycleText">Cycles:</label>
+            <span id="cycleText" class="value">8.888.888</span>
+            </div>
+            <div id="status">
+            <label id="statusLabel" for="statusText">Status:</label>
+            <span id="statusText">Fooooooooo</span>
+            </div>
             </div>
             <div id="versionMessage" class="ui-widget ui-state-error ui-corner-all" style="display: none">
-                <span class="ui-icon ui-icon-alert icon"></span>
-                <span id="versionText">
-                    Sorry, but your browser is not appropriate to run this Sudoku Solver. 
-                    Please, open this page in browsers such as Internet Explorer 10 +, 
-                    Firefox 35 +, Chrome 33 +, Safari 8 +, Opera 27 +, Android 4.4 + and iOS 5.1 +.
-                </span>
+            <span class="ui-icon ui-icon-alert icon"></span>
+            <span id="versionText">
+            Sorry, but your browser is not appropriate to run this Sudoku Solver. 
+            Please, open this page in browsers such as Internet Explorer 10 +, 
+            Firefox 35 +, Chrome 33 +, Safari 8 +, Opera 27 +, Android 4.4 + and iOS 5.1 +.
+            </span>
             </div>
-        </div>
-    </div>
-</body>
-
-</html>
+            </div>
+            </div>
+            </body>
+            
+            </html>
+                        

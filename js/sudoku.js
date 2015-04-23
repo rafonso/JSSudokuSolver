@@ -251,7 +251,7 @@ function initComponents() {
         select : function (event, ui) {
             worker.postMessage({
                 type : MessageToSolver.STEP_TIME,
-                value : parseInt(ui.item.value, 10)
+                value : parseInt(ui.item.label, 10)
             });
         }
     });

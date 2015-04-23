@@ -63,6 +63,11 @@ h1 {
 }
 /* PUZZLE CONFIGURATION - END */
 
+.ui-widget {
+    font-family: inherit;
+    font-size: 1em;
+}
+
 #messages {
     margin-top: 10px;
     height: 64px;
@@ -71,7 +76,12 @@ h1 {
 #errorMessages {
     height: 100%;
     display: none;
+    color: inherit;
 }
+.ui-state-error {
+    background-color: rgb(253, 223, 223);
+}
+
 .icon {
     float: left;
     margin-right: .3em;
