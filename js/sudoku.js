@@ -7,18 +7,6 @@ function getCell(row, cell) {
     return $("#cell" + row + cell);
 }
 
-function fillRunningMessages(time, cycle, puzzleStatus) {
-    if (!!time) {
-        $("#timeText").text(time);
-    }
-    if (!!cycle) {
-        $("#cycleText").text(cycle);
-    }
-    if (!!puzzleStatus) {
-        $("#statusText").text(puzzleStatus);
-    }
-}
-
 function initComponents() {
 
     function centralize() {
@@ -260,6 +248,18 @@ function initComponents() {
 }
 
 function initWorkerHandlers() {
+
+    function fillRunningMessages(time, cycle, puzzleStatus) {
+        if (!!time) {
+            $("#timeText").text(time);
+        }
+        if (!!cycle) {
+            $("#cycleText").text(cycle);
+        }
+        if (!!puzzleStatus) {
+            $("#statusText").text(puzzleStatus);
+        }
+    }
 
     function unfocus() {
         $(this).blur();
