@@ -45,7 +45,7 @@ function Cell(row, col, value, status) {
     this.toString = function () {
         return "[" + this.row +
         ", " + this.col +
-        ", " + this.sector +
+//        ", " + this.sector +
         ", " + (this.filled ? this.value : "-") +
         ", " + ((!!this.status) ? this.status.charAt(0) : "-") +
         "]";
