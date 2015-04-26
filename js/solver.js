@@ -67,10 +67,10 @@ function changeCellValue(cell, value, status, tabs) {
 
     cell.value = (!!value) ? value : null;
     cell.status = (!!value) ? status : null;
-    
-    if(status == CellStatus.FILLED || status == CellStatus.GUESSING) {
+
+    if (status == CellStatus.FILLED || status == CellStatus.GUESSING) {
         var tbs = "";
-        for(var i = 0; i < tabs; i ++) {
+        for (var i = 0; i < tabs; i++) {
             tbs += "\t";
         }
         console.debug(tbs + cell.toString());
@@ -129,39 +129,23 @@ function solve() {
 
     var memento = [];
 
-    /**
-     * Extract the values from filled cells.
-     *
-     * @param Function which extract the Cells from the puzzle
-     * @param
-     */
-    function getValues(func, pos) {
-        return func(pos).filter(function (c) {
-            return c.filled;
-        }).map(function (c) {
-            return c.value;
-        });
-    }
-
-    function solveNextCell(emptyCells, pos) {
-        if (puzzle.status === PuzzleStatus.STOPPED) {
-            return;
-        } else if (pos >= emptyCells.length) {
-            setTimeout(function () {
-                solveCycle(emptyCells);
-            });
-        } else {
-            var cell = emptyCells[pos];
-            // console.debug(cell);
-            changeCellStatus(cell, CellStatus.EVALUATING);
-            setTimeout(function () {
-                solveCell(cell, emptyCells, pos);
-            }, stepTime);
-        }
-    }
-
     // Here I compare with other cells
     function getPendentValues(cell) {
+
+        /**
+         * Extract the values from filled cells.
+         *
+         * @param Function which extract the Cells from the puzzle
+         * @param
+         */
+        function getValues(func, pos) {
+            return func(pos).filter(function (c) {
+                return c.filled;
+            }).map(function (c) {
+                return c.value;
+            });
+        }
+
         var diff = _.difference(_.range(1, 10), getValues(puzzle.getCellsRow, cell.row));
         diff = _.difference(diff, getValues(puzzle.getCellsCol, cell.col));
         diff = _.difference(diff, getValues(puzzle.getCellsSector, cell.sector));
@@ -192,7 +176,54 @@ function solve() {
         solveNextCell(emptyCells, pos + 1)
     }
 
+    function solveNextCell(emptyCells, pos) {
+        if (puzzle.status === PuzzleStatus.STOPPED) {
+            return;
+        } else if (pos >= emptyCells.length) {
+            setTimeout(function () {
+                solveCycle(emptyCells);
+            });
+        } else {
+            var cell = emptyCells[pos];
+            // console.debug(cell);
+            changeCellStatus(cell, CellStatus.EVALUATING);
+            setTimeout(function () {
+                solveCell(cell, emptyCells, pos);
+            }, stepTime);
+        }
+    }
+
     function solveCycle(priorEmptyCells) {
+
+        function tryGuess(pendents, guessCell, pendentValues) {
+            var cell = puzzle.getCell(guessCell.row, guessCell.col);
+            cycle++;
+            console.debug("CYCLE " + cycle);
+            _.rest(pendentValues).reverse().forEach(function (v) {
+                memento.push({
+                    cell : guessCell,
+                    pendentValue : v,
+                    cells : pendentCells
+                });
+            })
+            changeCellValue(cell, pendentValues[0], CellStatus.GUESSING, memento.length);
+//            console.debug(objectToString(memento));
+            solveNextCell(puzzle.cells.filter(isEmptyCell), 0);
+        }
+
+        function undoGuess() {
+            var memo = memento.pop();
+            memo.cells.forEach(function (cell) {
+                var puzzleCell = puzzle.getCell(cell.row, cell.col);
+                changeCellValue(puzzleCell, cell.value, cell.status);
+            });
+            cycle++;
+            console.debug("CYCLE " + cycle);
+            changeCellValue(puzzle.getCell(memo.cell.row, memo.cell.col), memo.pendentValue, CellStatus.GUESSING, memento.length);
+//            console.debug(objectToString(memento));
+            solveNextCell(puzzle.cells.filter(isEmptyCell), 0);
+        }
+
         // console.info("solveCycle(" + priorEmptyCells + ")")
         var emptyCells = puzzle.cells.filter(isEmptyCell);
         if (emptyCells.length === 0) {
@@ -204,25 +235,18 @@ function solve() {
             var pendentCells = puzzle.cells.filter(isEmptyCell).map(_.clone);
             var firstEmptyCell = pendentCells[0];
             var pendentValues = getPendentValues(firstEmptyCell);
-            var cell = puzzle.getCell(firstEmptyCell.row, firstEmptyCell.col);
-            changeCellValue(cell, pendentValues[0], CellStatus.GUESSING, memento.length);
-            pendentValues = _.rest(pendentValues);
-            memento.push({
-                cell : firstEmptyCell,
-                pendentValues : pendentValues,
-                cells : pendentCells
-            });
-//            console.debug(objectToString(memento));
-
-            cycle++;
-            solveNextCell(puzzle.cells.filter(isEmptyCell), 0);
-
-            /*             changePuzzleStatus(PuzzleStatus.INVALID, {
-            message : "Guesses not yet implemented!"
-            });
-             */
+            if (pendentValues.length) {
+                tryGuess(pendentCells, firstEmptyCell, pendentValues);
+            } else if (memento.length) {
+                undoGuess();
+            } else {
+                changePuzzleStatus(PuzzleStatus.INVALID, {
+                    message : "There is no solution! :"
+                });
+            }
         } else if (puzzle.status !== PuzzleStatus.STOPPED) {
             cycle++;
+            console.debug("CYCLE " + cycle);
             solveNextCell(emptyCells, 0);
         }
     }
