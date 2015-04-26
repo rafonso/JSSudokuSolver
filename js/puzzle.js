@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- *
+ * Represents a Puzzle, with all cells.
  */
 function Puzzle() {
 
@@ -10,8 +10,8 @@ function Puzzle() {
     this.status = PuzzleStatus.WAITING;
 
     this.cells = [];
-    for(var row = 1; row <= 9; row ++) {
-        for(var col = 1; col <= 9; col ++) {
+    for (var row = 1; row <= 9; row++) {
+        for (var col = 1; col <= 9; col++) {
             this.cells.push(new Cell(row, col));
         }
     }
@@ -20,15 +20,16 @@ function Puzzle() {
 
     var cls = this.cells;
     function get(func, pos, excludeCell) {
-        var predicate = function(c) {
+        var predicate = function (c) {
             return c[func] === pos;
         };
         var excluder = (!!excludeCell) ?
-            function(c) {
-                return !excludeCell.sameCell(c);
-            } : function() {
-                return true;
-            };
+        function (c) {
+            return !excludeCell.sameCell(c);
+        }
+         : function () {
+            return true;
+        };
 
         return cls.filter(predicate).filter(excluder);
     }
@@ -36,7 +37,7 @@ function Puzzle() {
     function changeStatus(newStatus) {
 
         function changeCellStatus(cellStatus) {
-            return function(c) {
+            return function (c) {
                 c.cellStatus = cellStatus;
             };
         }
@@ -47,23 +48,23 @@ function Puzzle() {
         console.debug(getFormattedHour() + "STATUS: " + oldStatus + " -> " + newStatus);
 
         puzzleElement.changePuzzleStatus(oldStatus, newStatus);
-        cells.forEach(function(c) {
+        cells.forEach(function (c) {
             c.puzzleStatus = newStatus;
         });
         switch (newStatus) {
-            case PuzzleStatus.RUNNING:
-                cells.filter(function(c) {
-                    return c.filled;
-                }).forEach(changeCellStatus(CellStatus.ORIGINAL));
-                break;
-            case PuzzleStatus.WAITING:
-                cells.forEach(function(c) {
-                    c.value = null;
-                });
-                cells.forEach(changeCellStatus(CellStatus.IDLE));
-                break;
-            default:
-                cells.forEach(changeCellStatus(CellStatus.IDLE));
+        case PuzzleStatus.RUNNING:
+            cells.filter(function (c) {
+                return c.filled;
+            }).forEach(changeCellStatus(CellStatus.ORIGINAL));
+            break;
+        case PuzzleStatus.WAITING:
+            cells.forEach(function (c) {
+                c.value = null;
+            });
+            cells.forEach(changeCellStatus(CellStatus.IDLE));
+            break;
+        default:
+            cells.forEach(changeCellStatus(CellStatus.IDLE));
         }
     }
 
@@ -76,7 +77,7 @@ function Puzzle() {
      * @param excludeCell Cell to be excluded in result.
      * @return Cells which are in the solicitated Row. If excludeCell is defined, this will not be present in result.
      */
-    this.getCellsRow = function(row, excludeCell) {
+    this.getCellsRow = function (row, excludeCell) {
         return get("row", row, excludeCell);
     };
 
@@ -87,7 +88,7 @@ function Puzzle() {
      * @param excludeCell Cell to be excluded in result.
      * @return Cells which are in the solicitated Column. If excludeCell is defined, this will not be present in result.
      */
-    this.getCellsCol = function(col, excludeCell) {
+    this.getCellsCol = function (col, excludeCell) {
         return get("col", col, excludeCell);
     };
 
@@ -98,17 +99,17 @@ function Puzzle() {
      * @param excludeCell Cell to be excluded in result.
      * @return Cells which are in the solicitated Sector. If excludeCell is defined, this will not be present in result.
      */
-    this.getCellsSector = function(sec, excludeCell) {
+    this.getCellsSector = function (sec, excludeCell) {
         return get("sector", sec, excludeCell);
     };
-    
-    this.getCell = function(row, col) {
-        return _.find(this.cells, function(c) {
+
+    this.getCell = function (row, col) {
+        return _.find(this.cells, function (c) {
             return (c.row === row) && (c.col === col);
         });
     };
 
-    this.toString = function() {
+    this.toString = function () {
         return "Puzzle[status: " + this.status + ", cells: " + this.cells + "]";
     };
 

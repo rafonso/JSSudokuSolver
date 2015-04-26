@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- *
+ * Represents a puzzle cell with the values.
  */
 function Cell(row, col, value, status) {
 

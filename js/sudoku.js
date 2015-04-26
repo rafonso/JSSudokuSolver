@@ -1,3 +1,4 @@
+// UI FUNCTIONS
 "use strict";
 
 var worker = {};
