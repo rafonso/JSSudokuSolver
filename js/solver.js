@@ -1,3 +1,4 @@
+// SUDOKU SOLVER METHODS
 "use strict";
 
 var actionByMessageToSolver = [];
@@ -59,13 +60,21 @@ function changeCellStatus(cell, status) {
     });
 }
 
-function changeCellValue(cell, value, status) {
+function changeCellValue(cell, value, status, tabs) {
     if (cell.value === value) {
         return;
     }
 
     cell.value = (!!value) ? value : null;
     cell.status = (!!value) ? status : null;
+    
+    if(status == CellStatus.FILLED || status == CellStatus.GUESSING) {
+        var tbs = "";
+        for(var i = 0; i < tabs; i ++) {
+            tbs += "\t";
+        }
+        console.debug(tbs + cell.toString());
+    }
 
     postMessage({
         type : MessageFromSolver.CELL_STATUS,
@@ -176,7 +185,7 @@ function solve() {
         }
 
         if (diff.length === 1) {
-            changeCellValue(cell, diff[0], CellStatus.FILLED);
+            changeCellValue(cell, diff[0], CellStatus.FILLED, memento.length);
         } else {
             changeCellStatus(cell, null);
         }
@@ -195,14 +204,15 @@ function solve() {
             var pendentCells = puzzle.cells.filter(isEmptyCell).map(_.clone);
             var firstEmptyCell = pendentCells[0];
             var pendentValues = getPendentValues(firstEmptyCell);
-            changeCellValue(puzzle.getCell(firstEmptyCell.row, firstEmptyCell.col), pendentValues[0], CellStatus.GUESSING);
+            var cell = puzzle.getCell(firstEmptyCell.row, firstEmptyCell.col);
+            changeCellValue(cell, pendentValues[0], CellStatus.GUESSING, memento.length);
             pendentValues = _.rest(pendentValues);
             memento.push({
                 cell : firstEmptyCell,
                 pendentValues : pendentValues,
                 cells : pendentCells
             });
-            console.debug(objectToString(memento));
+//            console.debug(objectToString(memento));
 
             cycle++;
             solveNextCell(puzzle.cells.filter(isEmptyCell), 0);
