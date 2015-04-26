@@ -19,31 +19,36 @@ function getFormattedHour() {
 }
 
 function objectToString(obj) {
-    var str = "{";
+    var str = "";
     if (!!obj) {
-        Object.keys(obj).forEach(function (key, index, array) {
-            var value = obj[key];
-            if (!_.isFunction(value)) {
-                str += (key + "=");
-                if (_.isArray(value)) {
-                    str += "[";
-                    for (var i = 0; i < value.length; i++) {
-                        str += objectToString(value[i]);
-                        str += (i < value.length - 1) ? ", " : "";
+        if (_.has(obj, "toString")) {
+            str += obj.toString();
+        } else {
+            str += "{";
+            Object.keys(obj).forEach(function (key, index, array) {
+                var value = obj[key];
+                if (!_.isFunction(value)) {
+                    str += (key + "=");
+                    if (_.isArray(value)) {
+                        str += "[";
+                        for (var i = 0; i < value.length; i++) {
+                            str += objectToString(value[i]);
+                            str += (i < value.length - 1) ? ", " : "";
+                        }
+                        str += "]";
+                    } else if (_.isObject(value)) {
+                        str += objectToString(value);
+                    } else {
+                        str += value;
                     }
-                    str += "]";
-                } else if (_.isObject(value)) {
-                    str += objectToString(value);
-                } else {
-                    str += value;
+                    if (index < array.length - 1) {
+                        str += ", ";
+                    }
                 }
-                if (index < array.length - 1) {
-                    str += ", ";
-                }
-            }
-        });
+            });
+            str += "}";
+        }
     }
-    str += "}";
 
     return str;
 }
