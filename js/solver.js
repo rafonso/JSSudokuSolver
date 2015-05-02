@@ -195,19 +195,23 @@ function solve() {
 
     function solveCycle(priorEmptyCells) {
 
-        function tryGuess(pendents, guessCell, pendentValues) {
-            var cell = puzzle.getCell(guessCell.row, guessCell.col);
+        function incrementCycle() {
             cycle++;
             console.debug("CYCLE " + cycle);
+        }
+
+        function tryGuess(pendents, guessCell, pendentValues) {
+            var cell = puzzle.getCell(guessCell.row, guessCell.col);
+            incrementCycle();
             _.rest(pendentValues).reverse().forEach(function (v) {
                 memento.push({
                     cell : guessCell,
                     pendentValue : v,
-                    cells : pendentCells
+                    cells : pendents
                 });
             })
             changeCellValue(cell, pendentValues[0], CellStatus.GUESSING, memento.length);
-//            console.debug(objectToString(memento));
+            //            console.debug(objectToString(memento));
             solveNextCell(puzzle.cells.filter(isEmptyCell), 0);
         }
 
@@ -217,10 +221,9 @@ function solve() {
                 var puzzleCell = puzzle.getCell(cell.row, cell.col);
                 changeCellValue(puzzleCell, cell.value, cell.status);
             });
-            cycle++;
-            console.debug("CYCLE " + cycle);
+            incrementCycle();
             changeCellValue(puzzle.getCell(memo.cell.row, memo.cell.col), memo.pendentValue, CellStatus.GUESSING, memento.length);
-//            console.debug(objectToString(memento));
+            //            console.debug(objectToString(memento));
             solveNextCell(puzzle.cells.filter(isEmptyCell), 0);
         }
 
@@ -232,6 +235,7 @@ function solve() {
                 time : getRunningTime()
             });
         } else if (emptyCells.length === priorEmptyCells.length) {
+
             var pendentCells = puzzle.cells.filter(isEmptyCell).map(_.clone);
             var firstEmptyCell = pendentCells[0];
             var pendentValues = getPendentValues(firstEmptyCell);
@@ -245,13 +249,12 @@ function solve() {
                 });
             }
         } else if (puzzle.status !== PuzzleStatus.STOPPED) {
-            cycle++;
-            console.debug("CYCLE " + cycle);
+            incrementCycle();
             solveNextCell(emptyCells, 0);
         }
     }
 
-    function init() {
+    function start() {
         switch (puzzle.status) {
         case PuzzleStatus.READY:
             cycle = 0;
@@ -273,7 +276,7 @@ function solve() {
         });
     }
 
-    init();
+    start();
 }
 
 function initializeActions() {

@@ -17,6 +17,12 @@ function notifyCellValue(row, col, value) {
     });
 }
 
+/**
+ * Inject the values in a String in the Puzzle. This puzzle should contains just 0 to 9 and ".".
+ * The "." value will be ignored. The "0" values will correspond to empty cells.
+ *
+ * @param puzzle String which will fill the puzzle.
+ */
 function insertPuzzle(puzzle) {
     var puzzle = puzzle.replace(/\./g, "");
     if (!/^\d{81}$/.test(puzzle)) {
@@ -38,6 +44,30 @@ function insertPuzzle(puzzle) {
             col++;
         }
     }
+}
+
+/**
+ * Convert a Puzzle to a call to the insertPuzzle function.
+ *
+ * @param justOriginals if just the original cells (class="original") will be read or all cells.
+ * @return call to insertPuzzle 
+ */
+function puzzleToinsertPuzzle(justOriginals) {
+    var cellToValue = justOriginals ?
+    function () {
+        return ($(this).attr("class") === CellStatus.ORIGINAL) ? $(this).val() : 0;
+    }
+     : function () {
+        return $(this).val() || 0;
+    };
+    var concatValues = function (str, value, idx) {
+        var dot = (idx == 80) ? "" : (((idx + 1) % 9 == 0) ? "." : "");
+        return str + value + dot;
+    };
+
+    var values = $("#puzzle :text").map(cellToValue);
+    var argument = _.reduce(values, concatValues, "");
+    return "insertPuzzle(\"" + argument + "\");";
 }
 
 function initComponents() {
