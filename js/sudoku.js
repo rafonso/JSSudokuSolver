@@ -8,6 +8,38 @@ function getCell(row, cell) {
     return $("#cell" + row + cell);
 }
 
+function notifyCellValue(row, col, value) {
+    worker.postMessage({
+        type : MessageToSolver.FILL_CELL, //
+        row : row, //
+        col : col, //
+        value : value //
+    });
+}
+
+function insertPuzzle(puzzle) {
+    var puzzle = puzzle.replace(/\./g, "");
+    if (!/^\d{81}$/.test(puzzle)) {
+        throw new Error("Invalid Puzzle!");
+    }
+
+    $("#btnClean").click();
+    var row = 1,
+    col = 1;
+    for (var i = 0; i < 81; i++) {
+        var d = parseInt(puzzle.charAt(i), 10);
+        if (d) {
+            notifyCellValue(row, col, d);
+        }
+        if (col == 9) {
+            row++;
+            col = 1;
+        } else {
+            col++;
+        }
+    }
+}
+
 function initComponents() {
 
     function centralize() {
@@ -68,12 +100,7 @@ function initComponents() {
 
     function notifyCellChange(cellId, number) {
         var pos = cellRegex.exec(cellId);
-        worker.postMessage({
-            type : MessageToSolver.FILL_CELL, //
-            row : parseInt(pos[1], 10), //
-            col : parseInt(pos[2], 10), //
-            value : number //
-        });
+        notifyCellValue(parseInt(pos[1], 10), parseInt(pos[2], 10), number)
     }
 
     function createMovementAction(movement) {
