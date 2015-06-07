@@ -321,7 +321,7 @@ function initializeActions() {
 
 // See http://stackoverflow.com/questions/14500091/uncaught-referenceerror-importscripts-is-not-defined
 if ('function' === typeof importScripts) {
-    importScripts("underscore-min.js", "utils.js", "worker-messages.js", "puzzle.js", "cell.js");
+    importScripts("https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js", "utils.js", "worker-messages.js", "puzzle.js", "cell.js");
     addEventListener('message', function (e) {
         actionByMessageToSolver[e.data.type](e.data);
         //        console.debug(puzzle.cells.toString());
