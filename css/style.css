@@ -145,3 +145,10 @@ h1 {
 }
 /* rowSteptime CONFIGURATION - END */
 
+#exportDialog {
+    display: none;
+}
+
+#puzzleToExport {
+    font-family: monospace;
+}

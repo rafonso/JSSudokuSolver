@@ -47,27 +47,37 @@ function insertPuzzle(puzzle) {
 }
 
 /**
- * Convert a Puzzle to a call to the insertPuzzle function.
+ * Export a puzzle as a String.
  *
  * @param justOriginals if just the original cells (class="original") will be read or all cells.
- * @return call to insertPuzzle 
+ * @return exported puzzle.
  */
-function puzzleToinsertPuzzle(justOriginals) {
-    var cellToValue = justOriginals ?
-    function () {
+function exportPuzzle(justOriginals) {
+    var extractOriginals = function () {
         return ($(this).attr("class") === CellStatus.ORIGINAL) ? $(this).val() : 0;
-    }
-     : function () {
+    };
+    var extractAll = function () {
         return $(this).val() || 0;
     };
+
+    var cellToValue = justOriginals ? extractOriginals : extractAll;
     var concatValues = function (str, value, idx) {
         var dot = (idx == 80) ? "" : (((idx + 1) % 9 == 0) ? "." : "");
         return str + value + dot;
     };
 
     var values = $("#puzzle :text").map(cellToValue);
-    var argument = _.reduce(values, concatValues, "");
-    return "insertPuzzle(\"" + argument + "\");";
+    return _.reduce(values, concatValues, "");
+}
+
+/**
+ * Convert a Puzzle to a call to the insertPuzzle function.
+ *
+ * @param justOriginals if just the original cells (class="original") will be read or all cells.
+ * @return call to insertPuzzle
+ */
+function puzzleToinsertPuzzle(justOriginals) {
+    return "insertPuzzle(\"" + exportPuzzle(justOriginals) + "\");";
 }
 
 function initComponents() {
@@ -247,6 +257,24 @@ function initComponents() {
         }
     }
 
+    function puzzleDialog(title, onOpen, onOk, tooltip) {
+        $("#puzzleToExport").tooltip({
+            content : tooltip
+        });
+        $("#exportDialog").dialog({
+            modal : true,
+            width : 800,
+            title : title,
+            open : onOpen,
+            close : function (event, ui) {
+                $("#puzzleToExport").val("");
+            },
+            buttons : {
+                Ok : onOk
+            }
+        }).focus();
+    }
+
     $(window)
     .resize(centralize)
     .keyup(handleKeyboardShortcut);
@@ -301,8 +329,34 @@ function initComponents() {
             });
         }
     });
+    $(document) //
+    .bind('keydown', 'shift+e', function () {
+        puzzleDialog("Export Puzzle", function () {
+            $("#puzzleToExport").val(exportPuzzle(true)).attr("readonly", "true").select().focus();
+        }, function () {
+            $(this).dialog("close");
+        });
+    }, "Export a puzzle") //
+    .bind('keydown', 'shift+i', function () {
+        if ($("#btnRun").button("option", "disabled")) {
+            // If it is running, don't allow to import
+            return;
+        }
+
+        puzzleDialog("Import Puzzle", function () {
+            $("#puzzleToExport").removeAttr("readonly");
+        }, function () {
+            try {
+                insertPuzzle($("#puzzleToExport").val());
+                $(this).dialog("close");
+            } catch (e) {
+                alert(e);
+            }
+        }, "Insert a puzzle.");
+    });
     getCell(1, 1).focus();
     centralize();
+
 }
 
 function initWorkerHandlers() {
@@ -329,6 +383,7 @@ function initWorkerHandlers() {
         $("#btnRun").button("enable");
         $("#errorMessages, #runningMessages").hide();
         $("#puzzle input:first").focus();
+        fillRunningMessages(0, 0, "");
     };
     actionByPuzzleStatus[PuzzleStatus.VALIDATING] = function (data) {
         console.info("PuzzleStatus.VALIDATING: " + objectToString(data));
@@ -375,7 +430,7 @@ function initWorkerHandlers() {
         fillRunningMessages(data.time, data.cycle, data.status);
     };
     actionByPuzzleStatus[PuzzleStatus.SOLVED] = function (data) {
-        console.info("PuzzleStatus.SOLVED: " + objectToString(data));
+        // console.info("PuzzleStatus.SOLVED: " + objectToString(data));
         $("#btnStop").button("disable");
         $("#btnClean").button("enable");
         fillRunningMessages(data.time, data.cycle, data.status);
