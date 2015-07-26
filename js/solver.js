@@ -201,6 +201,7 @@ function solve() {
         }
 
         function tryGuess(pendents, guessCell, pendentValues) {
+//            console.debug("PEDENT CELL: " + guessCell + " - " + pendentValues);
             var cell = puzzle.getCell(guessCell.row, guessCell.col);
             incrementCycle();
             _.rest(pendentValues).reverse().forEach(function (v) {
@@ -235,12 +236,16 @@ function solve() {
                 time : getRunningTime()
             });
         } else if (emptyCells.length === priorEmptyCells.length) {
-
             var pendentCells = puzzle.cells.filter(isEmptyCell).map(_.clone);
-            var firstEmptyCell = pendentCells[0];
-            var pendentValues = getPendentValues(firstEmptyCell);
+            // Selects the first cell with less possible values among the empty ones.
+            var emptyCell = pendentCells.reduce(function (prev, curr) {
+                    var prevValues = getPendentValues(prev);
+                    var currValues = getPendentValues(curr);
+                    return (prevValues.length <= currValues.length) ? prev : curr;
+                });
+            var pendentValues = getPendentValues(emptyCell);
             if (pendentValues.length) {
-                tryGuess(pendentCells, firstEmptyCell, pendentValues);
+                tryGuess(pendentCells, emptyCell, pendentValues);
             } else if (memento.length) {
                 undoGuess();
             } else {
