@@ -285,6 +285,16 @@ function solve() {
 }
 
 function initializeActions() {
+	
+	function cleanCells(whichCells) {
+        puzzle.cells
+        .filter(whichCells)
+        .forEach(function (cell) {
+            changeCellValue(cell, null);
+        });
+        changePuzzleStatus(PuzzleStatus.WAITING);
+	}
+	
     actionByMessageToSolver[MessageToSolver.START] = function (data) {
         try {
             if (puzzle.status == PuzzleStatus.WAITING || puzzle.status == PuzzleStatus.INVALID) {
@@ -301,10 +311,7 @@ function initializeActions() {
     };
     actionByMessageToSolver[MessageToSolver.CLEAN] = function (data) {
         // clean all filled Cells
-        puzzle.cells.forEach(function (cell) {
-            changeCellValue(cell, null);
-        });
-        changePuzzleStatus(PuzzleStatus.WAITING);
+    	cleanCells(_.constant(true));
     };
     actionByMessageToSolver[MessageToSolver.STOP] = function (data) {
         console.warn("STOP REQUESTED!!!!");
@@ -322,11 +329,19 @@ function initializeActions() {
         stepTime = data.value;
         console.debug("STEP_TIME: " + stepTime);
     };
+    actionByMessageToSolver[MessageToSolver.RESET] = function (data) {
+        console.warn("RESET PUZZLE");
+        // clean all not ORIGINAL Cells
+        cleanCells(function (cell) {
+            return cell.status !== CellStatus.ORIGINAL;
+        });
+    };
 }
 
 // See http://stackoverflow.com/questions/14500091/uncaught-referenceerror-importscripts-is-not-defined
 if ('function' === typeof importScripts) {
-    importScripts("https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js", "utils.js", "worker-messages.js", "puzzle.js", "cell.js");
+    importScripts("https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js", 
+    		"utils.js", "worker-messages.js", "puzzle.js", "cell.js");
     addEventListener('message', function (e) {
         actionByMessageToSolver[e.data.type](e.data);
         //        console.debug(puzzle.cells.toString());

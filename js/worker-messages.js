@@ -6,6 +6,7 @@ var MessageToSolver = {
     START: "start",
     CLEAN: "clean",
     STOP: "stop",
+    RESET: "reset",
     STEP_TIME: "stepTime"
 };
 

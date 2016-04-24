@@ -309,6 +309,7 @@ function initComponents() {
         worker.postMessage({
             type : MessageToSolver.CLEAN
         });
+        $("#puzzle input:first").focus();
     }); //
     $("#btnStop")
     .button("option", "icons", {
@@ -321,6 +322,20 @@ function initComponents() {
             type : MessageToSolver.STOP
         });
     });
+
+    $("#btnReset")
+    .button("option", "icons", {
+        primary : "ui-icon ui-icon-arrowrefresh-1-w"
+    })
+    .button("option", "label", "Reset")
+    .click(function () {
+        worker.postMessage({
+            type : MessageToSolver.RESET
+        });
+    })
+    .hide();
+
+    
     $("#steptime").selectmenu({
         select : function (event, ui) {
             worker.postMessage({
@@ -356,7 +371,6 @@ function initComponents() {
     });
     getCell(1, 1).focus();
     centralize();
-
 }
 
 function initWorkerHandlers() {
@@ -379,8 +393,11 @@ function initWorkerHandlers() {
 
     var actionByPuzzleStatus = [];
     actionByPuzzleStatus[PuzzleStatus.WAITING] = function (data) {
-        $("#puzzle input").val("").unbind("focus", unfocus);
+        $("#puzzle input").unbind("focus", unfocus);
         $("#btnRun").button("enable");
+        $("#btnStop").button("disable").show();
+        $("#btnReset").hide();
+
         $("#errorMessages, #runningMessages").hide();
         $("#puzzle input:first").focus();
         fillRunningMessages(0, 0, "");
@@ -393,6 +410,7 @@ function initWorkerHandlers() {
         $("#btnClean").button("enable");
         $("#btnStop").button("disable");
         $("#btnRun").button("enable"); // Just for debug!
+        $("#btnReset").hide();
         $("#runningMessages").hide();
         $("#errorMessages").show();
         $("#errorText").text((!!err.message) ? err.message : err);
@@ -417,7 +435,8 @@ function initWorkerHandlers() {
     actionByPuzzleStatus[PuzzleStatus.READY] = function (data) {}
     actionByPuzzleStatus[PuzzleStatus.RUNNING] = function (data) {
         $("#btnRun, #btnClean").button("disable");
-        $("#btnStop").button("enable");
+        $("#btnStop").button("enable").show();
+        $("#btnReset").hide();
         $("#puzzle input").bind("focus", unfocus);
         $("#errorMessages").hide();
         $("#runningMessages").show();
@@ -425,14 +444,18 @@ function initWorkerHandlers() {
         fillRunningMessages(data.time, data.cycle, data.status);
     };
     actionByPuzzleStatus[PuzzleStatus.STOPPED] = function (data) {
-        $("#btnRun, #btnClean").button("enable");
-        $("#btnStop").button("disable");
+        $("#btnClean").button("enable");
+        $("#btnRun").button("disable");
+        $("#btnStop").hide();
+        $("#btnReset").show();
         fillRunningMessages(data.time, data.cycle, data.status);
     };
     actionByPuzzleStatus[PuzzleStatus.SOLVED] = function (data) {
         // console.info("PuzzleStatus.SOLVED: " + objectToString(data));
-        $("#btnStop").button("disable");
         $("#btnClean").button("enable");
+        $("#btnStop").button("disable").hide();
+        $("#btnReset").button("enable").show();
+        
         fillRunningMessages(data.time, data.cycle, data.status);
     };
 
@@ -464,6 +487,7 @@ function initWorker() {
         worker = new Worker('js/solver.js');
         worker.onmessage = function (e) {
             try {
+            	console.info(e.toString());
                 if (!!e.data.type) {
                     actionByMessageFromSolver[e.data.type](e.data);
                 } else {
