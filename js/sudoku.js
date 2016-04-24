@@ -87,14 +87,23 @@ function puzzleToinsertPuzzle (justOriginals) {
     return "insertPuzzle(\"" + exportPuzzle(justOriginals) + "\");";
 }
 
+/**
+ * Initialize HTML components.
+ */
 function initComponents () {
 
+    /**
+     * Centralize components in the middle of page.
+     */
     function centralize () {
         $("#main").position({
             of: "body"
         });
     }
 
+    /**
+     * Cursor movements according typed key.
+     */
     var Movement = {
         TO_ROW_END: function (currentRow, currentCol) {
             return {
@@ -140,6 +149,15 @@ function initComponents () {
 
     var cellRegex = /^cell(\d)(\d)$/;
 
+    /**
+     * Function which decides to where the cursor will move after key typing.
+     * 
+     * @param e
+     *            JQuery key event
+     * @param movement
+     *            kind of movement, according Movement array
+     * @param preventDefault
+     */
     function moveTo (e, movement, preventDefault) {
         var pos = cellRegex.exec(e.target.id);
         var nextPos = movement(parseInt(pos[1], 10), parseInt(pos[2], 10));
@@ -242,6 +260,12 @@ function initComponents () {
         }
     }
 
+    /**
+     * Key up action
+     * 
+     * @param e
+     *            Key Event.
+     */
     function handleKeyUp (e) {
         if (((e.keyCode >= 49) && (e.keyCode <= 57))
                 || ((e.keyCode >= 97) && (e.keyCode <= 105))) {
@@ -270,6 +294,18 @@ function initComponents () {
         }
     }
 
+    /**
+     * Show Import/export dialog.
+     * 
+     * @param title
+     *            title dialog
+     * @param onOpen
+     *            action when opening dialog.
+     * @param onOk
+     *            Action when clicking Ok Button.
+     * @param tooltip
+     *            Dialog tooltip
+     */
     function puzzleDialog (title, onOpen, onOk, tooltip) {
         $("#puzzleToExport").tooltip({
             content: tooltip
@@ -370,6 +406,9 @@ function initComponents () {
     centralize();
 }
 
+/**
+ * Initialize WebWorker handlers.
+ */
 function initWorkerHandlers () {
 
     function fillRunningMessages (time, cycle, puzzleStatus) {
@@ -384,6 +423,9 @@ function initWorkerHandlers () {
         }
     }
 
+    /**
+     * Blur input text component when focused.
+     */
     function unfocus () {
         $(this).blur();
     }
@@ -480,6 +522,9 @@ function initWorkerHandlers () {
     };
 }
 
+/**
+ * Initialize WebWorker.
+ */
 function initWorker () {
     if (!!window.Worker) {
         worker = new Worker('js/solver.js');
@@ -504,6 +549,9 @@ function initWorker () {
     }
 }
 
+/**
+ * Initialize the page.
+ */
 function initSudoku () {
     console.debug(getFormattedHour() + "Initializing");
     initComponents();

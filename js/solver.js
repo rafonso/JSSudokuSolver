@@ -159,6 +159,23 @@ function solve () {
         return diff;
     }
 
+    function solveNextCell (emptyCells, pos) {
+        if (puzzle.status === PuzzleStatus.STOPPED) {
+            return;
+        } else if (pos >= emptyCells.length) {
+            setTimeout(function () {
+                solveCycle(emptyCells);
+            });
+        } else {
+            var cell = emptyCells[pos];
+            // console.debug(cell);
+            changeCellStatus(cell, CellStatus.EVALUATING);
+            setTimeout(function () {
+                solveCell(cell, emptyCells, pos);
+            }, stepTime);
+        }
+    }
+
     function solveCell (cell, emptyCells, pos) {
         var diff = getPendentValues(cell);
 
@@ -182,23 +199,6 @@ function solve () {
             changeCellStatus(cell, null);
         }
         solveNextCell(emptyCells, pos + 1)
-    }
-
-    function solveNextCell (emptyCells, pos) {
-        if (puzzle.status === PuzzleStatus.STOPPED) {
-            return;
-        } else if (pos >= emptyCells.length) {
-            setTimeout(function () {
-                solveCycle(emptyCells);
-            });
-        } else {
-            var cell = emptyCells[pos];
-            // console.debug(cell);
-            changeCellStatus(cell, CellStatus.EVALUATING);
-            setTimeout(function () {
-                solveCell(cell, emptyCells, pos);
-            }, stepTime);
-        }
     }
 
     function solveCycle (priorEmptyCells) {
