@@ -1,9 +1,9 @@
 // HELPER FUNCTIONS
 "use strict";
 
-function getFormattedHour() {
+function getFormattedHour () {
 
-    function format(value, size, end) {
+    function format (value, size, end) {
         var string = value.toString();
         while (string.length < size) {
             string = '0' + string;
@@ -13,12 +13,15 @@ function getFormattedHour() {
     }
 
     var d = new Date();
-    return "[" + format(d.getHours(), 2, ":") +
-    format(d.getMinutes(), 2, ":") + format(d.getSeconds(), 2, '.') +
-    format(d.getMilliseconds(), 3, ']') + " ";
+    return "[" //
+            + format(d.getHours(), 2, ":") //
+            + format(d.getMinutes(), 2, ":") //
+            + format(d.getSeconds(), 2, '.')
+            + format(d.getMilliseconds(), 3, ']') //
+            + " ";
 }
 
-function objectToString(obj) {
+function objectToString (obj) {
     var str = "";
     if (!!obj) {
         if (_.has(obj, "toString")) {
