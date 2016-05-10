@@ -4,7 +4,7 @@
 function getFormattedHour () {
 
     function format (value, size, end) {
-        var string = value.toString();
+        let string = value.toString();
         while (string.length < size) {
             string = '0' + string;
         }
@@ -12,7 +12,7 @@ function getFormattedHour () {
         return string + end;
     }
 
-    var d = new Date();
+    let d = new Date();
     return "[" //
             + format(d.getHours(), 2, ":") //
             + format(d.getMinutes(), 2, ":") //
@@ -22,19 +22,19 @@ function getFormattedHour () {
 }
 
 function objectToString (obj) {
-    var str = "";
+    let str = "";
     if (!!obj) {
         if (_.has(obj, "toString")) {
             str += obj.toString();
         } else {
             str += "{";
             Object.keys(obj).forEach(function (key, index, array) {
-                var value = obj[key];
+                let value = obj[key];
                 if (!_.isFunction(value)) {
                     str += (key + "=");
                     if (_.isArray(value)) {
                         str += "[";
-                        for (var i = 0; i < value.length; i++) {
+                        for (let i = 0; i < value.length; i++) {
                             str += objectToString(value[i]);
                             str += (i < value.length - 1) ? ", " : "";
                         }

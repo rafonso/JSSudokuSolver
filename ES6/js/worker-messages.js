@@ -1,7 +1,7 @@
-// TYPE OF MESSAGES TO BE EXCHANGED BETWWEN UI AND SOLVER THREADS
+// TYPE OF MESSAGES TO BE EXCHANGED BETWEEN UI AND SOLVER THREADS
 "use strict";
 
-var MessageToSolver = {
+let MessageToSolver = {
     FILL_CELL: "fillCell",
     START: "start",
     CLEAN: "clean",
@@ -10,7 +10,7 @@ var MessageToSolver = {
     STEP_TIME: "stepTime"
 };
 
-var MessageFromSolver = {
+let MessageFromSolver = {
     INVALID_SOLVER: "puzzleInvalid",
     PUZZLE_STATUS: "puzzleStatus",
     CELL_STATUS: "cellStatus",
@@ -18,7 +18,7 @@ var MessageFromSolver = {
     ERROR: "error"
 };
 
-var PuzzleStatus = {
+let PuzzleStatus = {
     WAITING: "waiting",
     VALIDATING: "validating",
     READY: "ready",
@@ -28,7 +28,7 @@ var PuzzleStatus = {
     SOLVED: "solved"
 };
 
-var CellStatus = {
+let CellStatus = {
     IDLE: "idle",
     ORIGINAL: "original",
     FILLED: "filled",

@@ -1,8 +1,8 @@
 // UI FUNCTIONS
 "use strict";
 
-var worker = {};
-var actionByMessageFromSolver = [];
+let worker = {};
+let actionByMessageFromSolver = [];
 
 function getCell (row, cell) {
     return $("#cell" + row + cell);
@@ -27,15 +27,15 @@ function notifyCellValue (row, col, value) {
  *            String which will fill the puzzle.
  */
 function insertPuzzle (puzzle) {
-    var puzzle = puzzle.replace(/\./g, "");
+    let puzzle = puzzle.replace(/\./g, "");
     if (!/^\d{81}$/.test(puzzle)) {
         throw new Error("Invalid Puzzle!");
     }
 
     $("#btnClean").click();
-    var row = 1, col = 1;
-    for (var i = 0; i < 81; i++) {
-        var d = parseInt(puzzle.charAt(i), 10);
+    let row = 1, col = 1;
+    for (let i = 0; i < 81; i++) {
+        let d = parseInt(puzzle.charAt(i), 10);
         if (d) {
             notifyCellValue(row, col, d);
         }
@@ -57,21 +57,21 @@ function insertPuzzle (puzzle) {
  * @return exported puzzle.
  */
 function exportPuzzle (justOriginals) {
-    var extractOriginals = function () {
+    let extractOriginals = function () {
         return ($(this).attr("class") === CellStatus.ORIGINAL) ? $(this).val()
                 : 0;
     };
-    var extractAll = function () {
+    let extractAll = function () {
         return $(this).val() || 0;
     };
 
-    var cellToValue = justOriginals ? extractOriginals : extractAll;
-    var concatValues = function (str, value, idx) {
-        var dot = (idx == 80) ? "" : (((idx + 1) % 9 == 0) ? "." : "");
+    let cellToValue = justOriginals ? extractOriginals : extractAll;
+    let concatValues = function (str, value, idx) {
+        let dot = (idx == 80) ? "" : (((idx + 1) % 9 == 0) ? "." : "");
         return str + value + dot;
     };
 
-    var values = $("#puzzle :text").map(cellToValue);
+    let values = $("#puzzle :text").map(cellToValue);
     return _.reduce(values, concatValues, "");
 }
 
@@ -104,7 +104,7 @@ function initComponents () {
     /**
      * Cursor movements according typed key.
      */
-    var Movement = {
+    let Movement = {
         TO_ROW_END: function (currentRow, currentCol) {
             return {
                 row: currentRow,
@@ -147,7 +147,7 @@ function initComponents () {
         }
     };
 
-    var cellRegex = /^cell(\d)(\d)$/;
+    let cellRegex = /^cell(\d)(\d)$/;
 
     /**
      * Function which decides to where the cursor will move after key typing.
@@ -159,8 +159,8 @@ function initComponents () {
      * @param preventDefault
      */
     function moveTo (e, movement, preventDefault) {
-        var pos = cellRegex.exec(e.target.id);
-        var nextPos = movement(parseInt(pos[1], 10), parseInt(pos[2], 10));
+        let pos = cellRegex.exec(e.target.id);
+        let nextPos = movement(parseInt(pos[1], 10), parseInt(pos[2], 10));
         getCell(nextPos.row, nextPos.col).focus();
         if (preventDefault) {
             e.preventDefault();
@@ -168,7 +168,7 @@ function initComponents () {
     }
 
     function notifyCellChange (cellId, number) {
-        var pos = cellRegex.exec(cellId);
+        let pos = cellRegex.exec(cellId);
         notifyCellValue(parseInt(pos[1], 10), parseInt(pos[2], 10), number)
     }
 
@@ -187,19 +187,19 @@ function initComponents () {
         notifyCellChange(e.target.id, number);
     }
 
-    var noAction = function (e) {
+    let noAction = function (e) {
     };
-    var numberAction = function (e) {
+    let numberAction = function (e) {
         if (e.shiftKey) {
             e.preventDefault();
         } else {
             changeInputValue(e, e.keyCode - 48);
         }
     };
-    var numberPadAction = function (e) {
+    let numberPadAction = function (e) {
         changeInputValue(e, e.keyCode - 96);
     };
-    var cleanAndGotoPrevious = function (e) {
+    let cleanAndGotoPrevious = function (e) {
         if (e.target.value) {
             e.target.value = null;
             notifyCellChange(e.target.id, null);
@@ -207,7 +207,7 @@ function initComponents () {
             moveTo(e, Movement.TO_LEFT, true);
         }
     };
-    var cleanAndGotoNext = function (e) {
+    let cleanAndGotoNext = function (e) {
         if (e.target.value) {
             e.target.value = null;
             notifyCellChange(e.target.id, null);
@@ -215,7 +215,7 @@ function initComponents () {
         gotoNextCell(e);
     };
 
-    var actionByKeyCode = {
+    let actionByKeyCode = {
         8: cleanAndGotoPrevious, // Backspace
         9: noAction, // Tab
         13: noAction, // Enter
@@ -252,7 +252,7 @@ function initComponents () {
     };
 
     function handleKey (e) {
-        var action = actionByKeyCode[e.keyCode];
+        let action = actionByKeyCode[e.keyCode];
         if (action) {
             action(e);
         } else {
@@ -430,7 +430,7 @@ function initWorkerHandlers () {
         $(this).blur();
     }
 
-    var actionByPuzzleStatus = [];
+    let actionByPuzzleStatus = [];
     actionByPuzzleStatus[PuzzleStatus.WAITING] = function (data) {
         $("#puzzle input").unbind("focus", unfocus);
         $("#btnRun").button("enable");
@@ -464,7 +464,7 @@ function initWorkerHandlers () {
                     $(id).effect("pulsate");
                 });
             } else {
-                var c = err.cells;
+                let c = err.cells;
                 getCell(c.row, c.col).removeClass().focus().effect("pulsate");
             }
         }
@@ -509,7 +509,7 @@ function initWorkerHandlers () {
     };
     actionByMessageFromSolver[MessageFromSolver.CELL_STATUS] = function (data) {
         // console.info("CELL_STATUS: " + objectToString(data) );
-        var cell = getCell(data.row, data.col);
+        let cell = getCell(data.row, data.col);
         cell.removeClass().addClass(data.status).val(data.value);
         fillRunningMessages(data.time, data.cycle, null);
     };

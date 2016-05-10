@@ -1,12 +1,12 @@
 // SUDOKU SOLVER METHODS
 "use strict";
 
-var actionByMessageToSolver = [];
-var puzzle = {};
-var stepTime = 0;
-var accumulatedTime;
-var startTme;
-var cycle;
+let actionByMessageToSolver = [];
+let puzzle = {};
+let stepTime = 0;
+let accumulatedTime;
+let startTme;
+let cycle;
 
 function serializeCell (c) {
     return {
@@ -30,7 +30,7 @@ function changePuzzleStatus (status, extras) {
 
     puzzle.status = status;
 
-    var message = _.extend({
+    let message = _.extend({
         type: MessageFromSolver.PUZZLE_STATUS,
         status: puzzle.status
     }, extras);
@@ -69,8 +69,8 @@ function changeCellValue (cell, value, status, tabs) {
     cell.status = (!!value) ? status : null;
 
     if (status == CellStatus.FILLED || status == CellStatus.GUESSING) {
-        var tbs = "";
-        for (var i = 0; i < tabs; i++) {
+        let tbs = "";
+        for (let i = 0; i < tabs; i++) {
             tbs += "\t";
         }
         console.debug(tbs + cell.toString());
@@ -92,11 +92,11 @@ function validatePuzzle () {
     function validate (cells, pos, description) {
         // The found array has 10 positions to avoid always subtract 1. The 0th
         // position is simply not used.
-        var found = [ false, false, false, false, false, false, false, false,
+        let found = [ false, false, false, false, false, false, false, false,
                 false, false ];
         cells.forEach(function (cell) {
             if (cell.filled) {
-                var value = cell.value;
+                let value = cell.value;
                 if (found[value]) {
                     throw _.extend(new Error(description + " " + pos
                             + ". Repeated value: " + value), {
@@ -130,7 +130,7 @@ function validatePuzzle () {
 
 function solve () {
 
-    var memento = [];
+    let memento = [];
 
     // Here I compare with other cells
     function getPendentValues (cell) {
@@ -150,7 +150,7 @@ function solve () {
             });
         }
 
-        var diff = _.difference(_.range(1, 10), getValues(puzzle.getCellsRow,
+        let diff = _.difference(_.range(1, 10), getValues(puzzle.getCellsRow,
                 cell.row));
         diff = _.difference(diff, getValues(puzzle.getCellsCol, cell.col));
         diff = _
@@ -167,7 +167,7 @@ function solve () {
                 solveCycle(emptyCells);
             });
         } else {
-            var cell = emptyCells[pos];
+            let cell = emptyCells[pos];
             // console.debug(cell);
             changeCellStatus(cell, CellStatus.EVALUATING);
             setTimeout(function () {
@@ -177,7 +177,7 @@ function solve () {
     }
 
     function solveCell (cell, emptyCells, pos) {
-        var diff = getPendentValues(cell);
+        let diff = getPendentValues(cell);
 
         if (diff.length === 0) {
             if (memento.length == 0) {
@@ -211,7 +211,7 @@ function solve () {
         function tryGuess (pendents, guessCell, pendentValues) {
             // console.debug("PEDENT CELL: " + guessCell + " - " +
             // pendentValues);
-            var cell = puzzle.getCell(guessCell.row, guessCell.col);
+            let cell = puzzle.getCell(guessCell.row, guessCell.col);
             incrementCycle();
             _.rest(pendentValues).reverse().forEach(function (v) {
                 memento.push({
@@ -227,9 +227,9 @@ function solve () {
         }
 
         function undoGuess () {
-            var memo = memento.pop();
+            let memo = memento.pop();
             memo.cells.forEach(function (cell) {
-                var puzzleCell = puzzle.getCell(cell.row, cell.col);
+                let puzzleCell = puzzle.getCell(cell.row, cell.col);
                 changeCellValue(puzzleCell, cell.value, cell.status);
             });
             incrementCycle();
@@ -240,22 +240,22 @@ function solve () {
         }
 
         // console.info("solveCycle(" + priorEmptyCells + ")")
-        var emptyCells = puzzle.cells.filter(isEmptyCell);
+        let emptyCells = puzzle.cells.filter(isEmptyCell);
         if (emptyCells.length === 0) {
             changePuzzleStatus(PuzzleStatus.SOLVED, {
                 cycle: cycle,
                 time: getRunningTime()
             });
         } else if (emptyCells.length === priorEmptyCells.length) {
-            var pendentCells = puzzle.cells.filter(isEmptyCell).map(_.clone);
+            let pendentCells = puzzle.cells.filter(isEmptyCell).map(_.clone);
             // Selects the first cell with less possible values among the empty
             // ones.
-            var emptyCell = pendentCells.reduce(function (prev, curr) {
-                var prevValues = getPendentValues(prev);
-                var currValues = getPendentValues(curr);
+            let emptyCell = pendentCells.reduce(function (prev, curr) {
+                let prevValues = getPendentValues(prev);
+                let currValues = getPendentValues(curr);
                 return (prevValues.length <= currValues.length) ? prev : curr;
             });
-            var pendentValues = getPendentValues(emptyCell);
+            let pendentValues = getPendentValues(emptyCell);
             if (pendentValues.length) {
                 tryGuess(pendentCells, emptyCell, pendentValues);
             } else if (memento.length) {
@@ -334,7 +334,7 @@ function initializeActions () {
         });
     };
     actionByMessageToSolver[MessageToSolver.FILL_CELL] = function (data) {
-        var cell = puzzle.getCell(data.row, data.col);
+        let cell = puzzle.getCell(data.row, data.col);
         changeCellValue(cell, data.value, CellStatus.ORIGINAL);
     };
     actionByMessageToSolver[MessageToSolver.STEP_TIME] = function (data) {

@@ -10,20 +10,20 @@ function Puzzle () {
     this.status = PuzzleStatus.WAITING;
 
     this.cells = [];
-    for (var row = 1; row <= 9; row++) {
-        for (var col = 1; col <= 9; col++) {
+    for (let row = 1; row <= 9; row++) {
+        for (let col = 1; col <= 9; col++) {
             this.cells.push(new Cell(row, col));
         }
     }
 
     // PRIVATE METHODS
 
-    var cls = this.cells;
+    let cls = this.cells;
     function get (func, pos, excludeCell) {
-        var predicate = function (c) {
+        let predicate = function (c) {
             return c[func] === pos;
         };
-        var excluder = (!!excludeCell) ? function (c) {
+        let excluder = (!!excludeCell) ? function (c) {
             return !excludeCell.sameCell(c);
         } : function () {
             return true;
@@ -40,7 +40,7 @@ function Puzzle () {
             };
         }
 
-        var oldStatus = status;
+        let oldStatus = status;
         status = newStatus;
 
         console.debug(getFormattedHour() + "STATUS: " + oldStatus + " -> "
