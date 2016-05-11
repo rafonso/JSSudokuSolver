@@ -27,7 +27,7 @@ function notifyCellValue (row, col, value) {
  *            String which will fill the puzzle.
  */
 function insertPuzzle (puzzle) {
-    let puzzle = puzzle.replace(/\./g, "");
+    puzzle = puzzle.replace(/\./g, "");
     if (!/^\d{81}$/.test(puzzle)) {
         throw new Error("Invalid Puzzle!");
     }
