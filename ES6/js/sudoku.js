@@ -57,16 +57,11 @@ function insertPuzzle (puzzle) {
  * @return exported puzzle.
  */
 function exportPuzzle (justOriginals) {
-    let extractOriginals = function () {
-        return ($(this).attr("class") === CellStatus.ORIGINAL) ? $(this).val()
-                : 0;
-    };
-    let extractAll = function () {
-        return $(this).val() || 0;
-    };
+    let extractOriginals = ()  => ($(this).attr("class") === CellStatus.ORIGINAL) ? $(this).val() : 0;
+    let extractAll = () => $(this).val() || 0;
 
     let cellToValue = justOriginals ? extractOriginals : extractAll;
-    let concatValues = function (str, value, idx) {
+    let concatValues =  (str, value, idx) => {
         let dot = (idx == 80) ? "" : (((idx + 1) % 9 == 0) ? "." : "");
         return str + value + dot;
     };
@@ -173,9 +168,7 @@ function initComponents () {
     }
 
     function createMovementAction (movement) {
-        return function (e) {
-            moveTo(e, movement, false);
-        };
+        return e => moveTo(e, movement, false);
     }
 
     function gotoNextCell (e) {
@@ -187,19 +180,16 @@ function initComponents () {
         notifyCellChange(e.target.id, number);
     }
 
-    let noAction = function (e) {
-    };
-    let numberAction = function (e) {
+    let noAction = e => {};
+    let numberAction = e => {
         if (e.shiftKey) {
             e.preventDefault();
         } else {
             changeInputValue(e, e.keyCode - 48);
         }
     };
-    let numberPadAction = function (e) {
-        changeInputValue(e, e.keyCode - 96);
-    };
-    let cleanAndGotoPrevious = function (e) {
+    let numberPadAction = e => changeInputValue(e, e.keyCode - 96);
+    let cleanAndGotoPrevious = e => {
         if (e.target.value) {
             e.target.value = null;
             notifyCellChange(e.target.id, null);
@@ -207,7 +197,7 @@ function initComponents () {
             moveTo(e, Movement.TO_LEFT, true);
         }
     };
-    let cleanAndGotoNext = function (e) {
+    let cleanAndGotoNext = e => {
         if (e.target.value) {
             e.target.value = null;
             notifyCellChange(e.target.id, null);
@@ -315,9 +305,7 @@ function initComponents () {
             width: 800,
             title: title,
             open: onOpen,
-            close: function (event, ui) {
-                $("#puzzleToExport").val("");
-            },
+            close: (event, ui) => ($("#puzzleToExport").val("")),
             buttons: {
                 Ok: onOk
             }
@@ -334,16 +322,13 @@ function initComponents () {
     $("button").button();
     $("#btnRun").button("option", "icons", {
         primary: "ui-icon-play"
-    }).button("option", "label", "Run").attr("accesskey", "r").click(
-            function () {
+    }).button("option", "label", "Run").attr("accesskey", "r").click(() =>
                 worker.postMessage({
                     type: MessageToSolver.START
-                });
-            });
+                }));
     $("#btnClean").button("option", "icons", {
         primary: "ui-icon-document"
-    }).button("option", "label", "Clean").attr("accesskey", "c").click(
-            function () {
+    }).button("option", "label", "Clean").attr("accesskey", "c").click(() => {
                 worker.postMessage({
                     type: MessageToSolver.CLEAN
                 });
@@ -351,27 +336,26 @@ function initComponents () {
             }); //
     $("#btnStop").button("option", "icons", {
         primary: "ui-icon-stop"
-    }).button("option", "label", "Stop").button("disable").click(function () {
+    }).button("option", "label", "Stop").button("disable").click(() =>
         worker.postMessage({
             type: MessageToSolver.STOP
-        });
-    });
+        })
+    );
 
     $("#btnReset").button("option", "icons", {
         primary: "ui-icon ui-icon-arrowrefresh-1-w"
-    }).button("option", "label", "Reset").click(function () {
+    }).button("option", "label", "Reset").click(() =>
         worker.postMessage({
             type: MessageToSolver.RESET
-        });
-    }).hide();
+        })
+    ).hide();
 
     $("#steptime").selectmenu({
-        select: function (event, ui) {
+        select: (event, ui) => 
             worker.postMessage({
                 type: MessageToSolver.STEP_TIME,
                 value: parseInt(ui.item.label, 10)
-            });
-        }
+            })
     });
     $(document) //
     .bind(
@@ -431,7 +415,7 @@ function initWorkerHandlers () {
     }
 
     let actionByPuzzleStatus = [];
-    actionByPuzzleStatus[PuzzleStatus.WAITING] = function (data) {
+    actionByPuzzleStatus[PuzzleStatus.WAITING] = data => {
         $("#puzzle input").unbind("focus", unfocus);
         $("#btnRun").button("enable");
         $("#btnStop").button("disable").show();
@@ -441,10 +425,9 @@ function initWorkerHandlers () {
         $("#puzzle input:first").focus();
         fillRunningMessages(0, 0, "");
     };
-    actionByPuzzleStatus[PuzzleStatus.VALIDATING] = function (data) {
+    actionByPuzzleStatus[PuzzleStatus.VALIDATING] = data => 
         console.info("PuzzleStatus.VALIDATING: " + objectToString(data));
-    };
-    actionByPuzzleStatus[PuzzleStatus.INVALID] = function (err) {
+    actionByPuzzleStatus[PuzzleStatus.INVALID] = (err) => {
         console.warn(objectToString(err));
         $("#btnClean").button("enable");
         $("#btnStop").button("disable");
@@ -455,9 +438,8 @@ function initWorkerHandlers () {
         $("#errorText").text((!!err.message) ? err.message : err);
         if (!!err.cells) {
             if (_.isArray(err.cells)) {
-                err.cells.map(function (c) {
-                    return getCell(c.row, c.col);
-                }).forEach(function (id, index) {
+                err.cells.map(c => getCell(c.row, c.col)).
+                forEach((id, index) => {
                     if (index === 0) {
                         $(id).focus();
                     }
@@ -469,9 +451,8 @@ function initWorkerHandlers () {
             }
         }
     };
-    actionByPuzzleStatus[PuzzleStatus.READY] = function (data) {
-    }
-    actionByPuzzleStatus[PuzzleStatus.RUNNING] = function (data) {
+    actionByPuzzleStatus[PuzzleStatus.READY] = data => {};
+    actionByPuzzleStatus[PuzzleStatus.RUNNING] = data => {
         $("#btnRun, #btnClean").button("disable");
         $("#btnStop").button("enable").show();
         $("#btnReset").hide();
@@ -481,14 +462,14 @@ function initWorkerHandlers () {
         $("#errorText").text("");
         fillRunningMessages(data.time, data.cycle, data.status);
     };
-    actionByPuzzleStatus[PuzzleStatus.STOPPED] = function (data) {
+    actionByPuzzleStatus[PuzzleStatus.STOPPED] = data =>  {
         $("#btnClean").button("enable");
         $("#btnRun").button("disable");
         $("#btnStop").hide();
         $("#btnReset").show();
         fillRunningMessages(data.time, data.cycle, data.status);
     };
-    actionByPuzzleStatus[PuzzleStatus.SOLVED] = function (data) {
+    actionByPuzzleStatus[PuzzleStatus.SOLVED] = data => {
         // console.info("PuzzleStatus.SOLVED: " + objectToString(data));
         $("#btnClean").button("enable");
         $("#btnStop").button("disable").hide();
@@ -497,26 +478,22 @@ function initWorkerHandlers () {
         fillRunningMessages(data.time, data.cycle, data.status);
     };
 
-    actionByMessageFromSolver[MessageFromSolver.INVALID_SOLVER] = function (
-            data) {
+    actionByMessageFromSolver[MessageFromSolver.INVALID_SOLVER] = data => 
         console.error("INVALID_SOLVER: " + objectToString(data));
-    };
-    actionByMessageFromSolver[MessageFromSolver.PUZZLE_STATUS] = function (data) {
+    actionByMessageFromSolver[MessageFromSolver.PUZZLE_STATUS] = data =>  {
         // console.debug("MessageFromSolver.PUZZLE_STATUS: " +
         // objectToString(data));
         $("#puzzle").removeClass().addClass(data.status);
         actionByPuzzleStatus[data.status](data);
     };
-    actionByMessageFromSolver[MessageFromSolver.CELL_STATUS] = function (data) {
+    actionByMessageFromSolver[MessageFromSolver.CELL_STATUS] = data => {
         // console.info("CELL_STATUS: " + objectToString(data) );
         let cell = getCell(data.row, data.col);
         cell.removeClass().addClass(data.status).val(data.value);
         fillRunningMessages(data.time, data.cycle, null);
     };
-    actionByMessageFromSolver[MessageFromSolver.CELL_VALUE] = function (data) {
-        // console.info("CELL_VALUE: " + objectToString(data));
-    };
-    actionByMessageFromSolver[MessageFromSolver.ERROR] = function (data) {
+    actionByMessageFromSolver[MessageFromSolver.CELL_VALUE] = data => {}
+    actionByMessageFromSolver[MessageFromSolver.ERROR] = data => {
         console.error("ERROR: " + objectToString(data));
         fillRunningMessages(data.time, data.cycle, data.status);
     };
@@ -528,7 +505,7 @@ function initWorkerHandlers () {
 function initWorker () {
     if (!!window.Worker) {
         worker = new Worker('js/solver.js');
-        worker.onmessage = function (e) {
+        worker.onmessage = e => {
             try {
                 console.info(e.toString());
                 if (!!e.data.type) {

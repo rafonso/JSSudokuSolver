@@ -35,7 +35,7 @@ function changePuzzleStatus (status, extras) {
         status: puzzle.status
     }, extras);
 
-console.warn("changePuzzleStatus(): " + objectToString(message));
+    console.warn("changePuzzleStatus(): " + objectToString(message));
     postMessage(message);
 }
 
@@ -94,7 +94,7 @@ function validatePuzzle () {
         // position is simply not used.
         let found = [ false, false, false, false, false, false, false, false,
                 false, false ];
-        cells.forEach(function (cell) {
+        cells.forEach(cell => {
             if (cell.filled()) {
                 let value = cell.value;
                 if (found[value]) {
@@ -110,9 +110,7 @@ function validatePuzzle () {
     }
 
     function val (func, description) {
-        _.range(1, 10).forEach(function (i) {
-            validate(puzzle[func](i), i, description);
-        });
+        _.range(1, 10).forEach(i => validate(puzzle[func](i), i, description));
     }
 
     changePuzzleStatus(PuzzleStatus.VALIDATING);
@@ -146,11 +144,9 @@ function solve () {
             return puzzle[func](pos).filter(c => c.filled()).map(c => c.value);
         }
 
-        let diff = _.difference(_.range(1, 10), getValues("getCellsRow",
-                cell.row));
+        let diff = _.difference(_.range(1, 10), getValues("getCellsRow", cell.row));
         diff = _.difference(diff, getValues("getCellsCol", cell.col));
-        diff = _
-                .difference(diff, getValues("getCellsSector", cell.sector));
+        diff = _.difference(diff, getValues("getCellsSector", cell.sector));
 
         return diff;
     }
@@ -159,16 +155,12 @@ function solve () {
         if (puzzle.status === PuzzleStatus.STOPPED) {
             return;
         } else if (pos >= emptyCells.length) {
-            setTimeout(function () {
-                solveCycle(emptyCells);
-            });
+            setTimeout(() => solveCycle(emptyCells));
         } else {
             let cell = emptyCells[pos];
             console.debug(cell);
             changeCellStatus(cell, CellStatus.EVALUATING);
-            setTimeout(function () {
-                solveCell(cell, emptyCells, pos);
-            }, stepTime);
+            setTimeout(() => solveCell(cell, emptyCells, pos), stepTime);
         }
     }
 
@@ -205,26 +197,25 @@ function solve () {
         }
 
         function tryGuess (pendents, guessCell, pendentValues) {
-             console.debug("PEDENT CELL: " + guessCell + " - " +
-             pendentValues);
+            console.debug("PEDENT CELL: " + guessCell + " - " +
+            pendentValues);
             let cell = puzzle.getCell(guessCell.row, guessCell.col);
             incrementCycle();
-            _.rest(pendentValues).reverse().forEach(function (v) {
+            _.rest(pendentValues).reverse().forEach(v =>
                 memento.push({
                     cell: guessCell,
                     pendentValue: v,
                     cells: pendents
-                });
-            })
-            changeCellValue(cell, pendentValues[0], CellStatus.GUESSING,
-                    memento.length);
-             console.debug(objectToString(memento));
+                })
+            );
+            changeCellValue(cell, pendentValues[0], CellStatus.GUESSING, memento.length);
+            console.debug(objectToString(memento));
             solveNextCell(puzzle.cells.filter(isEmptyCell), 0);
         }
 
         function undoGuess () {
             let memo = memento.pop();
-            memo.cells.forEach(function (cell) {
+            memo.cells.forEach(cell => {
                 let puzzleCell = puzzle.getCell(cell.row, cell.col);
                 changeCellValue(puzzleCell, cell.value, cell.status);
             });
@@ -246,7 +237,7 @@ function solve () {
             let pendentCells = puzzle.cells.filter(isEmptyCell).map(_.clone);
             // Selects the first cell with less possible values among the empty
             // ones.
-            let emptyCell = pendentCells.reduce(function (prev, curr) {
+            let emptyCell = pendentCells.reduce((prev, curr) => {
                 let prevValues = getPendentValues(prev);
                 let currValues = getPendentValues(curr);
                 return (prevValues.length <= currValues.length) ? prev : curr;
@@ -284,9 +275,7 @@ function solve () {
             time: getRunningTime()
         });
 
-        setTimeout(function () {
-            solveCycle([])
-        });
+        setTimeout(() => solveCycle([]));
     }
 
     start();
@@ -295,13 +284,11 @@ function solve () {
 function initializeActions () {
 
     function cleanCells (whichCells) {
-        puzzle.cells.filter(whichCells).forEach(function (cell) {
-            changeCellValue(cell, null);
-        });
+        puzzle.cells.filter(whichCells).forEach(cell => changeCellValue(cell, null));
         changePuzzleStatus(PuzzleStatus.WAITING);
     }
 
-    actionByMessageToSolver[MessageToSolver.START] = function (data) {
+    actionByMessageToSolver[MessageToSolver.START] = data => {
         try {
             if (puzzle.status == PuzzleStatus.WAITING
                     || puzzle.status == PuzzleStatus.INVALID) {
@@ -317,11 +304,11 @@ function initializeActions () {
             console.error(e.stack);
         }
     };
-    actionByMessageToSolver[MessageToSolver.CLEAN] = function (data) {
+    actionByMessageToSolver[MessageToSolver.CLEAN] = data => {
         // clean all filled Cells
         cleanCells(_.constant(true));
     };
-    actionByMessageToSolver[MessageToSolver.STOP] = function (data) {
+    actionByMessageToSolver[MessageToSolver.STOP] = data => {
         console.warn("STOP REQUESTED!!!!");
         accumulatedTime = getRunningTime();
         changePuzzleStatus(PuzzleStatus.STOPPED, {
@@ -329,20 +316,18 @@ function initializeActions () {
             time: getRunningTime()
         });
     };
-    actionByMessageToSolver[MessageToSolver.FILL_CELL] = function (data) {
+    actionByMessageToSolver[MessageToSolver.FILL_CELL] = data => {
         let cell = puzzle.getCell(data.row, data.col);
         changeCellValue(cell, data.value, CellStatus.ORIGINAL);
     };
-    actionByMessageToSolver[MessageToSolver.STEP_TIME] = function (data) {
+    actionByMessageToSolver[MessageToSolver.STEP_TIME] = data => {
         stepTime = data.value;
         console.debug("STEP_TIME: " + stepTime);
     };
-    actionByMessageToSolver[MessageToSolver.RESET] = function (data) {
+    actionByMessageToSolver[MessageToSolver.RESET] = data => {
         console.warn("RESET PUZZLE");
         // clean all not ORIGINAL Cells
-        cleanCells(function (cell) {
-            return cell.status !== CellStatus.ORIGINAL;
-        });
+        cleanCells(cell => cell.status !== CellStatus.ORIGINAL);
     };
 }
 
@@ -354,12 +339,12 @@ if ('function' === typeof importScripts) {
     importScripts(
             "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js",
             "utils.js", "worker-messages.js", "puzzle.js", "cell.js");
-    addEventListener('message', function (e) {
+    addEventListener('message', e => {
         actionByMessageToSolver[e.data.type](e.data);
-         console.debug(puzzle.cells.toString());
+        console.debug(puzzle.cells.toString());
     });
     initializeActions();
 
     puzzle = new Puzzle();
-     console.info(puzzle);
+    console.info(puzzle);
 }
