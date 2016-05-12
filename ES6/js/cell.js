@@ -3,26 +3,24 @@
 /**
  * Represents a puzzle cell with the values.
  */
-function Cell (row, col, value, status) {
+class Cell {
+    
+    constructor(row, col, value, status) {
+        this.row = row;
 
-    // PUBLIC PROPERTIES
+        this.col = col;
 
-    this.row = row;
+        this.sector = ((row > 6) ? 6 : ((row > 3) ? 3 : 0))
+                + ((col > 6) ? 3 : ((col > 3) ? 2 : 1));
 
-    this.col = col;
+        this.value = (!!value) ? value : null;
 
-    this.sector = ((row > 6) ? 6 : ((row > 3) ? 3 : 0))
-            + ((col > 6) ? 3 : ((col > 3) ? 2 : 1));
+        this.status = (!!status) ? status : CellStatus.IDLE;
+    }
 
-    this.value = (!!value) ? value : null;
-
-    this.status = (!!status) ? status : CellStatus.IDLE;
-
-    Object.defineProperty(this, "filled", {
-        get: function () {
-            return !!this.value;
-        }
-    });
+    filled() {
+        return !!this.value;
+    }
 
     // PUBLIC METHODS
 
@@ -34,15 +32,15 @@ function Cell (row, col, value, status) {
      *            Cell to be evaluated
      * @return true if c is in the same Row and Column
      */
-    this.sameCell = function (c) {
+    sameCell(c) {
         return (this.row === c.row) && (this.col === c.col);
-    };
+    }
 
-    this.clone = function () {
+    clone() {
         return new Cell(this.row, this.col, this.value, this.status);
     }
 
-    this.toString = function () {
+    toString() {
         return "[" //
                 + this.row + ", " //
                 + this.col + ", " //
@@ -53,4 +51,4 @@ function Cell (row, col, value, status) {
 
 }
 
-Object.freeze(Cell);
+// Object.freeze(Cell);

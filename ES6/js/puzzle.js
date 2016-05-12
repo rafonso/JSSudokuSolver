@@ -1,41 +1,43 @@
 "use strict";
 
+function _get (p, func, pos, excludeCell)  {
+    let predicate = function (c) {
+        return c[func] === pos;
+    };
+    let excluder = (!!excludeCell) ? function (c) {
+        return !excludeCell.sameCell(c);
+    } : function () {
+        return true;
+    };
+
+    return p.cells.filter(predicate).filter(excluder);
+}
+
+
+
+// cls = this.cells;
 /**
  * Represents a Puzzle, with all cells.
  */
-function Puzzle () {
+class Puzzle {
 
     // PUBLIC PROPERTIES
-
-    this.status = PuzzleStatus.WAITING;
-
-    this.cells = [];
-    for (let row = 1; row <= 9; row++) {
-        for (let col = 1; col <= 9; col++) {
-            this.cells.push(new Cell(row, col));
+    
+    constructor() {
+        this.status = PuzzleStatus.WAITING;
+        
+        this.cells = [];
+        for (let row = 1; row <= 9; row++) {
+            for (let col = 1; col <= 9; col++) {
+                this.cells.push(new Cell(row, col));
+            }
         }
     }
-
-    // PRIVATE METHODS
-
-    let cls = this.cells;
-    function get (func, pos, excludeCell) {
-        let predicate = function (c) {
-            return c[func] === pos;
-        };
-        let excluder = (!!excludeCell) ? function (c) {
-            return !excludeCell.sameCell(c);
-        } : function () {
-            return true;
-        };
-
-        return cls.filter(predicate).filter(excluder);
-    }
-
-    function changeStatus (newStatus) {
+    
+    changeStatus (newStatus) {
 
         function changeCellStatus (cellStatus) {
-            return function (c) {
+            return (c) => {
                 c.cellStatus = cellStatus;
             };
         }
@@ -47,17 +49,16 @@ function Puzzle () {
                 + newStatus);
 
         puzzleElement.changePuzzleStatus(oldStatus, newStatus);
-        cells.forEach(function (c) {
+        cells.forEach((c) => {
             c.puzzleStatus = newStatus;
         });
         switch (newStatus) {
         case PuzzleStatus.RUNNING:
-            cells.filter(function (c) {
-                return c.filled;
-            }).forEach(changeCellStatus(CellStatus.ORIGINAL));
+            cells.filter(c => c.filled
+            ).forEach(changeCellStatus(CellStatus.ORIGINAL));
             break;
         case PuzzleStatus.WAITING:
-            cells.forEach(function (c) {
+            cells.forEach( (c) => {
                 c.value = null;
             });
             cells.forEach(changeCellStatus(CellStatus.IDLE));
@@ -80,9 +81,9 @@ function Puzzle () {
      * @return Cells which are in the solicitated Row. If excludeCell is
      *         defined, this will not be present in result.
      */
-    this.getCellsRow = function (row, excludeCell) {
-        return get("row", row, excludeCell);
-    };
+    getCellsRow(row, excludeCell) {
+        return _get(this, "row", row, excludeCell);
+    }
 
     /**
      * Returns the Cells who are in determinated Column. It is possible exclude
@@ -95,9 +96,9 @@ function Puzzle () {
      * @return Cells which are in the solicitated Column. If excludeCell is
      *         defined, this will not be present in result.
      */
-    this.getCellsCol = function (col, excludeCell) {
-        return get("col", col, excludeCell);
-    };
+    getCellsCol(col, excludeCell) {
+        return _get(this, "col", col, excludeCell);
+    }
 
     /**
      * Returns the Cells who are in determinated Sector. It is possible exclude
@@ -110,18 +111,17 @@ function Puzzle () {
      * @return Cells which are in the solicitated Sector. If excludeCell is
      *         defined, this will not be present in result.
      */
-    this.getCellsSector = function (sec, excludeCell) {
-        return get("sector", sec, excludeCell);
-    };
+    getCellsSector(sec, excludeCell) {
+        return _get(this, "sector", sec, excludeCell);
+    }
 
-    this.getCell = function (row, col) {
-        return _.find(this.cells, function (c) {
-            return (c.row === row) && (c.col === col);
-        });
-    };
+    getCell(row, col) {
+        return _.find(this.cells, (c) => ((c.row === row) && (c.col === col)));
+    }
 
-    this.toString = function () {
+    toString() {
         return "Puzzle[status: " + this.status + ", cells: " + this.cells + "]";
-    };
+    }
 
 }
+
