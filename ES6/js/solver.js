@@ -35,7 +35,7 @@ function changePuzzleStatus (status, extras) {
         status: puzzle.status
     }, extras);
 
-    console.warn("changePuzzleStatus(): " + objectToString(message));
+    console.warn(`changePuzzleStatus(): ${JSON.stringify(message)}`);
     postMessage(message);
 }
 
@@ -98,8 +98,7 @@ function validatePuzzle () {
             if (cell.filled()) {
                 let value = cell.value;
                 if (found[value]) {
-                    throw _.extend(new Error(description + " " + pos
-                            + ". Repeated value: " + value), {
+                    throw _.extend(new Error(`${description} ${pos}. Repeated value: ${value}`), {
                         invalidCells: cells
                     });
                 } else {
@@ -158,7 +157,7 @@ function solve () {
             setTimeout(() => solveCycle(emptyCells));
         } else {
             let cell = emptyCells[pos];
-            console.debug(cell);
+            console.debug(cell.toString());
             changeCellStatus(cell, CellStatus.EVALUATING);
             setTimeout(() => solveCell(cell, emptyCells, pos), stepTime);
         }
@@ -193,12 +192,11 @@ function solve () {
 
         function incrementCycle () {
             cycle++;
-            console.debug("CYCLE " + cycle);
+            console.debug(`CYCLE ${cycle}`);
         }
 
         function tryGuess (pendents, guessCell, pendentValues) {
-            console.debug("PEDENT CELL: " + guessCell + " - " +
-            pendentValues);
+            console.debug(`PENDENT CELL: ${guessCell.toString()} - ${pendentValues}`);
             let cell = puzzle.getCell(guessCell.row, guessCell.col);
             incrementCycle();
             _.rest(pendentValues).reverse().forEach(v =>
@@ -209,7 +207,7 @@ function solve () {
                 })
             );
             changeCellValue(cell, pendentValues[0], CellStatus.GUESSING, memento.length);
-            console.debug(objectToString(memento));
+            console.debug(memento);
             solveNextCell(puzzle.cells.filter(isEmptyCell), 0);
         }
 
@@ -222,11 +220,11 @@ function solve () {
             incrementCycle();
             changeCellValue(puzzle.getCell(memo.cell.row, memo.cell.col),
                     memo.pendentValue, CellStatus.GUESSING, memento.length);
-             console.debug(objectToString(memento));
+            console.debug(memento);
             solveNextCell(puzzle.cells.filter(isEmptyCell), 0);
         }
 
-         console.info("solveCycle(" + priorEmptyCells + ")")
+        console.info(`solveCycle(${priorEmptyCells})`)
         let emptyCells = puzzle.cells.filter(isEmptyCell);
         if (emptyCells.length === 0) {
             changePuzzleStatus(PuzzleStatus.SOLVED, {

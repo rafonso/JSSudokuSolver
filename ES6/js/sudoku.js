@@ -5,7 +5,7 @@ let worker = {};
 let actionByMessageFromSolver = [];
 
 function getCell (row, cell) {
-    return $("#cell" + row + cell);
+    return $(`#cell${row}${cell}`);
 }
 
 function notifyCellValue (row, col, value) {
@@ -431,9 +431,9 @@ function initWorkerHandlers () {
         fillRunningMessages(0, 0, "");
     };
     actionByPuzzleStatus[PuzzleStatus.VALIDATING] = data => 
-        console.info("PuzzleStatus.VALIDATING: " + objectToString(data));
+        console.info(`PuzzleStatus.VALIDATING: ${JSON.stringify(data)}`);
     actionByPuzzleStatus[PuzzleStatus.INVALID] = (err) => {
-        console.warn(objectToString(err));
+        console.warn(JSON.stringify(err));
         $("#btnClean").button("enable");
         $("#btnStop").button("disable");
         $("#btnRun").button("enable"); // Just for debug!
@@ -484,7 +484,7 @@ function initWorkerHandlers () {
     };
 
     actionByMessageFromSolver[MessageFromSolver.INVALID_SOLVER] = data => 
-        console.error("INVALID_SOLVER: " + objectToString(data));
+        console.error("INVALID_SOLVER: " + JSON.stringify(data));
     actionByMessageFromSolver[MessageFromSolver.PUZZLE_STATUS] = data =>  {
         // console.debug("MessageFromSolver.PUZZLE_STATUS: " +
         // objectToString(data));
@@ -499,7 +499,7 @@ function initWorkerHandlers () {
     };
     actionByMessageFromSolver[MessageFromSolver.CELL_VALUE] = data => {}
     actionByMessageFromSolver[MessageFromSolver.ERROR] = data => {
-        console.error("ERROR: " + objectToString(data));
+        console.error("ERROR: " + JSON.stringify(data));
         fillRunningMessages(data.time, data.cycle, data.status);
     };
 }
@@ -512,7 +512,7 @@ function initWorker () {
         worker = new Worker('js/solver.js');
         worker.onmessage = e => {
             try {
-                console.info(e.toString());
+                console.info(JSON.stringify(e));
                 if (!!e.data.type) {
                     actionByMessageFromSolver[e.data.type](e.data);
                 } else {
