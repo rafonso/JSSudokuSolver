@@ -57,11 +57,16 @@ function insertPuzzle (puzzle) {
  * @return exported puzzle.
  */
 function exportPuzzle (justOriginals) {
-    let extractOriginals = ()  => ($(this).attr("class") === CellStatus.ORIGINAL) ? $(this).val() : 0;
-    let extractAll = () => $(this).val() || 0;
+    let extractOriginals = function () {
+        return ($(this).attr("class") === CellStatus.ORIGINAL) ? $(this).val()
+                : 0;
+    };
+    let extractAll = function () {
+        return $(this).val() || 0;
+    };
 
     let cellToValue = justOriginals ? extractOriginals : extractAll;
-    let concatValues =  (str, value, idx) => {
+    let concatValues = (str, value, idx) => {
         let dot = (idx == 80) ? "" : (((idx + 1) % 9 == 0) ? "." : "");
         return str + value + dot;
     };
