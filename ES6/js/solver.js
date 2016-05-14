@@ -19,10 +19,6 @@ function getRunningTime () {
     return (Date.now() - startTme) + accumulatedTime;
 }
 
-function isEmptyCell (c) {
-    return !c.filled();
-}
-
 function changePuzzleStatus (status, extras) {
     if (puzzle.status === status) {
         return;
@@ -90,12 +86,9 @@ function changeCellValue (cell, value, status, tabs) {
 function validatePuzzle () {
 
     function validate (cells, pos, description) {
-        // The found array has 10 positions to avoid always subtract 1. The 0th
-        // position is simply not used.
-        let found = [ false, false, false, false, false, false, false, false,
-                false, false ];
+        let found = [];
         cells.forEach(cell => {
-            if (cell.filled()) {
+            if (cell.filled) {
                 let value = cell.value;
                 if (found[value]) {
                     throw _.extend(new Error(`${description} ${pos}. Repeated value: ${value}`), {
@@ -115,7 +108,7 @@ function validatePuzzle () {
 
     changePuzzleStatus(PuzzleStatus.VALIDATING);
 
-    if (_.every(puzzle.cells, isEmptyCell)) {
+    if (_.every(puzzle.cells, Cell.isEmptyCell)) {
         throw _.extend(new Error("All Cells are empty!"), {
             isSolverError: true
         });
@@ -143,7 +136,7 @@ function solve () {
          * @param
          */
         function getValues (func, pos) {
-            return puzzle[func](pos).filter(c => c.filled()).map(c => c.value);
+            return puzzle[func](pos).filter(c => c.filled).map(c => c.value);
         }
 
         let diff = _.difference(_.range(1, 10), getValues("getCellsRow", cell.row));
@@ -211,7 +204,7 @@ function solve () {
             );
             changeCellValue(cell, pendentValues[0], CellStatus.GUESSING, memento.length);
             log(() => memento);
-            solveNextCell(puzzle.cells.filter(isEmptyCell), 0);
+            solveNextCell(puzzle.cells.filter(Cell.isEmptyCell), 0);
         }
 
         function undoGuess () {
@@ -224,18 +217,18 @@ function solve () {
             changeCellValue(puzzle.getCell(memo.cell.row, memo.cell.col),
                     memo.pendentValue, CellStatus.GUESSING, memento.length);
             log(() => memento);
-            solveNextCell(puzzle.cells.filter(isEmptyCell), 0);
+            solveNextCell(puzzle.cells.filter(Cell.isEmptyCell), 0);
         }
 
         log(() => `solveCycle(${priorEmptyCells})`)
-        let emptyCells = puzzle.cells.filter(isEmptyCell);
+        let emptyCells = puzzle.cells.filter(Cell.isEmptyCell);
         if (emptyCells.length === 0) {
             changePuzzleStatus(PuzzleStatus.SOLVED, {
                 cycle: cycle,
                 time: getRunningTime()
             });
         } else if (emptyCells.length === priorEmptyCells.length) {
-            let pendentCells = puzzle.cells.filter(isEmptyCell).map(_.clone);
+            let pendentCells = puzzle.cells.filter(Cell.isEmptyCell).map(_.clone);
             // Selects the first cell with less possible values among the empty
             // ones.
             let emptyCell = pendentCells.reduce((prev, curr) => {
@@ -309,9 +302,9 @@ function initializeActions () {
             }
         }
     };
+    // clean all filled Cells
     actionByMessageToSolver[MessageToSolver.CLEAN] = data => {
-        // clean all filled Cells
-        cleanCells(_.constant(true));
+        cleanCells(() => (true));
     };
     actionByMessageToSolver[MessageToSolver.STOP] = data => {
         log(() => "STOP REQUESTED!!!!", FINE);
@@ -329,9 +322,9 @@ function initializeActions () {
         stepTime = data.value;
         log(() => "STEP_TIME: " + stepTime, FINE);
     };
+    // clean all not ORIGINAL Cells
     actionByMessageToSolver[MessageToSolver.RESET] = data => {
         log(() => "RESET PUZZLE", FINE);
-        // clean all not ORIGINAL Cells
         cleanCells(cell => cell.status !== CellStatus.ORIGINAL);
     };
 }
