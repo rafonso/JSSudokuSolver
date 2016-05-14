@@ -431,9 +431,9 @@ function initWorkerHandlers () {
         fillRunningMessages(0, 0, "");
     };
     actionByPuzzleStatus[PuzzleStatus.VALIDATING] = data => 
-        console.info(`PuzzleStatus.VALIDATING: ${JSON.stringify(data)}`);
+        log(() => `PuzzleStatus.VALIDATING: ${JSON.stringify(data)}`, FINE);
     actionByPuzzleStatus[PuzzleStatus.INVALID] = (err) => {
-        console.warn(JSON.stringify(err));
+        log(() => JSON.stringify(err), FINE);
         $("#btnClean").button("enable");
         $("#btnStop").button("disable");
         $("#btnRun").button("enable"); // Just for debug!
@@ -475,7 +475,6 @@ function initWorkerHandlers () {
         fillRunningMessages(data.time, data.cycle, data.status);
     };
     actionByPuzzleStatus[PuzzleStatus.SOLVED] = data => {
-        // console.info("PuzzleStatus.SOLVED: " + objectToString(data));
         $("#btnClean").button("enable");
         $("#btnStop").button("disable").hide();
         $("#btnReset").button("enable").show();
@@ -486,13 +485,10 @@ function initWorkerHandlers () {
     actionByMessageFromSolver[MessageFromSolver.INVALID_SOLVER] = data => 
         console.error("INVALID_SOLVER: " + JSON.stringify(data));
     actionByMessageFromSolver[MessageFromSolver.PUZZLE_STATUS] = data =>  {
-        // console.debug("MessageFromSolver.PUZZLE_STATUS: " +
-        // objectToString(data));
         $("#puzzle").removeClass().addClass(data.status);
         actionByPuzzleStatus[data.status](data);
     };
     actionByMessageFromSolver[MessageFromSolver.CELL_STATUS] = data => {
-        // console.info("CELL_STATUS: " + objectToString(data) );
         let cell = getCell(data.row, data.col);
         cell.removeClass().addClass(data.status).val(data.value);
         fillRunningMessages(data.time, data.cycle, null);
@@ -512,11 +508,11 @@ function initWorker () {
         worker = new Worker('js/solver.js');
         worker.onmessage = e => {
             try {
-                console.info(JSON.stringify(e));
+                log(() => JSON.stringify(e));
                 if (!!e.data.type) {
                     actionByMessageFromSolver[e.data.type](e.data);
                 } else {
-                    console.info(e.toString());
+                    log(() => e.toString(), FINER);
                 }
             } catch (err) {
                 console.error(err);
@@ -535,10 +531,10 @@ function initWorker () {
  * Initialize the page.
  */
 function initSudoku () {
-    console.debug(getFormattedHour() + "Initializing");
+    log(() => (getFormattedHour() + "Initializing"), FINE);
     initComponents();
     initWorker();
-    console.debug(getFormattedHour() + "Initializing finished");
+    log(() => (getFormattedHour() + "Initializing finished"), FINE);
 }
 
 $(document).ready(initSudoku);
