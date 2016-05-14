@@ -531,10 +531,10 @@ function initWorker () {
  * Initialize the page.
  */
 function initSudoku () {
-    log(() => (getFormattedHour() + "Initializing"), FINE);
+    log(() => "Initializing", FINE);
     initComponents();
     initWorker();
-    log(() => (getFormattedHour() + "Initializing finished"), FINE);
+    log(() => "Initializing finished", FINE);
 }
 
 $(document).ready(initSudoku);

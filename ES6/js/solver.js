@@ -64,12 +64,14 @@ function changeCellValue (cell, value, status, tabs) {
     cell.value = (!!value) ? value : null;
     cell.status = (!!value) ? status : null;
 
-    if (status == CellStatus.FILLED || status == CellStatus.GUESSING) {
-        let tbs = "";
-        for (let i = 0; i < tabs; i++) {
-            tbs += "\t";
-        }
-        log(() => (tbs + cell.toString()));
+    if ((status == CellStatus.FILLED || status == CellStatus.GUESSING)) {
+        log(() => {
+            let tbs = "";
+            for (let i = 0; i < tabs; i++) {
+                tbs += "\t";
+            }
+            return tbs + cell.toString()
+        });
     }
 
     postMessage({
