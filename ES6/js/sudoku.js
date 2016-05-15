@@ -483,21 +483,22 @@ function initWorkerHandlers () {
     }]
     ]);
 
-    actionByMessageFromSolver.set(MessageFromSolver.INVALID_SOLVER, (data) => { 
+    actionByMessageFromSolver
+    .set(MessageFromSolver.INVALID_SOLVER, (data) => { 
         console.error("INVALID_SOLVER: " + JSON.stringify(data));
-    });
-    actionByMessageFromSolver.set(MessageFromSolver.PUZZLE_STATUS, (data) =>  {
+    })
+    .set(MessageFromSolver.PUZZLE_STATUS, (data) =>  {
         $("#puzzle").removeClass().addClass(data.status);
         actionByPuzzleStatus.get(data.status)(data);
-    });
-    actionByMessageFromSolver.set(MessageFromSolver.CELL_STATUS, (data) => {
+    })
+    .set(MessageFromSolver.CELL_STATUS, (data) => {
         let cell = getCell(data.row, data.col);
         cell.removeClass().addClass(data.status).val(data.value);
         fillRunningMessages(data.time, data.cycle, null);
-    });
-    actionByMessageFromSolver.set(MessageFromSolver.CELL_VALUE, (data) => {
-    });
-    actionByMessageFromSolver.set(MessageFromSolver.ERROR, (data) => {
+    })
+    .set(MessageFromSolver.CELL_VALUE, (data) => {
+    })
+    .set(MessageFromSolver.ERROR, (data) => {
         console.error("ERROR: " + JSON.stringify(data));
         fillRunningMessages(data.time, data.cycle, data.status);
     });

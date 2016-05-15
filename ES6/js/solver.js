@@ -285,7 +285,8 @@ function initializeActions () {
         changePuzzleStatus(PuzzleStatus.WAITING);
     }
 
-    actionByMessageToSolver.set(MessageToSolver.START, (data) => {
+    actionByMessageToSolver
+    .set(MessageToSolver.START, (data) => {
         try {
             if (puzzle.status == PuzzleStatus.WAITING ||
                     puzzle.status == PuzzleStatus.INVALID) {
@@ -302,29 +303,29 @@ function initializeActions () {
                 console.error(e.stack);
             }
         }
-    });
-    // clean all filled Cells
-    actionByMessageToSolver.set(MessageToSolver.CLEAN, (data) => {
+    })
+    .set(MessageToSolver.CLEAN, (data) => {
+        // clean all filled Cells
         cleanCells(() => (true));
-    });
-    actionByMessageToSolver.set(MessageToSolver.STOP, (data) => {
+    })
+    .set(MessageToSolver.STOP, (data) => {
         console.warn("STOP REQUESTED!!!!");
         accumulatedTime = getRunningTime();
         changePuzzleStatus(PuzzleStatus.STOPPED, {
             cycle: cycle,
             time: getRunningTime()
         });
-    });
-    actionByMessageToSolver.set(MessageToSolver.FILL_CELL, (data) => {
+    })
+    .set(MessageToSolver.FILL_CELL, (data) => {
         let cell = puzzle.getCell(data.row, data.col);
         changeCellValue(cell, data.value, CellStatus.ORIGINAL);
-    });
-    actionByMessageToSolver.set(MessageToSolver.STEP_TIME, (data) => {
+    })
+    .set(MessageToSolver.STEP_TIME, (data) => {
         stepTime = data.value;
         console.debug("STEP_TIME: " + stepTime);
-    });
-    // clean all not ORIGINAL Cells
-    actionByMessageToSolver.set(MessageToSolver.RESET, (data) => {
+    })
+    .set(MessageToSolver.RESET, (data) => {
+        // clean all not ORIGINAL Cells
         console.warn("RESET PUZZLE");
         // clean all not ORIGINAL Cells
         cleanCells(cell => cell.status !== CellStatus.ORIGINAL);
