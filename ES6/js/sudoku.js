@@ -431,9 +431,9 @@ function initWorkerHandlers () {
         fillRunningMessages(0, 0, "");
     };
     actionByPuzzleStatus[PuzzleStatus.VALIDATING] = data => 
-        log(() => `PuzzleStatus.VALIDATING: ${JSON.stringify(data)}`, FINE);
+        console.info(`PuzzleStatus.VALIDATING: ${JSON.stringify(data)}`);
     actionByPuzzleStatus[PuzzleStatus.INVALID] = (err) => {
-        log(() => JSON.stringify(err), FINE);
+        console.warn(JSON.stringify(err));
         $("#btnClean").button("enable");
         $("#btnStop").button("disable");
         $("#btnRun").button("enable"); // Just for debug!
@@ -508,11 +508,11 @@ function initWorker () {
         worker = new Worker('js/solver.js');
         worker.onmessage = e => {
             try {
-                log(() => JSON.stringify(e));
+                console.info(JSON.stringify(e));
                 if (!!e.data.type) {
                     actionByMessageFromSolver[e.data.type](e.data);
                 } else {
-                    log(() => e.toString(), FINER);
+                    console.info(e.toString());
                 }
             } catch (err) {
                 console.error(err);
@@ -531,10 +531,10 @@ function initWorker () {
  * Initialize the page.
  */
 function initSudoku () {
-    log(() => "Initializing", FINE);
+    console.debug(getFormattedHour() + "Initializing");
     initComponents();
     initWorker();
-    log(() => "Initializing finished", FINE);
+    console.debug(getFormattedHour() + "Initializing finished");
 }
 
 $(document).ready(initSudoku);

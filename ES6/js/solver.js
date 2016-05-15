@@ -31,7 +31,7 @@ function changePuzzleStatus (status, extras) {
         status: puzzle.status
     }, extras);
 
-    log(() => `changePuzzleStatus(): ${JSON.stringify(message)}`, FINER);
+    console.warn(`changePuzzleStatus(): ${JSON.stringify(message)}`);
     postMessage(message);
 }
 
@@ -64,14 +64,12 @@ function changeCellValue (cell, value, status, tabs) {
     cell.value = (!!value) ? value : null;
     cell.status = (!!value) ? status : null;
 
-    if ((status == CellStatus.FILLED || status == CellStatus.GUESSING)) {
-        log(() => {
-            let tbs = "";
-            for (let i = 0; i < tabs; i++) {
-                tbs += "\t";
-            }
-            return tbs + cell.toString()
-        });
+    if (status == CellStatus.FILLED || status == CellStatus.GUESSING) {
+        let tbs = "";
+        for (let i = 0; i < tabs; i++) {
+            tbs += "\t";
+        }
+        console.debug(tbs + cell.toString());
     }
 
     postMessage({
@@ -155,7 +153,7 @@ function solve () {
             setTimeout(() => solveCycle(emptyCells));
         } else {
             let cell = emptyCells[pos];
-            log(() => cell.toString());
+            console.debug(cell.toString());
             changeCellStatus(cell, CellStatus.EVALUATING);
             setTimeout(() => solveCell(cell, emptyCells, pos), stepTime);
         }
@@ -190,11 +188,11 @@ function solve () {
 
         function incrementCycle () {
             cycle++;
-            log(() => `CYCLE ${cycle}`);
+            console.debug(`CYCLE ${cycle}`);
         }
 
         function tryGuess (pendents, guessCell, pendentValues) {
-            log(() => `PENDENT CELL: ${guessCell.toString()} - ${pendentValues}`);
+            console.debug(`PENDENT CELL: ${guessCell.toString()} - ${pendentValues}`);
             let cell = puzzle.getCell(guessCell.row, guessCell.col);
             incrementCycle();
             _.rest(pendentValues).reverse().forEach(v =>
@@ -205,7 +203,7 @@ function solve () {
                 })
             );
             changeCellValue(cell, pendentValues[0], CellStatus.GUESSING, memento.length);
-            log(() => memento);
+            console.debug(memento);
             solveNextCell(puzzle.cells.filter(Cell.isEmptyCell), 0);
         }
 
@@ -218,11 +216,11 @@ function solve () {
             incrementCycle();
             changeCellValue(puzzle.getCell(memo.cell.row, memo.cell.col),
                     memo.pendentValue, CellStatus.GUESSING, memento.length);
-            log(() => memento);
+            console.debug(memento);
             solveNextCell(puzzle.cells.filter(Cell.isEmptyCell), 0);
         }
 
-        log(() => `solveCycle(${priorEmptyCells})`)
+        console.info(`solveCycle(${priorEmptyCells})`)
         let emptyCells = puzzle.cells.filter(Cell.isEmptyCell);
         if (emptyCells.length === 0) {
             changePuzzleStatus(PuzzleStatus.SOLVED, {
@@ -309,7 +307,7 @@ function initializeActions () {
         cleanCells(() => (true));
     };
     actionByMessageToSolver[MessageToSolver.STOP] = data => {
-        log(() => "STOP REQUESTED!!!!", FINE);
+        console.warn("STOP REQUESTED!!!!");
         accumulatedTime = getRunningTime();
         changePuzzleStatus(PuzzleStatus.STOPPED, {
             cycle: cycle,
@@ -322,11 +320,12 @@ function initializeActions () {
     };
     actionByMessageToSolver[MessageToSolver.STEP_TIME] = data => {
         stepTime = data.value;
-        log(() => "STEP_TIME: " + stepTime, FINE);
+        console.debug("STEP_TIME: " + stepTime);
     };
     // clean all not ORIGINAL Cells
     actionByMessageToSolver[MessageToSolver.RESET] = data => {
-        log(() => "RESET PUZZLE", FINE);
+        console.warn("RESET PUZZLE");
+        // clean all not ORIGINAL Cells
         cleanCells(cell => cell.status !== CellStatus.ORIGINAL);
     };
 }
@@ -341,10 +340,10 @@ if ('function' === typeof importScripts) {
             "utils.js", "worker-messages.js", "puzzle.js", "cell.js");
     addEventListener('message', e => {
         actionByMessageToSolver[e.data.type](e.data);
-        log(() => puzzle.cells.toString());
+        console.debug(puzzle.cells.toString());
     });
     initializeActions();
 
     puzzle = new Puzzle();
-    log(() => puzzle, FINE);
+    console.info(puzzle);
 }
