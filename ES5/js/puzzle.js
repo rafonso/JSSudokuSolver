@@ -32,41 +32,6 @@ function Puzzle () {
         return cls.filter(predicate).filter(excluder);
     }
 
-    function changeStatus (newStatus) {
-
-        function changeCellStatus (cellStatus) {
-            return function (c) {
-                c.cellStatus = cellStatus;
-            };
-        }
-
-        var oldStatus = status;
-        this.status = newStatus;
-
-        console.debug(getFormattedHour() + "STATUS: " + oldStatus + " -> " + 
-                newStatus);
-
-        puzzleElement.changePuzzleStatus(oldStatus, newStatus);
-        this.cells.forEach(function (c) {
-            c.puzzleStatus = newStatus;
-        });
-        switch (newStatus) {
-        case PuzzleStatus.RUNNING:
-            this.cells.filter(function (c) {
-                return c.filled;
-            }).forEach(changeCellStatus(CellStatus.ORIGINAL));
-            break;
-        case PuzzleStatus.WAITING:
-            this.cells.forEach(function (c) {
-                c.value = null;
-            });
-            this.cells.forEach(changeCellStatus(CellStatus.IDLE));
-            break;
-        default :
-            this.cells.forEach(changeCellStatus(CellStatus.IDLE));
-        }
-    }
-
     // PUBLIC METHODS
 
     /**

@@ -34,40 +34,6 @@ class Puzzle {
         }
     }
     
-    changeStatus (newStatus) {
-
-        function changeCellStatus (cellStatus) {
-            return (c) => {
-                c.cellStatus = cellStatus;
-            };
-        }
-
-        let oldStatus = status;
-        this.status = newStatus;
-
-        console.debug(getFormattedHour() + "STATUS: " + oldStatus + " -> " +
-                newStatus);
-
-        puzzleElement.changePuzzleStatus(oldStatus, newStatus);
-        this.cells.forEach((c) => {
-            c.puzzleStatus = newStatus;
-        });
-        switch (newStatus) {
-        case PuzzleStatus.RUNNING:
-            this.cells.filter(c => c.filled
-            ).forEach(changeCellStatus(CellStatus.ORIGINAL));
-            break;
-        case PuzzleStatus.WAITING:
-            this.cells.forEach( (c) => {
-                c.value = null;
-            });
-            this.cells.forEach(changeCellStatus(CellStatus.IDLE));
-            break;
-        default :
-            this.cells.forEach(changeCellStatus(CellStatus.IDLE));
-        }
-    }
-
     // PUBLIC METHODS
 
     /**
