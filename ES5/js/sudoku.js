@@ -426,8 +426,8 @@ function initWorkerHandlers () {
     /**
      * Blur input text component when focused.
      */
-    function unfocus () {
-        $(this).blur();
+    function unfocus (el) {
+        $(el.target).blur();
     }
 
     var actionByPuzzleStatus = [];
