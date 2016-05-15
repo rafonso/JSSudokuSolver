@@ -27,7 +27,7 @@ function notifyCellValue (row, col, value) {
  *            String which will fill the puzzle.
  */
 function insertPuzzle (puzzle) {
-    var puzzle = puzzle.replace(/\./g, "");
+    puzzle = puzzle.replace(/\./g, "");
     if (!/^\d{81}$/.test(puzzle)) {
         throw new Error("Invalid Puzzle!");
     }
@@ -67,7 +67,7 @@ function exportPuzzle (justOriginals) {
 
     var cellToValue = justOriginals ? extractOriginals : extractAll;
     var concatValues = function (str, value, idx) {
-        var dot = (idx == 80) ? "" : (((idx + 1) % 9 == 0) ? "." : "");
+        var dot = (idx == 80) ? "" : (((idx + 1) % 9 === 0) ? "." : "");
         return str + value + dot;
     };
 
@@ -169,7 +169,7 @@ function initComponents () {
 
     function notifyCellChange (cellId, number) {
         var pos = cellRegex.exec(cellId);
-        notifyCellValue(parseInt(pos[1], 10), parseInt(pos[2], 10), number)
+        notifyCellValue(parseInt(pos[1], 10), parseInt(pos[2], 10), number);
     }
 
     function createMovementAction (movement) {
@@ -267,8 +267,8 @@ function initComponents () {
      *            Key Event.
      */
     function handleKeyUp (e) {
-        if (((e.keyCode >= 49) && (e.keyCode <= 57))
-                || ((e.keyCode >= 97) && (e.keyCode <= 105))) {
+        if (((e.keyCode >= 49) && (e.keyCode <= 57)) ||
+                ((e.keyCode >= 97) && (e.keyCode <= 105))) {
             gotoNextCell(e);
         }
     }
@@ -470,7 +470,7 @@ function initWorkerHandlers () {
         }
     };
     actionByPuzzleStatus[PuzzleStatus.READY] = function (data) {
-    }
+    };
     actionByPuzzleStatus[PuzzleStatus.RUNNING] = function (data) {
         $("#btnRun, #btnClean").button("disable");
         $("#btnStop").button("enable").show();

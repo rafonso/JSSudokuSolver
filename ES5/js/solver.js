@@ -98,8 +98,8 @@ function validatePuzzle () {
             if (cell.filled) {
                 var value = cell.value;
                 if (found[value]) {
-                    throw _.extend(new Error(description + " " + pos
-                            + ". Repeated value: " + value), {
+                    throw _.extend(new Error(description + " " + pos +
+                            ". Repeated value: " + value), {
                         invalidCells: cells
                     });
                 } else {
@@ -180,7 +180,7 @@ function solve () {
         var diff = getPendentValues(cell);
 
         if (diff.length === 0) {
-            if (memento.length == 0) {
+            if (memento.length === 0) {
                 changePuzzleStatus(
                         PuzzleStatus.INVALID,
                         {
@@ -198,7 +198,7 @@ function solve () {
         } else {
             changeCellStatus(cell, null);
         }
-        solveNextCell(emptyCells, pos + 1)
+        solveNextCell(emptyCells, pos + 1);
     }
 
     function solveCycle (priorEmptyCells) {
@@ -219,7 +219,7 @@ function solve () {
                     pendentValue: v,
                     cells: pendents
                 });
-            })
+            });
             changeCellValue(cell, pendentValues[0], CellStatus.GUESSING,
                     memento.length);
             // console.debug(objectToString(memento));
@@ -276,6 +276,7 @@ function solve () {
         case PuzzleStatus.READY:
             cycle = 0;
             accumulatedTime = 0;
+            break;
         case PuzzleStatus.STOPPED:
             break;
         default :
@@ -289,7 +290,7 @@ function solve () {
         });
 
         setTimeout(function () {
-            solveCycle([])
+            solveCycle([]);
         });
     }
 
@@ -307,8 +308,8 @@ function initializeActions () {
 
     actionByMessageToSolver[MessageToSolver.START] = function (data) {
         try {
-            if (puzzle.status == PuzzleStatus.WAITING
-                    || puzzle.status == PuzzleStatus.INVALID) {
+            if (puzzle.status == PuzzleStatus.WAITING ||
+                    puzzle.status == PuzzleStatus.INVALID) {
                 validatePuzzle();
             }
             solve();

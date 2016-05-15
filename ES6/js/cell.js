@@ -10,8 +10,8 @@ class Cell {
 
         this.col = col;
 
-        this.sector = ((row > 6) ? 6 : ((row > 3) ? 3 : 0))
-                + ((col > 6) ? 3 : ((col > 3) ? 2 : 1));
+        this.sector = ((row > 6) ? 6 : ((row > 3) ? 3 : 0)) +
+                 ((col > 6) ? 3 : ((col > 3) ? 2 : 1));
 
         this.value = (!!value) ? value : null;
 

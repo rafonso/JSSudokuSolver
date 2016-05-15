@@ -41,29 +41,29 @@ function Puzzle () {
         }
 
         var oldStatus = status;
-        status = newStatus;
+        this.status = newStatus;
 
-        console.debug(getFormattedHour() + "STATUS: " + oldStatus + " -> "
-                + newStatus);
+        console.debug(getFormattedHour() + "STATUS: " + oldStatus + " -> " + 
+                newStatus);
 
         puzzleElement.changePuzzleStatus(oldStatus, newStatus);
-        cells.forEach(function (c) {
+        this.cells.forEach(function (c) {
             c.puzzleStatus = newStatus;
         });
         switch (newStatus) {
         case PuzzleStatus.RUNNING:
-            cells.filter(function (c) {
+            this.cells.filter(function (c) {
                 return c.filled;
             }).forEach(changeCellStatus(CellStatus.ORIGINAL));
             break;
         case PuzzleStatus.WAITING:
-            cells.forEach(function (c) {
+            this.cells.forEach(function (c) {
                 c.value = null;
             });
-            cells.forEach(changeCellStatus(CellStatus.IDLE));
+            this.cells.forEach(changeCellStatus(CellStatus.IDLE));
             break;
         default :
-            cells.forEach(changeCellStatus(CellStatus.IDLE));
+            this.cells.forEach(changeCellStatus(CellStatus.IDLE));
         }
     }
 

@@ -1,0 +1,13 @@
+{
+	"esversion": 6,
+	"strict": "global",
+	"browser": true,
+	"devel": true,
+	"jquery": true,
+	"worker": true,
+/*	"globals": true, */
+	"predef": ["_", "Cell", "Puzzle", 
+		"PuzzleStatus", "CellStatus", "MessageFromSolver", 
+		"MessageToSolver", "getFormattedHour", "objectToString"],
+	"undef": true
+}

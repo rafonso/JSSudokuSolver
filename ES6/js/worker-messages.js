@@ -1,3 +1,4 @@
+/*jshint -W079 */
 // TYPE OF MESSAGES TO BE EXCHANGED BETWEEN UI AND SOLVER THREADS
 "use strict";
 
@@ -18,7 +19,7 @@ let MessageFromSolver = {
     ERROR: "error"
 };
 
-let PuzzleStatus = {
+var PuzzleStatus = {
     WAITING: "waiting",
     VALIDATING: "validating",
     READY: "ready",
@@ -28,7 +29,7 @@ let PuzzleStatus = {
     SOLVED: "solved"
 };
 
-let CellStatus = {
+var CellStatus = {
     IDLE: "idle",
     ORIGINAL: "original",
     FILLED: "filled",

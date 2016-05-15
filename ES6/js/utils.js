@@ -13,10 +13,10 @@ function getFormattedHour () {
     }
 
     let d = new Date();
-    return "[" //
-            + format(d.getHours(), 2, ":") //
-            + format(d.getMinutes(), 2, ":") //
-            + format(d.getSeconds(), 2, '.')
-            + format(d.getMilliseconds(), 3, ']') //
-            + " ";
+    return "[" + //
+            format(d.getHours(), 2, ":") + //
+            format(d.getMinutes(), 2, ":") + //
+            format(d.getSeconds(), 2, '.') + 
+            format(d.getMilliseconds(), 3, ']') + //
+            " ";
 }

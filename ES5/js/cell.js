@@ -11,8 +11,8 @@ function Cell (row, col, value, status) {
 
     this.col = col;
 
-    this.sector = ((row > 6) ? 6 : ((row > 3) ? 3 : 0))
-            + ((col > 6) ? 3 : ((col > 3) ? 2 : 1));
+    this.sector = ((row > 6) ? 6 : ((row > 3) ? 3 : 0)) +
+            ((col > 6) ? 3 : ((col > 3) ? 2 : 1));
 
     this.value = (!!value) ? value : null;
 
@@ -40,15 +40,15 @@ function Cell (row, col, value, status) {
 
     this.clone = function () {
         return new Cell(this.row, this.col, this.value, this.status);
-    }
+    };
 
     this.toString = function () {
-        return "[" //
-                + this.row + ", " //
-                + this.col + ", " //
-                + (this.filled ? this.value : "-") + ", "
-                + ((!!this.status) ? this.status.charAt(0) : "-") //
-                + "]";
+        return "[" + //
+                this.row + ", " + //
+                this.col + ", " + //
+                (this.filled ? this.value : "-") + ", " +
+                ((!!this.status) ? this.status.charAt(0) : "-") + //
+                "]";
     };
 
 }

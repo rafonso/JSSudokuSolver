@@ -163,7 +163,7 @@ function solve () {
         let diff = getPendentValues(cell);
 
         if (diff.length === 0) {
-            if (memento.length == 0) {
+            if (memento.length === 0) {
                 changePuzzleStatus(
                         PuzzleStatus.INVALID,
                         {
@@ -181,7 +181,7 @@ function solve () {
         } else {
             changeCellStatus(cell, null);
         }
-        solveNextCell(emptyCells, pos + 1)
+        solveNextCell(emptyCells, pos + 1);
     }
 
     function solveCycle (priorEmptyCells) {
@@ -220,7 +220,7 @@ function solve () {
             solveNextCell(puzzle.cells.filter(Cell.isEmptyCell), 0);
         }
 
-        console.info(`solveCycle(${priorEmptyCells})`)
+        console.info(`solveCycle(${priorEmptyCells})`);
         let emptyCells = puzzle.cells.filter(Cell.isEmptyCell);
         if (emptyCells.length === 0) {
             changePuzzleStatus(PuzzleStatus.SOLVED, {
@@ -257,6 +257,7 @@ function solve () {
         case PuzzleStatus.READY:
             cycle = 0;
             accumulatedTime = 0;
+            break;
         case PuzzleStatus.STOPPED:
             break;
         default :
@@ -286,8 +287,8 @@ function initializeActions () {
 
     actionByMessageToSolver[MessageToSolver.START] = data => {
         try {
-            if (puzzle.status == PuzzleStatus.WAITING
-                    || puzzle.status == PuzzleStatus.INVALID) {
+            if (puzzle.status == PuzzleStatus.WAITING ||
+                    puzzle.status == PuzzleStatus.INVALID) {
                 validatePuzzle();
             }
             solve();

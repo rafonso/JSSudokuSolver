@@ -43,28 +43,28 @@ class Puzzle {
         }
 
         let oldStatus = status;
-        status = newStatus;
+        this.status = newStatus;
 
-        console.debug(getFormattedHour() + "STATUS: " + oldStatus + " -> "
-                + newStatus);
+        console.debug(getFormattedHour() + "STATUS: " + oldStatus + " -> " +
+                newStatus);
 
         puzzleElement.changePuzzleStatus(oldStatus, newStatus);
-        cells.forEach((c) => {
+        this.cells.forEach((c) => {
             c.puzzleStatus = newStatus;
         });
         switch (newStatus) {
         case PuzzleStatus.RUNNING:
-            cells.filter(c => c.filled
+            this.cells.filter(c => c.filled
             ).forEach(changeCellStatus(CellStatus.ORIGINAL));
             break;
         case PuzzleStatus.WAITING:
-            cells.forEach( (c) => {
+            this.cells.forEach( (c) => {
                 c.value = null;
             });
-            cells.forEach(changeCellStatus(CellStatus.IDLE));
+            this.cells.forEach(changeCellStatus(CellStatus.IDLE));
             break;
         default :
-            cells.forEach(changeCellStatus(CellStatus.IDLE));
+            this.cells.forEach(changeCellStatus(CellStatus.IDLE));
         }
     }
 

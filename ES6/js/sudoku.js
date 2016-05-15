@@ -67,7 +67,7 @@ function exportPuzzle (justOriginals) {
 
     let cellToValue = justOriginals ? extractOriginals : extractAll;
     let concatValues = (str, value, idx) => {
-        let dot = (idx == 80) ? "" : (((idx + 1) % 9 == 0) ? "." : "");
+        let dot = (idx == 80) ? "" : (((idx + 1) % 9 === 0) ? "." : "");
         return str + value + dot;
     };
 
@@ -169,7 +169,7 @@ function initComponents () {
 
     function notifyCellChange (cellId, number) {
         let pos = cellRegex.exec(cellId);
-        notifyCellValue(parseInt(pos[1], 10), parseInt(pos[2], 10), number)
+        notifyCellValue(parseInt(pos[1], 10), parseInt(pos[2], 10), number);
     }
 
     function createMovementAction (movement) {
@@ -262,8 +262,8 @@ function initComponents () {
      *            Key Event.
      */
     function handleKeyUp (e) {
-        if (((e.keyCode >= 49) && (e.keyCode <= 57))
-                || ((e.keyCode >= 97) && (e.keyCode <= 105))) {
+        if (((e.keyCode >= 49) && (e.keyCode <= 57)) ||
+                ((e.keyCode >= 97) && (e.keyCode <= 105))) {
             gotoNextCell(e);
         }
     }
@@ -493,7 +493,7 @@ function initWorkerHandlers () {
         cell.removeClass().addClass(data.status).val(data.value);
         fillRunningMessages(data.time, data.cycle, null);
     };
-    actionByMessageFromSolver[MessageFromSolver.CELL_VALUE] = data => {}
+    actionByMessageFromSolver[MessageFromSolver.CELL_VALUE] = data => {};
     actionByMessageFromSolver[MessageFromSolver.ERROR] = data => {
         console.error("ERROR: " + JSON.stringify(data));
         fillRunningMessages(data.time, data.cycle, data.status);
