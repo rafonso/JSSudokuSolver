@@ -65,11 +65,7 @@ function changeCellValue (cell, value, status, tabs) {
     cell.status = (!!value) ? status : null;
 
     if (status == CellStatus.FILLED || status == CellStatus.GUESSING) {
-        let tbs = "";
-        for (let i = 0; i < tabs; i++) {
-            tbs += "\t";
-        }
-        console.debug(tbs + cell.toString());
+        console.debug("\t".repeat(tabs) + cell.toString());
     }
 
     postMessage({
@@ -108,7 +104,7 @@ function validatePuzzle () {
 
     changePuzzleStatus(PuzzleStatus.VALIDATING);
 
-    if (_.every(puzzle.cells, Cell.isEmptyCell)) {
+    if (puzzle.cells.every(Cell.isEmptyCell)) {
         throw _.extend(new Error("All Cells are empty!"), {
             isSolverError: true
         });

@@ -1,9 +1,7 @@
 "use strict";
 
 function _get (p, func, pos, excludeCell)  {
-    let predicate = function (c) {
-        return c[func] === pos;
-    };
+    let predicate = (c) => (c[func] === pos);
     let excluder = (!!excludeCell) ? function (c) {
         return !excludeCell.sameCell(c);
     } : function () {
@@ -82,7 +80,7 @@ class Puzzle {
     }
 
     getCell(row, col) {
-        return _.find(this.cells, (c) => ((c.row === row) && (c.col === col)));
+        return this.cells.find((c) => ((c.row === row) && (c.col === col)));
     }
 
     toString() {
