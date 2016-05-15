@@ -2,7 +2,7 @@
 "use strict";
 
 let worker = {};
-let actionByMessageFromSolver = [];
+let actionByMessageFromSolver = new Map();
 
 function getCell (row, cell) {
     return $(`#cell${row}${cell}`);
@@ -417,8 +417,8 @@ function initWorkerHandlers () {
      */
     let unfocus = (el) => $(el.target).blur();
 
-    let actionByPuzzleStatus = [];
-    actionByPuzzleStatus[PuzzleStatus.WAITING] = data => {
+    let actionByPuzzleStatus = new Map([
+    [PuzzleStatus.WAITING, (data) => {
         $("#puzzle input").unbind("focus", unfocus);
         $("#btnRun").button("enable");
         $("#btnStop").button("disable").show();
@@ -427,10 +427,11 @@ function initWorkerHandlers () {
         $("#errorMessages, #runningMessages").hide();
         $("#puzzle input:first").focus();
         fillRunningMessages(0, 0, "");
-    };
-    actionByPuzzleStatus[PuzzleStatus.VALIDATING] = data => 
-        console.info(`PuzzleStatus.VALIDATING: ${JSON.stringify(data)}`);
-    actionByPuzzleStatus[PuzzleStatus.INVALID] = (err) => {
+    }],
+    [PuzzleStatus.VALIDATING, (data) => 
+        console.info(`PuzzleStatus.VALIDATING: ${JSON.stringify(data)}`)
+    ],
+    [PuzzleStatus.INVALID, (err) => {
         console.warn(JSON.stringify(err));
         $("#btnClean").button("enable");
         $("#btnStop").button("disable");
@@ -453,9 +454,10 @@ function initWorkerHandlers () {
                 getCell(c.row, c.col).removeClass().focus().effect("pulsate");
             }
         }
-    };
-    actionByPuzzleStatus[PuzzleStatus.READY] = data => {};
-    actionByPuzzleStatus[PuzzleStatus.RUNNING] = data => {
+    }],
+    [PuzzleStatus.READY, (data) => {
+    }],
+    [PuzzleStatus.RUNNING, (data) => {
         $("#btnRun, #btnClean").button("disable");
         $("#btnStop").button("enable").show();
         $("#btnReset").hide();
@@ -464,38 +466,41 @@ function initWorkerHandlers () {
         $("#runningMessages").show();
         $("#errorText").text("");
         fillRunningMessages(data.time, data.cycle, data.status);
-    };
-    actionByPuzzleStatus[PuzzleStatus.STOPPED] = data =>  {
+    }],
+    [PuzzleStatus.STOPPED, (data) =>  {
         $("#btnClean").button("enable");
         $("#btnRun").button("disable");
         $("#btnStop").hide();
         $("#btnReset").show();
         fillRunningMessages(data.time, data.cycle, data.status);
-    };
-    actionByPuzzleStatus[PuzzleStatus.SOLVED] = data => {
+    }],
+    [PuzzleStatus.SOLVED, (data) => {
         $("#btnClean").button("enable");
         $("#btnStop").button("disable").hide();
         $("#btnReset").button("enable").show();
 
         fillRunningMessages(data.time, data.cycle, data.status);
-    };
+    }]
+    ]);
 
-    actionByMessageFromSolver[MessageFromSolver.INVALID_SOLVER] = data => 
+    actionByMessageFromSolver.set(MessageFromSolver.INVALID_SOLVER, (data) => { 
         console.error("INVALID_SOLVER: " + JSON.stringify(data));
-    actionByMessageFromSolver[MessageFromSolver.PUZZLE_STATUS] = data =>  {
+    });
+    actionByMessageFromSolver.set(MessageFromSolver.PUZZLE_STATUS, (data) =>  {
         $("#puzzle").removeClass().addClass(data.status);
-        actionByPuzzleStatus[data.status](data);
-    };
-    actionByMessageFromSolver[MessageFromSolver.CELL_STATUS] = data => {
+        actionByPuzzleStatus.get(data.status)(data);
+    });
+    actionByMessageFromSolver.set(MessageFromSolver.CELL_STATUS, (data) => {
         let cell = getCell(data.row, data.col);
         cell.removeClass().addClass(data.status).val(data.value);
         fillRunningMessages(data.time, data.cycle, null);
-    };
-    actionByMessageFromSolver[MessageFromSolver.CELL_VALUE] = data => {};
-    actionByMessageFromSolver[MessageFromSolver.ERROR] = data => {
+    });
+    actionByMessageFromSolver.set(MessageFromSolver.CELL_VALUE, (data) => {
+    });
+    actionByMessageFromSolver.set(MessageFromSolver.ERROR, (data) => {
         console.error("ERROR: " + JSON.stringify(data));
         fillRunningMessages(data.time, data.cycle, data.status);
-    };
+    });
 }
 
 /**
@@ -508,7 +513,7 @@ function initWorker () {
             try {
                 console.info(JSON.stringify(e));
                 if (!!e.data.type) {
-                    actionByMessageFromSolver[e.data.type](e.data);
+                    actionByMessageFromSolver.get(e.data.type)(e.data);
                 } else {
                     console.info(e.toString());
                 }

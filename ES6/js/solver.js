@@ -1,7 +1,7 @@
 // SUDOKU SOLVER METHODS
 "use strict";
 
-let actionByMessageToSolver = [];
+let actionByMessageToSolver = new Map();
 let puzzle = {};
 let stepTime = 0;
 let accumulatedTime;
@@ -285,7 +285,7 @@ function initializeActions () {
         changePuzzleStatus(PuzzleStatus.WAITING);
     }
 
-    actionByMessageToSolver[MessageToSolver.START] = data => {
+    actionByMessageToSolver.set(MessageToSolver.START, (data) => {
         try {
             if (puzzle.status == PuzzleStatus.WAITING ||
                     puzzle.status == PuzzleStatus.INVALID) {
@@ -302,33 +302,33 @@ function initializeActions () {
                 console.error(e.stack);
             }
         }
-    };
+    });
     // clean all filled Cells
-    actionByMessageToSolver[MessageToSolver.CLEAN] = data => {
+    actionByMessageToSolver.set(MessageToSolver.CLEAN, (data) => {
         cleanCells(() => (true));
-    };
-    actionByMessageToSolver[MessageToSolver.STOP] = data => {
+    });
+    actionByMessageToSolver.set(MessageToSolver.STOP, (data) => {
         console.warn("STOP REQUESTED!!!!");
         accumulatedTime = getRunningTime();
         changePuzzleStatus(PuzzleStatus.STOPPED, {
             cycle: cycle,
             time: getRunningTime()
         });
-    };
-    actionByMessageToSolver[MessageToSolver.FILL_CELL] = data => {
+    });
+    actionByMessageToSolver.set(MessageToSolver.FILL_CELL, (data) => {
         let cell = puzzle.getCell(data.row, data.col);
         changeCellValue(cell, data.value, CellStatus.ORIGINAL);
-    };
-    actionByMessageToSolver[MessageToSolver.STEP_TIME] = data => {
+    });
+    actionByMessageToSolver.set(MessageToSolver.STEP_TIME, (data) => {
         stepTime = data.value;
         console.debug("STEP_TIME: " + stepTime);
-    };
+    });
     // clean all not ORIGINAL Cells
-    actionByMessageToSolver[MessageToSolver.RESET] = data => {
+    actionByMessageToSolver.set(MessageToSolver.RESET, (data) => {
         console.warn("RESET PUZZLE");
         // clean all not ORIGINAL Cells
         cleanCells(cell => cell.status !== CellStatus.ORIGINAL);
-    };
+    });
 }
 
 /*
@@ -340,7 +340,7 @@ if ('function' === typeof importScripts) {
             "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js",
             "utils.js", "worker-messages.js", "puzzle.js", "cell.js");
     addEventListener('message', e => {
-        actionByMessageToSolver[e.data.type](e.data);
+        actionByMessageToSolver.get(e.data.type)(e.data);
         console.debug(puzzle.cells.toString());
     });
     initializeActions();
