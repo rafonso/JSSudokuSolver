@@ -99,7 +99,7 @@ function validatePuzzle () {
     }
 
     function val (func, description) {
-        _.range(1, 10).forEach(i => validate(puzzle[func](i), i, description));
+        _.range(1, 10).forEach(i => validate(puzzle[["getCells" + func]](i), i, description));
     }
 
     changePuzzleStatus(PuzzleStatus.VALIDATING);
@@ -110,9 +110,9 @@ function validatePuzzle () {
         });
     }
 
-    val("getCellsRow", "Row");
-    val("getCellsCol", "Column");
-    val("getCellsSector", "Sector");
+    val("Row", "Row");
+    val("Col", "Column");
+    val("Sector", "Sector");
 
     changePuzzleStatus(PuzzleStatus.READY);
 }
@@ -132,12 +132,12 @@ function solve () {
          * @param
          */
         function getValues (func, pos) {
-            return puzzle[func](pos).filter(c => c.filled).map(c => c.value);
+            return puzzle[["getCells" + func]](pos).filter(c => c.filled).map(c => c.value);
         }
 
-        let diff = _.difference(_.range(1, 10), getValues("getCellsRow", cell.row));
-        diff = _.difference(diff, getValues("getCellsCol", cell.col));
-        diff = _.difference(diff, getValues("getCellsSector", cell.sector));
+        let diff = _.difference(_.range(1, 10), getValues("Row", cell.row));
+        diff = _.difference(diff, getValues("Col", cell.col));
+        diff = _.difference(diff, getValues("Sector", cell.sector));
 
         return diff;
     }
