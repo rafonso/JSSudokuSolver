@@ -210,44 +210,43 @@ function initComponents () {
         gotoNextCell(e);
     };
 
-    let actionByKeyCode = {
-        8: cleanAndGotoPrevious, // Backspace
-        9: noAction, // Tab
-        13: noAction, // Enter
-        27: noAction, // Esc
-        32: cleanAndGotoNext, // space
-        35: createMovementAction(Movement.TO_ROW_END), // end
-        36: createMovementAction(Movement.TO_ROW_START), // home
-        37: createMovementAction(Movement.TO_LEFT), // left arrow
-        38: createMovementAction(Movement.TO_UP), // up arrow
-        39: gotoNextCell, // right arrow
-        40: createMovementAction(Movement.TO_DOWN), // down arrow
-        46: noAction, // Delete
-        48: cleanAndGotoNext, // 0
-        49: numberAction, // 1
-        50: numberAction, // 2
-        51: numberAction, // 3
-        52: numberAction, // 4
-        53: numberAction, // 5
-        54: numberAction, // 6
-        55: numberAction, // 7
-        56: numberAction, // 8
-        57: numberAction, // 9
-        96: cleanAndGotoNext, // numpad 0
-        97: numberPadAction, // numpad 1
-        98: numberPadAction, // numpad 2
-        99: numberPadAction, // numpad 3
-        100: numberPadAction, // numpad 4
-        101: numberPadAction, // numpad 5
-        102: numberPadAction, // numpad 6
-        103: numberPadAction, // numpad 7
-        104: numberPadAction, // numpad 8
-        105: numberPadAction
-    // numpad 9
-    };
+    let actionByKeyCode = new Map([
+        [  8, cleanAndGotoPrevious                           ], // Backspace
+        [  9, noAction                                       ], // Tab
+        [ 13, noAction                                       ], // Enter
+        [ 27, noAction                                       ], // Esc
+        [ 32, cleanAndGotoNext                               ], // space
+        [ 35, createMovementAction(Movement.TO_ROW_END)      ], // end
+        [ 36, createMovementAction(Movement.TO_ROW_START)    ], // home
+        [ 37, createMovementAction(Movement.TO_LEFT)         ], // left arrow
+        [ 38, createMovementAction(Movement.TO_UP)           ], // up arrow
+        [ 39, gotoNextCell                                   ], // right arrow
+        [ 40, createMovementAction(Movement.TO_DOWN)         ], // down arrow
+        [ 46, noAction                                       ], // Delete
+        [ 48, cleanAndGotoNext                               ], // 0
+        [ 49, numberAction                                   ], // 1
+        [ 50, numberAction                                   ], // 2
+        [ 51, numberAction                                   ], // 3
+        [ 52, numberAction                                   ], // 4
+        [ 53, numberAction                                   ], // 5
+        [ 54, numberAction                                   ], // 6
+        [ 55, numberAction                                   ], // 7
+        [ 56, numberAction                                   ], // 8
+        [ 57, numberAction                                   ], // 9
+        [ 96, cleanAndGotoNext                               ], // numpad 0
+        [ 97, numberPadAction                                ], // numpad 1
+        [ 98, numberPadAction                                ], // numpad 2
+        [ 99, numberPadAction                                ], // numpad 3
+        [100, numberPadAction                                ], // numpad 4
+        [101, numberPadAction                                ], // numpad 5
+        [102, numberPadAction                                ], // numpad 6
+        [103, numberPadAction                                ], // numpad 7
+        [104, numberPadAction                                ], // numpad 8
+        [105, numberPadAction                                ]  // numpad 9
+    ]);
 
     function handleKey (e) {
-        let action = actionByKeyCode[e.keyCode];
+        let action = actionByKeyCode.get(e.keyCode);
         if (action) {
             action(e);
         } else {
