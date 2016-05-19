@@ -1,5 +1,5 @@
 {
-	"esversion": 6,
+/*	"esversion": 6,*/
 	"strict": "global",
 	"browser": true,
 	"devel": true,
@@ -8,6 +8,6 @@
 /*	"globals": true, */
 	"predef": ["_", "Cell", "Puzzle", 
 		"PuzzleStatus", "CellStatus", "MessageFromSolver", 
-		"MessageToSolver", "getFormattedHour", "objectToString"],
+		"MessageToSolver", "getFormattedHour", "objectToString", "DEBUG"],
 	"undef": true
 }

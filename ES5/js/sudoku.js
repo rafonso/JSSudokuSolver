@@ -442,10 +442,10 @@ function initWorkerHandlers () {
         fillRunningMessages(0, 0, "");
     };
     actionByPuzzleStatus[PuzzleStatus.VALIDATING] = function (data) {
-        console.info("PuzzleStatus.VALIDATING: " + objectToString(data));
+        if(DEBUG) console.info("PuzzleStatus.VALIDATING: " + objectToString(data));
     };
     actionByPuzzleStatus[PuzzleStatus.INVALID] = function (err) {
-        console.warn(objectToString(err));
+        if(DEBUG) console.warn(objectToString(err));
         $("#btnClean").button("enable");
         $("#btnStop").button("disable");
         $("#btnRun").button("enable"); // Just for debug!
@@ -489,7 +489,7 @@ function initWorkerHandlers () {
         fillRunningMessages(data.time, data.cycle, data.status);
     };
     actionByPuzzleStatus[PuzzleStatus.SOLVED] = function (data) {
-        // console.info("PuzzleStatus.SOLVED: " + objectToString(data));
+        // if(DEBUG) console.info("PuzzleStatus.SOLVED: " + objectToString(data));
         $("#btnClean").button("enable");
         $("#btnStop").button("disable").hide();
         $("#btnReset").button("enable").show();
@@ -499,25 +499,25 @@ function initWorkerHandlers () {
 
     actionByMessageFromSolver[MessageFromSolver.INVALID_SOLVER] = function (
             data) {
-        console.error("INVALID_SOLVER: " + objectToString(data));
+        if(DEBUG) console.error("INVALID_SOLVER: " + objectToString(data));
     };
     actionByMessageFromSolver[MessageFromSolver.PUZZLE_STATUS] = function (data) {
-        // console.debug("MessageFromSolver.PUZZLE_STATUS: " +
+        // if(DEBUG) console.debug("MessageFromSolver.PUZZLE_STATUS: " +
         // objectToString(data));
         $("#puzzle").removeClass().addClass(data.status);
         actionByPuzzleStatus[data.status](data);
     };
     actionByMessageFromSolver[MessageFromSolver.CELL_STATUS] = function (data) {
-        // console.info("CELL_STATUS: " + objectToString(data) );
+        // if(DEBUG) console.info("CELL_STATUS: " + objectToString(data) );
         var cell = getCell(data.row, data.col);
         cell.removeClass().addClass(data.status).val(data.value);
         fillRunningMessages(data.time, data.cycle, null);
     };
     actionByMessageFromSolver[MessageFromSolver.CELL_VALUE] = function (data) {
-        // console.info("CELL_VALUE: " + objectToString(data));
+        // if(DEBUG) console.info("CELL_VALUE: " + objectToString(data));
     };
     actionByMessageFromSolver[MessageFromSolver.ERROR] = function (data) {
-        console.error("ERROR: " + objectToString(data));
+        if(DEBUG) console.error("ERROR: " + objectToString(data));
         fillRunningMessages(data.time, data.cycle, data.status);
     };
 }
@@ -530,19 +530,19 @@ function initWorker () {
         worker = new Worker('js/solver.js');
         worker.onmessage = function (e) {
             try {
-                console.info(e.toString());
+                if(DEBUG) console.info(e.toString());
                 if (!!e.data.type) {
                     actionByMessageFromSolver[e.data.type](e.data);
                 } else {
-                    console.info(e.toString());
+                    if(DEBUG) console.info(e.toString());
                 }
             } catch (err) {
-                console.error(err);
+                if(DEBUG) console.error(err);
             }
         };
         initWorkerHandlers();
     } else {
-        console.warn("Browser not compatible. Web Worker is not present.");
+        if(DEBUG) console.warn("Browser not compatible. Web Worker is not present.");
         $("input").prop('disabled', true);
         $("#buttons").hide();
         $("#versionMessage").show();
@@ -553,10 +553,10 @@ function initWorker () {
  * Initialize the page.
  */
 function initSudoku () {
-    console.debug(getFormattedHour() + "Initializing");
+    if(DEBUG) console.debug(getFormattedHour() + "Initializing");
     initComponents();
     initWorker();
-    console.debug(getFormattedHour() + "Initializing finished");
+    if(DEBUG) console.debug(getFormattedHour() + "Initializing finished");
 }
 
 $(document).ready(initSudoku);

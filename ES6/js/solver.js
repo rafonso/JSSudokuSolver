@@ -31,13 +31,13 @@ function changePuzzleStatus (status, extras) {
         status: puzzle.status
     }, extras);
 
-    console.warn(`changePuzzleStatus(): ${JSON.stringify(message)}`);
+    if(DEBUG) console.warn(`changePuzzleStatus(): ${JSON.stringify(message)}`);
     postMessage(message);
 }
 
 function changeCellStatus (cell, status) {
     if (!!!cell) {
-        console.error("Empty cell!");
+        if(DEBUG) console.error("Empty cell!");
     }
     if (cell.status === status) {
         return;
@@ -65,7 +65,7 @@ function changeCellValue (cell, value, status, tabs) {
     cell.status = (!!value) ? status : null;
 
     if (status == CellStatus.FILLED || status == CellStatus.GUESSING) {
-        console.debug("\t".repeat(tabs) + cell.toString());
+        if(DEBUG) console.debug("\t".repeat(tabs) + cell.toString());
     }
 
     postMessage({
@@ -149,7 +149,7 @@ function solve () {
             setTimeout(() => solveCycle(emptyCells));
         } else {
             let cell = emptyCells[pos];
-            console.debug(cell.toString());
+            if(DEBUG) console.debug(cell.toString());
             changeCellStatus(cell, CellStatus.EVALUATING);
             setTimeout(() => solveCell(cell, emptyCells, pos), stepTime);
         }
@@ -184,11 +184,11 @@ function solve () {
 
         function incrementCycle () {
             cycle++;
-            console.debug(`CYCLE ${cycle}`);
+            if(DEBUG) console.debug(`CYCLE ${cycle}`);
         }
 
         function tryGuess (pendents, guessCell, pendentValues) {
-            console.debug(`PENDENT CELL: ${guessCell.toString()} - ${pendentValues}`);
+            if(DEBUG) console.debug(`PENDENT CELL: ${guessCell.toString()} - ${pendentValues}`);
             let cell = puzzle.getCell(guessCell.row, guessCell.col);
             incrementCycle();
             _.rest(pendentValues).reverse().forEach(v =>
@@ -199,7 +199,7 @@ function solve () {
                 })
             );
             changeCellValue(cell, pendentValues[0], CellStatus.GUESSING, memento.length);
-            console.debug(memento);
+            if(DEBUG) console.debug(memento);
             solveNextCell(puzzle.cells.filter(Cell.isEmptyCell), 0);
         }
 
@@ -212,11 +212,11 @@ function solve () {
             incrementCycle();
             changeCellValue(puzzle.getCell(memo.cell.row, memo.cell.col),
                     memo.pendentValue, CellStatus.GUESSING, memento.length);
-            console.debug(memento);
+            if(DEBUG) console.debug(memento);
             solveNextCell(puzzle.cells.filter(Cell.isEmptyCell), 0);
         }
 
-        console.info(`solveCycle(${priorEmptyCells})`);
+        if(DEBUG) console.info(`solveCycle(${priorEmptyCells})`);
         let emptyCells = puzzle.cells.filter(Cell.isEmptyCell);
         if (emptyCells.length === 0) {
             changePuzzleStatus(PuzzleStatus.SOLVED, {
@@ -296,7 +296,7 @@ function initializeActions () {
                         : null
             });
             if(!e.isSolverError) {
-                console.error(e.stack);
+                if(DEBUG) console.error(e.stack);
             }
         }
     })
@@ -305,7 +305,7 @@ function initializeActions () {
         cleanCells(() => (true));
     })
     .set(MessageToSolver.STOP, (data) => {
-        console.warn("STOP REQUESTED!!!!");
+        if(DEBUG) console.warn("STOP REQUESTED!!!!");
         accumulatedTime = getRunningTime();
         changePuzzleStatus(PuzzleStatus.STOPPED, {
             cycle: cycle,
@@ -318,11 +318,11 @@ function initializeActions () {
     })
     .set(MessageToSolver.STEP_TIME, (data) => {
         stepTime = data.value;
-        console.debug("STEP_TIME: " + stepTime);
+        if(DEBUG) console.debug("STEP_TIME: " + stepTime);
     })
     .set(MessageToSolver.RESET, (data) => {
         // clean all not ORIGINAL Cells
-        console.warn("RESET PUZZLE");
+        if(DEBUG) console.warn("RESET PUZZLE");
         // clean all not ORIGINAL Cells
         cleanCells(cell => cell.status !== CellStatus.ORIGINAL);
     });
@@ -338,10 +338,10 @@ if ('function' === typeof importScripts) {
             "utils.js", "worker-messages.js", "puzzle.js", "cell.js");
     addEventListener('message', e => {
         actionByMessageToSolver.get(e.data.type)(e.data);
-        console.debug(puzzle.cells.toString());
+        if(DEBUG) console.debug(puzzle.cells.toString());
     });
     initializeActions();
 
     puzzle = new Puzzle();
-    console.info(puzzle);
+    if(DEBUG) console.info(puzzle);
 }

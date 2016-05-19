@@ -427,11 +427,11 @@ function initWorkerHandlers () {
         $("#puzzle input:first").focus();
         fillRunningMessages(0, 0, "");
     }],
-    [PuzzleStatus.VALIDATING, (data) => 
-        console.info(`PuzzleStatus.VALIDATING: ${JSON.stringify(data)}`)
+    [PuzzleStatus.VALIDATING, (data) => {
+        if(DEBUG) console.info(`PuzzleStatus.VALIDATING: ${JSON.stringify(data)}`); }
     ],
     [PuzzleStatus.INVALID, (err) => {
-        console.warn(JSON.stringify(err));
+        if(DEBUG) console.warn(JSON.stringify(err));
         $("#btnClean").button("enable");
         $("#btnStop").button("disable");
         $("#btnRun").button("enable"); // Just for debug!
@@ -484,7 +484,7 @@ function initWorkerHandlers () {
 
     actionByMessageFromSolver
     .set(MessageFromSolver.INVALID_SOLVER, (data) => { 
-        console.error("INVALID_SOLVER: " + JSON.stringify(data));
+        if(DEBUG) console.error("INVALID_SOLVER: " + JSON.stringify(data));
     })
     .set(MessageFromSolver.PUZZLE_STATUS, (data) =>  {
         $("#puzzle").removeClass().addClass(data.status);
@@ -498,7 +498,7 @@ function initWorkerHandlers () {
     .set(MessageFromSolver.CELL_VALUE, (data) => {
     })
     .set(MessageFromSolver.ERROR, (data) => {
-        console.error("ERROR: " + JSON.stringify(data));
+        if(DEBUG) console.error("ERROR: " + JSON.stringify(data));
         fillRunningMessages(data.time, data.cycle, data.status);
     });
 }
@@ -511,19 +511,19 @@ function initWorker () {
         worker = new Worker('js/solver.js');
         worker.onmessage = e => {
             try {
-                console.info(JSON.stringify(e));
+                if(DEBUG) console.info(JSON.stringify(e));
                 if (!!e.data.type) {
                     actionByMessageFromSolver.get(e.data.type)(e.data);
                 } else {
-                    console.info(e.toString());
+                    if(DEBUG) console.info(e.toString());
                 }
             } catch (err) {
-                console.error(err);
+                if(DEBUG) console.error(err);
             }
         };
         initWorkerHandlers();
     } else {
-        console.warn("Browser not compatible. Web Worker is not present.");
+        if(DEBUG) console.warn("Browser not compatible. Web Worker is not present.");
         $("input").prop('disabled', true);
         $("#buttons").hide();
         $("#versionMessage").show();
@@ -534,10 +534,10 @@ function initWorker () {
  * Initialize the page.
  */
 function initSudoku () {
-    console.debug(getFormattedHour() + "Initializing");
+    if(DEBUG) console.debug(getFormattedHour() + "Initializing");
     initComponents();
     initWorker();
-    console.debug(getFormattedHour() + "Initializing finished");
+    if(DEBUG) console.debug(getFormattedHour() + "Initializing finished");
 }
 
 $(document).ready(initSudoku);

@@ -1,5 +1,8 @@
+/*jshint -W079 */
 // HELPER FUNCTIONS
 "use strict";
+
+var DEBUG = false;
 
 function getFormattedHour () {
 

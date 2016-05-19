@@ -35,13 +35,13 @@ function changePuzzleStatus (status, extras) {
         status: puzzle.status
     }, extras);
 
-    // console.warn("changePuzzleStatus(): " + objectToString(message));
+    // if(DEBUG) console.warn("changePuzzleStatus(): " + objectToString(message));
     postMessage(message);
 }
 
 function changeCellStatus (cell, status) {
     if (!!!cell) {
-        console.error("Empty cell!");
+        if(DEBUG) console.error("Empty cell!");
     }
     if (cell.status === status) {
         return;
@@ -73,7 +73,7 @@ function changeCellValue (cell, value, status, tabs) {
         for (var i = 0; i < tabs; i++) {
             tbs += "\t";
         }
-        console.debug(tbs + cell.toString());
+        if(DEBUG) console.debug(tbs + cell.toString());
     }
 
     postMessage({
@@ -168,7 +168,7 @@ function solve () {
             });
         } else {
             var cell = emptyCells[pos];
-            // console.debug(cell);
+            // if(DEBUG) console.debug(cell);
             changeCellStatus(cell, CellStatus.EVALUATING);
             setTimeout(function () {
                 solveCell(cell, emptyCells, pos);
@@ -205,11 +205,11 @@ function solve () {
 
         function incrementCycle () {
             cycle++;
-            console.debug("CYCLE " + cycle);
+            if(DEBUG) console.debug("CYCLE " + cycle);
         }
 
         function tryGuess (pendents, guessCell, pendentValues) {
-            // console.debug("PEDENT CELL: " + guessCell + " - " +
+            // if(DEBUG) console.debug("PEDENT CELL: " + guessCell + " - " +
             // pendentValues);
             var cell = puzzle.getCell(guessCell.row, guessCell.col);
             incrementCycle();
@@ -222,7 +222,7 @@ function solve () {
             });
             changeCellValue(cell, pendentValues[0], CellStatus.GUESSING,
                     memento.length);
-            // console.debug(objectToString(memento));
+            // if(DEBUG) console.debug(objectToString(memento));
             solveNextCell(puzzle.cells.filter(isEmptyCell), 0);
         }
 
@@ -235,11 +235,11 @@ function solve () {
             incrementCycle();
             changeCellValue(puzzle.getCell(memo.cell.row, memo.cell.col),
                     memo.pendentValue, CellStatus.GUESSING, memento.length);
-            // console.debug(objectToString(memento));
+            // if(DEBUG) console.debug(objectToString(memento));
             solveNextCell(puzzle.cells.filter(isEmptyCell), 0);
         }
 
-        // console.info("solveCycle(" + priorEmptyCells + ")")
+        // if(DEBUG) console.info("solveCycle(" + priorEmptyCells + ")")
         var emptyCells = puzzle.cells.filter(isEmptyCell);
         if (emptyCells.length === 0) {
             changePuzzleStatus(PuzzleStatus.SOLVED, {
@@ -319,7 +319,7 @@ function initializeActions () {
                 cells: (!!e.invalidCells) ? e.invalidCells.map(serializeCell)
                         : null
             });
-            console.error(e);
+            if(DEBUG) console.error(e);
         }
     };
     actionByMessageToSolver[MessageToSolver.CLEAN] = function (data) {
@@ -327,7 +327,7 @@ function initializeActions () {
         cleanCells(_.constant(true));
     };
     actionByMessageToSolver[MessageToSolver.STOP] = function (data) {
-        console.warn("STOP REQUESTED!!!!");
+        if(DEBUG) console.warn("STOP REQUESTED!!!!");
         accumulatedTime = getRunningTime();
         changePuzzleStatus(PuzzleStatus.STOPPED, {
             cycle: cycle,
@@ -340,10 +340,10 @@ function initializeActions () {
     };
     actionByMessageToSolver[MessageToSolver.STEP_TIME] = function (data) {
         stepTime = data.value;
-        console.debug("STEP_TIME: " + stepTime);
+        if(DEBUG) console.debug("STEP_TIME: " + stepTime);
     };
     actionByMessageToSolver[MessageToSolver.RESET] = function (data) {
-        console.warn("RESET PUZZLE");
+        if(DEBUG) console.warn("RESET PUZZLE");
         // clean all not ORIGINAL Cells
         cleanCells(function (cell) {
             return cell.status !== CellStatus.ORIGINAL;
@@ -361,10 +361,10 @@ if ('function' === typeof importScripts) {
             "utils.js", "worker-messages.js", "puzzle.js", "cell.js");
     addEventListener('message', function (e) {
         actionByMessageToSolver[e.data.type](e.data);
-        // console.debug(puzzle.cells.toString());
+        // if(DEBUG) console.debug(puzzle.cells.toString());
     });
     initializeActions();
 
     puzzle = new Puzzle();
-    // console.info(puzzle);
+    // if(DEBUG) console.info(puzzle);
 }
