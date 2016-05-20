@@ -5,17 +5,47 @@
  */
 class Cell {
     
-    constructor(row, col, value, status) {
-        this.row = row;
+    constructor(r, c, v, s) {
+        this._row = r;
 
-        this.col = col;
+        this._col = c;
 
-        this.sector = ((row > 6) ? 6 : ((row > 3) ? 3 : 0)) +
-                 ((col > 6) ? 3 : ((col > 3) ? 2 : 1));
+        this._sector = ((r > 6) ? 6 : ((r > 3) ? 3 : 0)) +
+                 ((c > 6) ? 3 : ((c > 3) ? 2 : 1));
 
-        this.value = (!!value) ? value : null;
+        this._value = (!!v) ? v : null;
 
-        this.status = (!!status) ? status : CellStatus.IDLE;
+        this._status = (!!s) ? s : CellStatus.IDLE;
+    }
+    
+    // GETTERS AND SETTERS
+    
+    get col() {
+        return this._col;
+    }
+    
+    get row() {
+        return this._row;
+    }
+    
+    get sector() {
+        return this._sector;
+    }
+    
+    get value() {
+        return this._value;
+    }
+    
+    set value(v) {
+        this._value = v;
+    }
+
+    get status() {
+        return this._status;
+    }
+    
+    set status(s) {
+        this._status = s;
     }
 
     get filled() {

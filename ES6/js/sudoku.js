@@ -511,7 +511,7 @@ function initWorker () {
         worker = new Worker('js/solver.js');
         worker.onmessage = e => {
             try {
-                if(DEBUG) console.info(JSON.stringify(e));
+                if(DEBUG && !e.hasOwnProperty('isTrusted')) console.info(JSON.stringify(e));
                 if (!!e.data.type) {
                     actionByMessageFromSolver.get(e.data.type)(e.data);
                 } else {

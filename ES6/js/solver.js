@@ -224,7 +224,7 @@ function solve () {
                 time: getRunningTime()
             });
         } else if (emptyCells.length === priorEmptyCells.length) {
-            let pendentCells = puzzle.cells.filter(Cell.isEmptyCell).map(_.clone);
+            let pendentCells = puzzle.cells.filter(Cell.isEmptyCell).map(c => c.clone());
             // Selects the first cell with less possible values among the empty
             // ones.
             let emptyCell = pendentCells.reduce((prev, curr) => {

@@ -22,16 +22,30 @@ class Puzzle {
     // PUBLIC PROPERTIES
     
     constructor() {
-        this.status = PuzzleStatus.WAITING;
+        this._status = PuzzleStatus.WAITING;
         
-        this.cells = [];
+        this._cells = [];
         for (let row = 1; row <= 9; row++) {
             for (let col = 1; col <= 9; col++) {
-                this.cells.push(new Cell(row, col));
+                this._cells.push(new Cell(row, col));
             }
         }
     }
     
+    // GETTERS AND SETTERS
+    
+    get status() {
+        return this._status;
+    }
+    
+    set status(s) {
+        this._status = s;
+    }
+    
+    get cells() {
+        return this._cells;
+    }
+
     // PUBLIC METHODS
 
     /**
