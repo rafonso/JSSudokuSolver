@@ -282,7 +282,7 @@ function initializeActions () {
     }
 
     actionByMessageToSolver
-    .set(MessageToSolver.START, (data) => {
+    .set(MessageToSolver.START, ({row, col, value}) => {
         try {
             if (puzzle.status == PuzzleStatus.WAITING ||
                     puzzle.status == PuzzleStatus.INVALID) {
@@ -300,11 +300,11 @@ function initializeActions () {
             }
         }
     })
-    .set(MessageToSolver.CLEAN, (data) => {
+    .set(MessageToSolver.CLEAN, ({row, col, value}) => {
         // clean all filled Cells
         cleanCells(() => (true));
     })
-    .set(MessageToSolver.STOP, (data) => {
+    .set(MessageToSolver.STOP, ({row, col, value}) => {
         if(DEBUG) console.warn("STOP REQUESTED!!!!");
         accumulatedTime = getRunningTime();
         changePuzzleStatus(PuzzleStatus.STOPPED, {
@@ -312,15 +312,15 @@ function initializeActions () {
             time: getRunningTime()
         });
     })
-    .set(MessageToSolver.FILL_CELL, (data) => {
-        let cell = puzzle.getCell(data.row, data.col);
-        changeCellValue(cell, data.value, CellStatus.ORIGINAL);
+    .set(MessageToSolver.FILL_CELL, ({row, col, value}) => {
+        let cell = puzzle.getCell(row, col);
+        changeCellValue(cell, value, CellStatus.ORIGINAL);
     })
-    .set(MessageToSolver.STEP_TIME, (data) => {
-        stepTime = data.value;
+    .set(MessageToSolver.STEP_TIME, ({row, col, value}) => {
+        stepTime = value;
         if(DEBUG) console.debug("STEP_TIME: " + stepTime);
     })
-    .set(MessageToSolver.RESET, (data) => {
+    .set(MessageToSolver.RESET, ({row, col, value}) => {
         // clean all not ORIGINAL Cells
         if(DEBUG) console.warn("RESET PUZZLE");
         // clean all not ORIGINAL Cells
