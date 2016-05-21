@@ -399,7 +399,9 @@ function initComponents () {
  */
 function initWorkerHandlers () {
 
-    function fillRunningMessages (time, cycle, puzzleStatus) {
+    function fillRunningMessages (time, cycle, puzzleStatus, actionBefore = (() => {})) {
+        actionBefore();
+        
         if (!!time) {
             $("#timeText").text(time);
         }
@@ -418,14 +420,15 @@ function initWorkerHandlers () {
 
     let actionByPuzzleStatus = new Map([
     [PuzzleStatus.WAITING, (data) => {
-        $("#puzzle input").unbind("focus", unfocus);
-        $("#btnRun").button("enable");
-        $("#btnStop").button("disable").show();
-        $("#btnReset").hide();
-
-        $("#errorMessages, #runningMessages").hide();
-        $("#puzzle input:first").focus();
-        fillRunningMessages(0, 0, "");
+        fillRunningMessages(0, 0, "", () => {
+            $("#puzzle input").unbind("focus", unfocus);
+            $("#btnRun").button("enable");
+            $("#btnStop").button("disable").show();
+            $("#btnReset").hide();
+            
+            $("#errorMessages, #runningMessages").hide();
+            $("#puzzle input:first").focus();
+        });
     }],
     [PuzzleStatus.VALIDATING, (data) => {
         if(DEBUG) console.info(`PuzzleStatus.VALIDATING: ${JSON.stringify(data)}`); }
@@ -457,28 +460,30 @@ function initWorkerHandlers () {
     [PuzzleStatus.READY, (data) => {
     }],
     [PuzzleStatus.RUNNING, (data) => {
-        $("#btnRun, #btnClean").button("disable");
-        $("#btnStop").button("enable").show();
-        $("#btnReset").hide();
-        $("#puzzle input").bind("focus", unfocus);
-        $("#errorMessages").hide();
-        $("#runningMessages").show();
-        $("#errorText").text("");
-        fillRunningMessages(data.time, data.cycle, data.status);
+        fillRunningMessages(data.time, data.cycle, data.status, () => {
+            $("#btnRun, #btnClean").button("disable");
+            $("#btnStop").button("enable").show();
+            $("#btnReset").hide();
+            $("#puzzle input").bind("focus", unfocus);
+            $("#errorMessages").hide();
+            $("#runningMessages").show();
+            $("#errorText").text("");
+        });
     }],
     [PuzzleStatus.STOPPED, (data) =>  {
-        $("#btnClean").button("enable");
-        $("#btnRun").button("disable");
-        $("#btnStop").hide();
-        $("#btnReset").show();
-        fillRunningMessages(data.time, data.cycle, data.status);
+        fillRunningMessages(data.time, data.cycle, data.status, () => {
+            $("#btnClean").button("enable");
+            $("#btnRun").button("disable");
+            $("#btnStop").hide();
+            $("#btnReset").show();
+        });
     }],
     [PuzzleStatus.SOLVED, (data) => {
-        $("#btnClean").button("enable");
-        $("#btnStop").button("disable").hide();
-        $("#btnReset").button("enable").show();
-
-        fillRunningMessages(data.time, data.cycle, data.status);
+        fillRunningMessages(data.time, data.cycle, data.status, () => {
+            $("#btnClean").button("enable");
+            $("#btnStop").button("disable").hide();
+            $("#btnReset").button("enable").show();
+        });
     }]
     ]);
 
@@ -491,15 +496,17 @@ function initWorkerHandlers () {
         actionByPuzzleStatus.get(data.status)(data);
     })
     .set(MessageFromSolver.CELL_STATUS, (data) => {
-        let cell = getCell(data.row, data.col);
-        cell.removeClass().addClass(data.status).val(data.value);
-        fillRunningMessages(data.time, data.cycle, null);
+        fillRunningMessages(data.time, data.cycle, null, () => {
+            let cell = getCell(data.row, data.col);
+            cell.removeClass().addClass(data.status).val(data.value);
+        });
     })
     .set(MessageFromSolver.CELL_VALUE, (data) => {
     })
     .set(MessageFromSolver.ERROR, (data) => {
-        if(DEBUG) console.error("ERROR: " + JSON.stringify(data));
-        fillRunningMessages(data.time, data.cycle, data.status);
+        fillRunningMessages(data.time, data.cycle, data.status, () => {
+            if(DEBUG) console.error("ERROR: " + JSON.stringify(data));
+        });
     });
 }
 
