@@ -8,13 +8,6 @@ let accumulatedTime;
 let startTme;
 let cycle;
 
-function serializeCell (c) {
-    return {
-        col: c.col,
-        row: c.row
-    };
-}
-
 function getRunningTime () {
     return (Date.now() - startTme) + accumulatedTime;
 }
@@ -164,7 +157,7 @@ function solve () {
                         PuzzleStatus.INVALID,
                         {
                             message: "Cell with no values remaining. Probably the puzzle was mistaken written.",
-                            cells: serializeCell(cell)
+                            cells: cell
                         });
                 return;
             } else {
@@ -292,7 +285,7 @@ function initializeActions () {
         } catch (e) {
             changePuzzleStatus(PuzzleStatus.INVALID, {
                 message: e.message,
-                cells: (!!e.invalidCells) ? e.invalidCells.map(serializeCell)
+                cells: (!!e.invalidCells) ? e.invalidCells
                         : null
             });
             if(!e.isSolverError) {
