@@ -247,7 +247,9 @@ function solve () {
                 time: getRunningTime()
             });
         } else if (emptyCells.length === priorEmptyCells.length) {
-            var pendentCells = puzzle.cells.filter(isEmptyCell).map(_.clone);
+            var pendentCells = puzzle.cells.filter(isEmptyCell).map(function(c) {
+                return c.clone();
+            });
             // Selects the first cell with less possible values among the empty
             // ones.
             var emptyCell = pendentCells.reduce(function (prev, curr) {

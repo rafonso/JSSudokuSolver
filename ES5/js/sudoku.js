@@ -417,7 +417,11 @@ function initComponents () {
  */
 function initWorkerHandlers () {
 
-    function fillRunningMessages (time, cycle, puzzleStatus) {
+    function fillRunningMessages (time, cycle, puzzleStatus, actionBefore) {
+        if(actionBefore) {
+            actionBefore();
+        }
+        
         if (!!time) {
             $("#timeText").text(time);
         }
@@ -438,15 +442,16 @@ function initWorkerHandlers () {
 
     var actionByPuzzleStatus = [];
     actionByPuzzleStatus[PuzzleStatus.WAITING] = function (data) {
-        $("#puzzle input").unbind("focus", unfocus);
-        $("#btnRun").button("enable");
-        $("#btnStop").button("disable").show();
-        $("#btnReset").hide();
-        $("#chkGuess").button("enable");
+        fillRunningMessages(0, 0, "", function() {
+            $("#puzzle input").unbind("focus", unfocus);
+            $("#btnRun").button("enable");
+            $("#btnStop").button("disable").show();
+            $("#btnReset").hide();
+            $("#chkGuess").button("enable");
 
-        $("#errorMessages, #runningMessages").hide();
-        $("#puzzle input:first").focus();
-        fillRunningMessages(0, 0, "");
+            $("#errorMessages, #runningMessages").hide();
+            $("#puzzle input:first").focus();
+        });
     };
     actionByPuzzleStatus[PuzzleStatus.VALIDATING] = function (data) {
         if(DEBUG) console.info("PuzzleStatus.VALIDATING: " + objectToString(data));
@@ -480,32 +485,34 @@ function initWorkerHandlers () {
     actionByPuzzleStatus[PuzzleStatus.READY] = function (data) {
     };
     actionByPuzzleStatus[PuzzleStatus.RUNNING] = function (data) {
-        $("#btnRun, #btnClean").button("disable");
-        $("#btnStop").button("enable").show();
-        $("#btnReset").hide();
-        $("#chkGuess").button("disable");
-        $("#puzzle input").bind("focus", unfocus);
-        $("#errorMessages").hide();
-        $("#runningMessages").show();
-        $("#errorText").text("");
-        fillRunningMessages(data.time, data.cycle, data.status);
+        fillRunningMessages(data.time, data.cycle, data.status, function() {
+            $("#btnRun, #btnClean").button("disable");
+            $("#btnStop").button("enable").show();
+            $("#btnReset").hide();
+            $("#chkGuess").button("disable");
+            $("#puzzle input").bind("focus", unfocus);
+            $("#errorMessages").hide();
+            $("#runningMessages").show();
+            $("#errorText").text("");
+        });
     };
     actionByPuzzleStatus[PuzzleStatus.STOPPED] = function (data) {
-        $("#btnClean").button("enable");
-        $("#btnRun").button("disable");
-        $("#btnStop").hide();
-        $("#btnReset").show();
-        $("#chkGuess").button("disable");
-        fillRunningMessages(data.time, data.cycle, data.status);
+        fillRunningMessages(data.time, data.cycle, data.status, function() {
+            $("#btnClean").button("enable");
+            $("#btnRun").button("disable");
+            $("#btnStop").hide();
+            $("#btnReset").show();
+            $("#chkGuess").button("disable");
+        });
     };
     actionByPuzzleStatus[PuzzleStatus.SOLVED] = function (data) {
-        // if(DEBUG) console.info("PuzzleStatus.SOLVED: " + objectToString(data));
-        $("#btnClean").button("enable");
-        $("#btnStop").button("disable").hide();
-        $("#btnReset").button("enable").show();
-        $("#chkGuess").button("disable");
-
-        fillRunningMessages(data.time, data.cycle, data.status);
+        fillRunningMessages(data.time, data.cycle, data.status, function() {
+            // if(DEBUG) console.info("PuzzleStatus.SOLVED: " + objectToString(data));
+            $("#btnClean").button("enable");
+            $("#btnStop").button("disable").hide();
+            $("#btnReset").button("enable").show();
+            $("#chkGuess").button("disable");
+        });
     };
 
     actionByMessageFromSolver[MessageFromSolver.INVALID_SOLVER] = function (
@@ -519,22 +526,24 @@ function initWorkerHandlers () {
         actionByPuzzleStatus[data.status](data);
     };
     actionByMessageFromSolver[MessageFromSolver.CELL_STATUS] = function (data) {
-        // if(DEBUG) console.info("CELL_STATUS: " + objectToString(data) );
-        var cell = getCell(data.row, data.col);
-        cell.removeClass().val(data.value);
-        if(data.status == CellStatus.GUESSING && !highlightGuesses) {
-            cell.addClass(CellStatus.IDLE);
-        } else {
-            cell.addClass(data.status);
-        }
-        fillRunningMessages(data.time, data.cycle, null);
+        fillRunningMessages(data.time, data.cycle, null, function() {
+            // if(DEBUG) console.info("CELL_STATUS: " + objectToString(data) );
+            var cell = getCell(data.row, data.col);
+            cell.removeClass().val(data.value);
+            if(data.status == CellStatus.GUESSING && !highlightGuesses) {
+                cell.addClass(CellStatus.IDLE);
+            } else {
+                cell.addClass(data.status);
+            }
+        });
     };
     actionByMessageFromSolver[MessageFromSolver.CELL_VALUE] = function (data) {
         // if(DEBUG) console.info("CELL_VALUE: " + objectToString(data));
     };
     actionByMessageFromSolver[MessageFromSolver.ERROR] = function (data) {
-        if(DEBUG) console.error("ERROR: " + objectToString(data));
-        fillRunningMessages(data.time, data.cycle, data.status);
+        fillRunningMessages(data.time, data.cycle, data.status, function() {
+            if(DEBUG) console.error("ERROR: " + objectToString(data));
+        });
     };
 }
 
