@@ -145,6 +145,11 @@ h1 {
 }
 /* rowSteptime CONFIGURATION - END */
 
+#rowGuesses {
+    margin-top: 10px;
+    text-align: center;
+}
+
 #exportDialog {
     display: none;
 }

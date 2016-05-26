@@ -3,6 +3,7 @@
 
 var worker = {};
 var actionByMessageFromSolver = [];
+var highlightGuesses = false;
 
 function getCell (row, cell) {
     return $("#cell" + row + cell);
@@ -373,6 +374,11 @@ function initComponents () {
             });
         }
     });
+
+    $("#chkGuess").button().attr("accesskey", "g").click(function(event) {
+        highlightGuesses = $(this)[0].checked;
+    });
+    
     $(document) //
     .bind(
             'keydown',
@@ -436,6 +442,7 @@ function initWorkerHandlers () {
         $("#btnRun").button("enable");
         $("#btnStop").button("disable").show();
         $("#btnReset").hide();
+        $("#chkGuess").button("enable");
 
         $("#errorMessages, #runningMessages").hide();
         $("#puzzle input:first").focus();
@@ -450,6 +457,7 @@ function initWorkerHandlers () {
         $("#btnStop").button("disable");
         $("#btnRun").button("enable"); // Just for debug!
         $("#btnReset").hide();
+        $("#chkGuess").button("enable");
         $("#runningMessages").hide();
         $("#errorMessages").show();
         $("#errorText").text((!!err.message) ? err.message : err);
@@ -475,6 +483,7 @@ function initWorkerHandlers () {
         $("#btnRun, #btnClean").button("disable");
         $("#btnStop").button("enable").show();
         $("#btnReset").hide();
+        $("#chkGuess").button("disable");
         $("#puzzle input").bind("focus", unfocus);
         $("#errorMessages").hide();
         $("#runningMessages").show();
@@ -486,6 +495,7 @@ function initWorkerHandlers () {
         $("#btnRun").button("disable");
         $("#btnStop").hide();
         $("#btnReset").show();
+        $("#chkGuess").button("disable");
         fillRunningMessages(data.time, data.cycle, data.status);
     };
     actionByPuzzleStatus[PuzzleStatus.SOLVED] = function (data) {
@@ -493,6 +503,7 @@ function initWorkerHandlers () {
         $("#btnClean").button("enable");
         $("#btnStop").button("disable").hide();
         $("#btnReset").button("enable").show();
+        $("#chkGuess").button("disable");
 
         fillRunningMessages(data.time, data.cycle, data.status);
     };
@@ -510,7 +521,12 @@ function initWorkerHandlers () {
     actionByMessageFromSolver[MessageFromSolver.CELL_STATUS] = function (data) {
         // if(DEBUG) console.info("CELL_STATUS: " + objectToString(data) );
         var cell = getCell(data.row, data.col);
-        cell.removeClass().addClass(data.status).val(data.value);
+        cell.removeClass().val(data.value);
+        if(data.status == CellStatus.GUESSING && !highlightGuesses) {
+            cell.addClass(CellStatus.IDLE);
+        } else {
+            cell.addClass(data.status);
+        }
         fillRunningMessages(data.time, data.cycle, null);
     };
     actionByMessageFromSolver[MessageFromSolver.CELL_VALUE] = function (data) {
