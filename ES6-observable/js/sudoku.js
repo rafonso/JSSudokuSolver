@@ -452,15 +452,11 @@ function initWorkerHandlers () {
         if (!!err.cells) {
             if (_.isArray(err.cells)) {
                 err.cells.map(c => getCell(c.row, c.col)).
-                forEach((id, index) => {
-                    if (index === 0) {
-                        $(id).focus();
-                    }
-                    $(id).effect("pulsate");
-                });
+                forEach((id, index) => $(id).effect("pulsate"));
+                $(getCell(err.cells[0].row, err.cells[0].col)).focus();
             } else {
                 let c = err.cells;
-                getCell(c.row, c.col).removeClass().focus().effect("pulsate");
+                getCell(c.row, c.col).removeClass().effect("pulsate").focus();
             }
         }
     }],
@@ -517,6 +513,10 @@ function initWorkerHandlers () {
         });
     })
     .set(MessageFromSolver.CELL_VALUE, (data) => {
+        fillRunningMessages(data.time, data.cycle, null, () => {
+            let cell = getCell(data.row, data.col);
+            cell.val(data.value);
+        });
     })
     .set(MessageFromSolver.ERROR, (data) => {
         fillRunningMessages(data.time, data.cycle, data.status, () => {

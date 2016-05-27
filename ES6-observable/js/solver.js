@@ -29,27 +29,6 @@ function changePuzzleStatus (status, extras) {
     postMessage(message);
 }
 
-function changeCellStatus (cell, status) {
-    if (!!!cell) {
-        if(DEBUG) console.error("Empty cell!");
-    }
-    if (cell.status === status) {
-        return;
-    }
-
-    cell.status = status;
-
-    postMessage({
-        type: MessageFromSolver.CELL_STATUS,
-        status: cell.status,
-        row: cell.row,
-        col: cell.col,
-        value: cell.value,
-        time: getRunningTime(),
-        cycle: cycle
-    });
-}
-
 function changeCellValue (cell, value, status, tabs) {
     if (cell.value === value) {
         return;
@@ -58,6 +37,7 @@ function changeCellValue (cell, value, status, tabs) {
     cell.value = (!!value) ? value : null;
     cell.status = (!!value) ? status : null;
 
+    /*
     if (status == CellStatus.FILLED || status == CellStatus.GUESSING) {
         if(DEBUG) console.debug("\t".repeat(tabs) + cell.toString());
     }
@@ -71,9 +51,14 @@ function changeCellValue (cell, value, status, tabs) {
         time: getRunningTime(),
         cycle: cycle
     });
+    */
 }
 
 function validatePuzzle () {
+    
+    function s(c) {
+        return {row: c.row, col: c.col};
+    }
 
     function validate (cells, pos, description) {
         let found = [];
@@ -81,8 +66,9 @@ function validatePuzzle () {
             if (cell.filled) {
                 let value = cell.value;
                 if (found[value]) {
+                    let invalidCells = cells.map(s);
                     throw _.extend(new Error(`${description} ${pos}. Repeated value: ${value}`), {
-                        invalidCells: cells,
+                        invalidCells,
                         isSolverError: true
                     });
                 } else {
@@ -144,7 +130,7 @@ function solve () {
         } else {
             let cell = emptyCells[pos];
             if(DEBUG) console.debug(cell.toString());
-            changeCellStatus(cell, CellStatus.EVALUATING);
+            cell.status = CellStatus.EVALUATING;
             setTimeout(() => solveCell(cell, emptyCells, pos), stepTime);
         }
     }
@@ -168,7 +154,7 @@ function solve () {
         if (diff.length === 1) {
             changeCellValue(cell, diff[0], CellStatus.FILLED, memento.length);
         } else {
-            changeCellStatus(cell, null);
+            cell.status = null;
         }
         solveNextCell(emptyCells, pos + 1);
     }
@@ -235,7 +221,7 @@ function solve () {
                 extrasFromSolver = {
                         message: "There is no solution! :"
                 };
-                puzzle.ptatus = PuzzleStatus.INVALID;
+                puzzle.status = PuzzleStatus.INVALID;
             }
         } else if (puzzle.status !== PuzzleStatus.STOPPED) {
             incrementCycle();
@@ -326,20 +312,45 @@ function initializeActions () {
     });
 }
 
+function puzzleStatusChanged(changes) {
+    changes.forEach(ch => {
+        console.debug(ch, ch.object.status);
+        postMessage(_.extend({
+            type: MessageFromSolver.PUZZLE_STATUS,
+            status: ch.object.status
+        }, extrasFromSolver));
+    });
+    extrasFromSolver = null;
+}
+
+function cellChanged(changes) {
+    changes.forEach(ch => {
+        let cell = ch.object;
+        let type = ch.name.includes("value")? MessageFromSolver.CELL_VALUE: MessageFromSolver.CELL_STATUS;
+        console.debug(ch, cell[ch.name]);
+
+        postMessage({
+            type,
+            status: cell.status,
+            row: cell.row,
+            col: cell.col,
+            value: cell.value,
+            time: getRunningTime(),
+            cycle
+        });
+    });
+//    extrasFromSolver = null;
+}
+
 function initializeObjects() {
     // Prepare Puzzle & Cells
     Object.observe(puzzle,
-            function(changes) {
-        changes.forEach(ch => {
-            console.debug(ch, ch.object.status);
-            postMessage(_.extend({
-                type: MessageFromSolver.PUZZLE_STATUS,
-                status: ch.object.status
-            }, extrasFromSolver));
-        });
-        extrasFromSolver = null;
-    }, 
-    ["update"]);
+            puzzleStatusChanged, 
+            ["update"]);
+    puzzle.cells.forEach(c => 
+    Object.observe(c,
+            cellChanged, 
+            ["update"]));
 }
 
 /*
