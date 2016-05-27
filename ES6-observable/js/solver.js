@@ -7,6 +7,7 @@ let stepTime = 0;
 let accumulatedTime;
 let startTme;
 let cycle;
+let extrasFromSolver = {};
 
 function getRunningTime () {
     return (Date.now() - startTme) + accumulatedTime;
@@ -95,7 +96,7 @@ function validatePuzzle () {
         _.range(1, 10).forEach(i => validate(puzzle[["getCells" + func]](i), i, description));
     }
 
-    changePuzzleStatus(PuzzleStatus.VALIDATING);
+    puzzle.status = PuzzleStatus.VALIDATING;
 
     if (puzzle.cells.every(Cell.isEmptyCell)) {
         throw _.extend(new Error("All Cells are empty!"), {
@@ -107,7 +108,7 @@ function validatePuzzle () {
     val("Col", "Column");
     val("Sector", "Sector");
 
-    changePuzzleStatus(PuzzleStatus.READY);
+    puzzle.status = PuzzleStatus.READY;
 }
 
 function solve () {
@@ -153,12 +154,11 @@ function solve () {
 
         if (diff.length === 0) {
             if (memento.length === 0) {
-                changePuzzleStatus(
-                        PuzzleStatus.INVALID,
-                        {
-                            message: "Cell with no values remaining. Probably the puzzle was mistaken written.",
-                            cells: cell
-                        });
+                extrasFromSolver = {
+                        message: "Cell with no values remaining. Probably the puzzle was mistaken written.",
+                        cells: cell
+                };
+                puzzle.status = PuzzleStatus.INVALID;
                 return;
             } else {
                 // Get top Memento ...
@@ -212,10 +212,11 @@ function solve () {
         if(DEBUG) console.info(`solveCycle(${priorEmptyCells})`);
         let emptyCells = puzzle.cells.filter(Cell.isEmptyCell);
         if (emptyCells.length === 0) {
-            changePuzzleStatus(PuzzleStatus.SOLVED, {
-                cycle: cycle,
-                time: getRunningTime()
-            });
+            extrasFromSolver = {
+                    cycle: cycle,
+                    time: getRunningTime()
+                };
+            puzzle.status = PuzzleStatus.SOLVED;
         } else if (emptyCells.length === priorEmptyCells.length) {
             let pendentCells = puzzle.cells.filter(Cell.isEmptyCell).map(c => c.clone());
             // Selects the first cell with less possible values among the empty
@@ -231,9 +232,10 @@ function solve () {
             } else if (memento.length) {
                 undoGuess();
             } else {
-                changePuzzleStatus(PuzzleStatus.INVALID, {
-                    message: "There is no solution! :"
-                });
+                extrasFromSolver = {
+                        message: "There is no solution! :"
+                };
+                puzzle.ptatus = PuzzleStatus.INVALID;
             }
         } else if (puzzle.status !== PuzzleStatus.STOPPED) {
             incrementCycle();
@@ -256,10 +258,11 @@ function solve () {
         }
 
         startTme = Date.now();
-        changePuzzleStatus(PuzzleStatus.RUNNING, {
-            cycle: cycle,
-            time: getRunningTime()
-        });
+        extrasFromSolver = {
+                cycle: cycle,
+                time: getRunningTime()
+        }; 
+        puzzle.status = PuzzleStatus.RUNNING;
 
         setTimeout(() => solveCycle([]));
     }
@@ -271,8 +274,9 @@ function initializeActions () {
 
     function cleanCells (whichCells) {
         puzzle.cells.filter(whichCells).forEach(cell => changeCellValue(cell, null));
-        changePuzzleStatus(PuzzleStatus.WAITING);
+        puzzle.status = PuzzleStatus.WAITING;
     }
+    
 
     actionByMessageToSolver
     .set(MessageToSolver.START, ({row, col, value}) => {
@@ -283,11 +287,11 @@ function initializeActions () {
             }
             solve();
         } catch (e) {
-            changePuzzleStatus(PuzzleStatus.INVALID, {
-                message: e.message,
-                cells: (!!e.invalidCells) ? e.invalidCells
-                        : null
-            });
+            extrasFromSolver = {
+                    message: e.message,
+                    cells: (!!e.invalidCells) ? e.invalidCells : null
+            };
+            puzzle.status = PuzzleStatus.INVALID;
             if(!e.isSolverError) {
                 if(DEBUG) console.error(e.stack);
             }
@@ -300,10 +304,11 @@ function initializeActions () {
     .set(MessageToSolver.STOP, ({row, col, value}) => {
         if(DEBUG) console.warn("STOP REQUESTED!!!!");
         accumulatedTime = getRunningTime();
-        changePuzzleStatus(PuzzleStatus.STOPPED, {
-            cycle: cycle,
-            time: getRunningTime()
-        });
+        extrasFromSolver = {
+                cycle: cycle,
+                time: getRunningTime()
+        };
+        puzzle.status = PuzzleStatus.STOPPED;
     })
     .set(MessageToSolver.FILL_CELL, ({row, col, value}) => {
         let cell = puzzle.getCell(row, col);
@@ -319,6 +324,22 @@ function initializeActions () {
         // clean all not ORIGINAL Cells
         cleanCells(cell => cell.status !== CellStatus.ORIGINAL);
     });
+}
+
+function initializeObjects() {
+    // Prepare Puzzle & Cells
+    Object.observe(puzzle,
+            function(changes) {
+        changes.forEach(ch => {
+            console.debug(ch, ch.object.status);
+            postMessage(_.extend({
+                type: MessageFromSolver.PUZZLE_STATUS,
+                status: ch.object.status
+            }, extrasFromSolver));
+        });
+        extrasFromSolver = null;
+    }, 
+    ["update"]);
 }
 
 /*
@@ -337,5 +358,7 @@ if ('function' === typeof importScripts) {
     initializeActions();
 
     puzzle = new Puzzle();
+    initializeObjects();
+
     if(DEBUG) console.info(puzzle);
 }
