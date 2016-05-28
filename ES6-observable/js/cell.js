@@ -71,7 +71,7 @@ class Cell {
     }
 
     toString() {
-        return `[${this.row}, ${this.col}, ${(this.filled ? this.value : "-")}, ${((!!this.status) ? this.status.charAt(0) : "-")}]`; 
+        return `[${this.row}${this.col}${(this.filled ? this.value : "-")}${((!!this.status) ? this.status.charAt(0) : "-")}]`; 
     }
     
     static isEmptyCell(c) {

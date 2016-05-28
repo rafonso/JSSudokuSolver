@@ -8,7 +8,7 @@ let accumulatedTime;
 let startTme;
 let cycle;
 let extrasFromSolver = {};
-let tabs = 0;
+let currentMemo = [];
 
 function getRunningTime () {
     return (Date.now() - startTme) + accumulatedTime;
@@ -60,6 +60,9 @@ function validatePuzzle () {
 function solve () {
 
     let memento = [];
+    Array.observe(memento, (changes) => {
+        currentMemo = memento.map(m => m.cell);
+    });
 
     // Here I compare with other cells
     function getPendentValues (cell) {
@@ -279,11 +282,18 @@ function initializeActions () {
 
 function puzzleStatusChanged(changes) {
     changes.forEach(ch => {
-//        console.debug(ch, ch.object.status);
+        let p = ch.object;
+        if(DEBUG) console.debug(`${!!currentMemo.length?(currentMemo + " "): ''}Puzzle Status: ${ch.oldValue} -> ${p.status}`);
         postMessage(_.extend({
             type: MessageFromSolver.PUZZLE_STATUS,
             status: ch.object.status
         }, extrasFromSolver));
+        
+        if((p.status === PuzzleStatus.INVALID) || 
+                (p.status === PuzzleStatus.STOPPED) || 
+                (p.status === PuzzleStatus.SOLVED)) {
+            currentMemo = [];
+        }
     });
     extrasFromSolver = null;
 }
@@ -292,12 +302,7 @@ function cellChanged(changes) {
     changes.forEach(ch => {
         let cell = ch.object;
         let type = ch.name.includes("value")? MessageFromSolver.CELL_VALUE: MessageFromSolver.CELL_STATUS;
-//        console.debug(ch, cell[ch.name]);
-
-        if ((type == MessageFromSolver.CELL_STATUS) && 
-                ((cell.status == CellStatus.FILLED) || (cell.status == CellStatus.GUESSING))){
-            if(DEBUG) console.debug("\t".repeat(tabs) + cell.toString());
-        }
+        if(DEBUG) console.debug(`${!!currentMemo.length? (currentMemo + " "): ''}Cell ${cell.toString()}. ${ch.name}: ${ch.oldValue} -> ${cell[ch.name]}`);
 
         postMessage({
             type,
