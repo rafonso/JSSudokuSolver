@@ -336,8 +336,7 @@ if ('function' === typeof importScripts) {
     importScripts(
             "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js",
             "https://cdnjs.cloudflare.com/ajax/libs/object-observe/0.2.6/object-observe-lite.min.js",
-            "https://raw.githubusercontent.com/MaxArt2501/array-observe/master/array-observe.min.js",
-            "utils.js", "worker-messages.js", "puzzle.js", "cell.js");
+            "utils.js", "worker-messages.js", "puzzle.js", "cell.js", "array-observe.min.js");
     addEventListener('message', e => {
         actionByMessageToSolver.get(e.data.type)(e.data);
         if(DEBUG) console.debug(puzzle.cells.toString());
