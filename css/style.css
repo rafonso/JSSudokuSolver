@@ -6,7 +6,7 @@ body {
     width: 300px;
 }
 
-h1 {
+h1, h5 {
     white-space: nowrap;
     text-align: center;
 }
